@@ -1,5 +1,8 @@
 import { expect, test } from "bun:test";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { isAlive } from "../src/process.ts";
 
 const cli = (...args: string[]): { code: number | null; stdout: string; stderr: string } => {
   const ran = spawnSync(process.execPath, ["src/cli.ts", ...args], { encoding: "utf8" });
@@ -56,3 +59,36 @@ test("translate needs no invariant", () => {
   expect(ran.stdout).toContain("INIT q_init");
   expect(ran.stdout).not.toContain("INVARIANT");
 }, 60_000);
+
+const posix = process.platform !== "win32";
+
+/** The pids of `parent`'s child processes whose command line contains `text`. */
+const children = (parent: number, text: string): number[] =>
+  spawnSync("ps", ["-eo", "pid=,ppid=,args="], { encoding: "utf8" }).stdout.split("\n")
+    .map((line) => line.trim().split(/\s+/))
+    .filter(([, ppid, ...args]) => Number(ppid) === parent && args.join(" ").includes(text))
+    .map(([pid]) => Number(pid));
+
+// POSIX only: Windows can't send a process SIGINT or SIGTERM. Quint's frontend runs in its own process group
+// there, so a signal to the CLI reaches only the CLI, which must stop the frontend itself.
+for (const [signal, code] of [["SIGINT", 130], ["SIGTERM", 143]] as const) {
+  test.skipIf(!posix)(`${signal} during Quint's frontend stops it, and the CLI exits ${code}`, async () => {
+    const run = spawn(process.execPath, ["src/cli.ts", "check", "bench/models/stock.qnt", "--main", "stock_large", "--invariant", "inv"], { stdio: "ignore" });
+    const pid = run.pid ?? 0;
+    const exited = new Promise<[number | null, string | null]>((resolve) => run.once("exit", (c, s) => resolve([c, s])));
+    let frontend: number | undefined;
+    try {
+      for (const end = performance.now() + 30_000; frontend === undefined && performance.now() < end; await Bun.sleep(20)) {
+        frontend = children(pid, "compile")[0];
+      }
+      expect(frontend, "Quint's frontend started").toBeDefined();
+      run.kill(signal);
+      expect(await exited).toEqual([code, null]);
+      expect(isAlive(frontend ?? 0), "the frontend is gone").toBe(false);
+      expect(readdirSync(tmpdir()).filter((n) => n.startsWith(`quint-ts-run-${pid}-`))).toEqual([]);
+    } finally {
+      run.kill("SIGKILL");
+      if (frontend !== undefined) try { process.kill(-frontend, "SIGKILL"); } catch { /* gone */ }
+    }
+  }, 60_000);
+}

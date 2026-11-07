@@ -84,10 +84,19 @@ if (timeout !== undefined && (!/^[1-9]\d*$/.test(timeout) || !Number.isSafeInteg
   const shown = timeout.length > 24 ? `${timeout.slice(0, 24)}… (${timeout.length} characters)` : JSON.stringify(timeout);
   usage(`--timeout takes a whole number of milliseconds from 1 to ${MAX_TIMEOUT_MS}, not ${shown}`);
 }
+// Ctrl-C and SIGTERM stop the check. On POSIX its children run in their own process group, so the signal
+// reaches only this process, and the check stops every child it started before the CLI exits.
+const SIGNAL_EXIT = { SIGINT: 130, SIGTERM: 143 } as const;
+const stop = new AbortController();
+for (const name of ["SIGINT", "SIGTERM"] as const) process.once(name, () => stop.abort(name));
 const result = await check(file, {
   ...selected,
   invariants: [first, ...others],
   ...timeoutMs === undefined ? {} : { timeoutMs },
+  signal: stop.signal,
+}).catch((err: unknown) => {
+  if (stop.signal.aborted) process.exit(SIGNAL_EXIT[stop.signal.reason as keyof typeof SIGNAL_EXIT]);
+  throw err;
 });
 console.log(JSON.stringify(result, null, 2));
 process.exit(result.status === "passed" ? 0 : 1);
