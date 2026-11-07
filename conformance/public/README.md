@@ -35,9 +35,25 @@ translated ones were checked with their authors' invariants:
 | … a definitive verdict with the authors' own invariant | 0 | 1 | **4**: 3 `passed` after a complete search, 1 `violated` with a counterexample |
 | … a complete verdict only with an invariant we added | 1 | 1 | 1 (`booleans.qnt`) |
 | … translated but `inconclusive` (unbounded) | 1 | 1 | 1 (`instances.qnt`) |
-| Refused by quint-ts | 49 | 48 | 45 |
+| Refused by quint-ts | 49 | 48 | 44 |
 | Rejected by Quint's own frontend with the module chosen | 1 | 1 | 1 |
-| Without both `init` and `step` (libraries and tests) | 25 | 25 | 25 |
+| Without both `init` and `step` (libraries and tests) | 25 | 25 | 26 |
+
+The "now" column comes from [SURVEY.md](SURVEY.md), which
+[survey.ts](../survey.ts) generates from a Quint checkout at the commit above,
+one row per file; the earlier columns were counted by hand:
+
+```sh
+bun run survey -- --examples <Quint checkout>
+```
+
+The hand count of the "now" column had `SimpleAuction.qnt` among the refused
+(45 refused, 25 without `init` or `step`). It has an `init` but no `step`, so
+Quint's frontend rejects it before translation, and the script counts it as
+without `init` or `step`. The script's
+invariants are the zero-parameter definitions named `inv`, `*Inv` or `*_inv`
+in the file, each checked on its own; for `ewd426.qnt` it checks the last
+module, `broken_ewd426`.
 
 Each verdict matches `quint verify --backend=tlc` on the same model and
 invariant: 117,649 states for `ewd426`, 16 for its `broken_ewd426` module,
