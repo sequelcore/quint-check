@@ -5,8 +5,9 @@
  * - POSIX: the child leads its own process group, and every termination signals the whole group, so
  *   a descendant can't outlive it or hold its pipes open. After the child exits, the group gets
  *   SIGKILL too, for any descendant still running.
- * - Windows: the child is ended with TerminateProcess. A Node child's descendants share the job object
- *   libuv gives it, which ends them when the child ends; quint-ts's own children start no descendants.
+ * - Windows: the child is ended with TerminateProcess. Processes a Node child starts without `detached`
+ *   end with it, through the job object libuv puts every Node process in; processes started with
+ *   `detached` leave that job and don't. quint-ts's own children start none.
  *
  * A stop sends SIGTERM, then SIGKILL after GRACE_MS. After the child exits, its pipes get DRAIN_MS to
  * close before they're destroyed, so a descendant holding them can't keep the run from settling.
