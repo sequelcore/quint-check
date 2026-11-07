@@ -1,0 +1,289 @@
+{
+  "environment": {
+    "date": "2026-11-07T09:41:00.708Z",
+    "platform": "win32-x64",
+    "machine": "github-windows-2025-x64",
+    "cpu": "AMD EPYC 9V45 96-Core Processor (2 logical)",
+    "memoryGiB": 8,
+    "bun": "1.4.4",
+    "node": "v24.22.1",
+    "java": "openjdk version \"17.0.21\" 2026-10-20",
+    "quint": "0.33.1",
+    "tlaTs": "0.0.8-dev.8067c48",
+    "apalache": "0.62.4",
+    "commit": "fb35f1b",
+    "dirty": false,
+    "runs": 10,
+    "memoryMeasure": "peak committed memory of the process tree (Job Object PeakJobMemoryUsed)"
+  },
+  "results": [
+    {
+      "id": "stock-small",
+      "file": "bench/models/stock.qnt",
+      "main": "stock_small",
+      "expect": "passed",
+      "comparable": true,
+      "problems": [],
+      "rows": [
+        {
+          "id": "quint-ts",
+          "what": "quint-ts end to end, tla-ts's compile cache warm",
+          "checkerOnly": false,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            1820
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 1020.6161999999999,
+          "msMin": 975.408,
+          "msMax": 1431.0047,
+          "msCv": 0.11883409711380803,
+          "peakMiBMedian": 259.431640625
+        },
+        {
+          "id": "quint-ts-nocache",
+          "what": "quint-ts end to end, cache off (QUINT_TS_CACHE=off): tla-ts compiles itself on every check",
+          "checkerOnly": false,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            1820
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 1335.76775,
+          "msMin": 1268.4475,
+          "msMax": 1857.7761,
+          "msCv": 0.1385745893265397,
+          "peakMiBMedian": 336.380859375
+        },
+        {
+          "id": "tla-ts",
+          "what": "tla-ts on quint-ts's TLA+",
+          "checkerOnly": true,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            1820
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 348.20045,
+          "msMin": 302.7902,
+          "msMax": 557.4989,
+          "msCv": 0.18932411051437043,
+          "peakMiBMedian": 161.474609375
+        }
+      ]
+    },
+    {
+      "id": "stock-large",
+      "file": "bench/models/stock.qnt",
+      "main": "stock_large",
+      "expect": "passed",
+      "comparable": true,
+      "problems": [],
+      "rows": [
+        {
+          "id": "quint-ts",
+          "what": "quint-ts end to end, tla-ts's compile cache warm",
+          "checkerOnly": false,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            46376
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 2137.17465,
+          "msMin": 1901.043,
+          "msMax": 2349.3321,
+          "msCv": 0.06256937742750332,
+          "peakMiBMedian": 306.0625
+        },
+        {
+          "id": "quint-ts-nocache",
+          "what": "quint-ts end to end, cache off (QUINT_TS_CACHE=off): tla-ts compiles itself on every check",
+          "checkerOnly": false,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            46376
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 2315.32575,
+          "msMin": 2120.4596,
+          "msMax": 2525.8011,
+          "msCv": 0.06298968201511831,
+          "peakMiBMedian": 358.09375
+        },
+        {
+          "id": "tla-ts",
+          "what": "tla-ts on quint-ts's TLA+",
+          "checkerOnly": true,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            46376
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 1408.74875,
+          "msMin": 1299.328,
+          "msMax": 1608.5201,
+          "msCv": 0.06951908911588359,
+          "peakMiBMedian": 209.6015625
+        }
+      ]
+    },
+    {
+      "id": "stock-deep-fault",
+      "file": "bench/models/stock.qnt",
+      "main": "stock_deep_fault",
+      "expect": "violated",
+      "comparable": true,
+      "problems": [],
+      "rows": [
+        {
+          "id": "quint-ts",
+          "what": "quint-ts end to end, tla-ts's compile cache warm",
+          "checkerOnly": false,
+          "verdicts": [
+            "violated"
+          ],
+          "states": [
+            46377
+          ],
+          "traces": [
+            32
+          ],
+          "msMedian": 2082.42085,
+          "msMin": 2012.5346,
+          "msMax": 2189.6879,
+          "msCv": 0.030235991200174818,
+          "peakMiBMedian": 303.248046875
+        },
+        {
+          "id": "quint-ts-nocache",
+          "what": "quint-ts end to end, cache off (QUINT_TS_CACHE=off): tla-ts compiles itself on every check",
+          "checkerOnly": false,
+          "verdicts": [
+            "violated"
+          ],
+          "states": [
+            46377
+          ],
+          "traces": [
+            32
+          ],
+          "msMedian": 2265.56565,
+          "msMin": 2172.1959,
+          "msMax": 2367.2353,
+          "msCv": 0.025801204251081806,
+          "peakMiBMedian": 367.333984375
+        },
+        {
+          "id": "tla-ts",
+          "what": "tla-ts on quint-ts's TLA+",
+          "checkerOnly": true,
+          "verdicts": [
+            "violated"
+          ],
+          "states": [
+            46377
+          ],
+          "traces": [
+            32
+          ],
+          "msMedian": 1382.3009000000002,
+          "msMin": 1353.6812,
+          "msMax": 1474.2483,
+          "msCv": 0.02913446146182643,
+          "peakMiBMedian": 211.7265625
+        }
+      ]
+    },
+    {
+      "id": "tokens",
+      "file": "conformance/models/tokens.qnt",
+      "main": "tokens",
+      "expect": "passed",
+      "comparable": true,
+      "problems": [],
+      "rows": [
+        {
+          "id": "quint-ts",
+          "what": "quint-ts end to end, tla-ts's compile cache warm",
+          "checkerOnly": false,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            107
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 1042.37135,
+          "msMin": 992.4214,
+          "msMax": 1128.6065,
+          "msCv": 0.03352174275239139,
+          "peakMiBMedian": 257.13671875
+        },
+        {
+          "id": "quint-ts-nocache",
+          "what": "quint-ts end to end, cache off (QUINT_TS_CACHE=off): tla-ts compiles itself on every check",
+          "checkerOnly": false,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            107
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 1259.1313,
+          "msMin": 1212.9807,
+          "msMax": 1304.7313,
+          "msCv": 0.02617358518666105,
+          "peakMiBMedian": 314.986328125
+        },
+        {
+          "id": "tla-ts",
+          "what": "tla-ts on quint-ts's TLA+",
+          "checkerOnly": true,
+          "verdicts": [
+            "passed"
+          ],
+          "states": [
+            107
+          ],
+          "traces": [
+            0
+          ],
+          "msMedian": 276.49559999999997,
+          "msMin": 260.2588,
+          "msMax": 324.3824,
+          "msCv": 0.06051109369606053,
+          "peakMiBMedian": 162.564453125
+        }
+      ]
+    }
+  ]
+}

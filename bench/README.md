@@ -1,7 +1,7 @@
 # Benchmarks
 
 `bun run bench [--runs N]` times quint-ts against TLC and Quint's own TLC
-route, and writes [BASELINE.md](BASELINE.md) from the results of every
+route, and writes `bench/BASELINE.md` from the results of every
 platform and machine in `results/`. Correctness comes first: a model's timings are kept
 only when every route reaches the expected verdict in every run, with the
 same number of distinct states for a pass and the same counterexample length
@@ -24,7 +24,7 @@ guarantee, bounded and symbolic, so it isn't compared.
 | `tlc-apalache` | That TLC on Apalache's translation, the TLA+ that `quint verify --backend=tlc` checks |
 | `quint-verify-tlc` | `quint verify --backend=tlc` end to end, starting its Apalache server |
 
-`bun bench/compare.ts` writes [COMPARISON.md](COMPARISON.md): each results
+`bun bench/compare.ts` writes `bench/COMPARISON.md`: each results
 file against the one of the same platform and machine in `results/baseline/`.
 
 ## Measures

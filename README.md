@@ -134,7 +134,9 @@ violated with a counterexample). The count, and what would extend it, is in
 tla-ts compiles its own JavaScript on first use, and quint-ts keeps the
 compiled code between checks. The Windows benchmark workflow
 (`.github/workflows/bench-windows.yml`) times checks with the cache warm and
-off on a hosted runner, and its results go in `bench/results/ci/`. The cache holds code of
+off on a hosted runner. In its run at the first commit, the warm cache took
+178 to 315 ms off the median check of each of four models
+([bench/results/ci](bench/results/ci/win32-x64-github-windows-2025-x64.md)). The cache holds code of
 tla-ts only, never anything about a model or a result; a result is the same
 with the cache off, empty, warm or corrupted (`tests/cache.test.ts`).
 
