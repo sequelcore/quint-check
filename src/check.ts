@@ -37,7 +37,7 @@ export interface Guarantee {
 
 export type CheckResult =
   | { readonly status: "passed"; readonly states: number; readonly guarantee: Guarantee }
-  | { readonly status: "violated"; readonly states: number; readonly trace: readonly TraceStep[]; readonly guarantee: Guarantee }
+  | { readonly status: "violated"; readonly invariant: string; readonly states: number; readonly trace: readonly TraceStep[]; readonly guarantee: Guarantee }
   | { readonly status: "unsupported"; readonly reason: string; readonly where: "translation" | "reached-state"; readonly guarantee: Guarantee }
   | { readonly status: "inconclusive"; readonly reason: string; readonly guarantee: Guarantee }
   | { readonly status: "error"; readonly stage: "frontend" | "translation" | "checker"; readonly output: string; readonly guarantee: Guarantee };
@@ -83,13 +83,16 @@ export function invariantProblem(invariants: readonly string[]): string | undefi
 /** Node, which runs Quint's CLI: this process when it is Node, else `node` from PATH (under Bun, in development). */
 const nodeExecutable: string = process.versions["bun"] === undefined ? process.execPath : "node";
 
-/** Quint's CLI and its arguments for the frontend: the IR of `file`, flattened, with q::init, q::step and q::inv added. */
+/**
+ * Quint's CLI and its arguments for the frontend: the IR of `file`, flattened, with q::init, q::step and q::inv added.
+ * Each invariant goes as `and(<entry>)`, so q::inv keeps one argument per entry even when an entry has commas.
+ */
 function frontendArgs(file: string, options: TranslateOptions): string[] {
   return [tools.quintCli, "compile", "--target", "json",
     ...options.main === undefined ? [] : ["--main", options.main],
     ...options.init === undefined ? [] : ["--init", options.init],
     ...options.step === undefined ? [] : ["--step", options.step],
-    ...options.invariants.length === 0 ? [] : [`--invariant=${options.invariants.join(",")}`], file];
+    ...options.invariants.length === 0 ? [] : [`--invariant=${options.invariants.map((i) => `and(${i})`).join(",")}`], file];
 }
 
 type FrontendOutput = { ok: true; ir: unknown } | { ok: false; output: string };
@@ -112,7 +115,7 @@ type Translated =
 function translated(front: FrontendOutput, options: TranslateOptions): Translated {
   if (!front.ok) return { kind: "frontend-error", output: front.output };
   try {
-    return { kind: "translated", translation: translate(front.ir, options.invariants.length > 0) };
+    return { kind: "translated", translation: translate(front.ir, options.invariants) };
   } catch (err) {
     if (err instanceof Unsupported) return { kind: "unsupported", reason: err.message };
     throw err;
@@ -320,7 +323,8 @@ export function verdict(r: CheckerResult, translation: Translation): CheckResult
     }
     return { status: "passed", states: r.distinctStates, guarantee: guarantee("complete") };
   }
-  if (r.status === "invariant-violation" && r.violation?.name === "q_inv" && r.violation.trace.length > 0) {
+  const invariant = r.status === "invariant-violation" ? translation.invariants.get(r.violation?.name ?? "") : undefined;
+  if (r.status === "invariant-violation" && invariant !== undefined && r.violation !== undefined && r.violation.trace.length > 0) {
     const trace = r.violation.trace.map((step, k): TraceStep => {
       // The action TLC names first in its label, as `step line 65, ...` or `request("p1") line 38, ...`.
       const name = step.label === null || k === 0 ? undefined : /^([^ >(]+)/.exec(step.label)?.[1];
@@ -329,7 +333,7 @@ export function verdict(r: CheckerResult, translation: Translation): CheckResult
         state: Object.fromEntries(Object.entries(step.state).map(([v, x]) => [translation.variables.get(v) ?? v, x.replace(/\s+/g, " ")])),
       };
     });
-    return { status: "violated", states: r.distinctStates, trace, guarantee: guarantee("partial") };
+    return { status: "violated", invariant, states: r.distinctStates, trace, guarantee: guarantee("partial") };
   }
   return { status: "error", stage: "checker", output: `the checker returned ${r.status} without a result quint-ts can read`, guarantee: guarantee("partial") };
 }

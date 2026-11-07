@@ -335,6 +335,8 @@ export interface Translation {
   readonly cfg: string;
   readonly variables: ReadonlyMap<string, string>;
   readonly names: ReadonlyMap<string, string>;
+  /** Each invariant's TLA+ name, `q_inv_1` and so on, to the entry the caller gave. */
+  readonly invariants: ReadonlyMap<string, string>;
 }
 
 /** Undefined and contested operations stop the check where a state reaches them. */
@@ -350,8 +352,12 @@ const PRELUDE = [
   `QTS__put(QTS__f, QTS__k, QTS__v) == [QTS__x \\in DOMAIN QTS__f \\cup {QTS__k} |-> IF QTS__x = QTS__k THEN QTS__v ELSE QTS__f[QTS__x]]`,
 ];
 
-/** Translate `ir`, the JSON of `quint compile --target json`, with `q::inv` checked when `invariant` is set. */
-export function translate(ir: Ex, invariant: boolean): Translation {
+/**
+ * Translate `ir`, the JSON of `quint compile --target json`, checking each of `invariants`. The frontend
+ * was given each entry as `and(<entry>)`, so `q::inv` is the `and` of one `and` per entry, and each
+ * becomes its own definition and its own `INVARIANT` line, which is how the checker names the one that broke.
+ */
+export function translate(ir: Ex, invariants: readonly string[]): Translation {
   const main = ir.modules.find((m: Ex) => m.name === ir.main) ?? ir.modules[0];
   const vars = new Set<string>();
   const defs = new Map<string, Def>();
@@ -364,8 +370,7 @@ export function translate(ir: Ex, invariant: boolean): Translation {
   for (const required of ["q::init", "q::step"]) {
     if (!defs.has(required)) throw new Unsupported(`no ${required}`);
   }
-  // Quint's CLI drops an invariant that is `true`, so it defines no q::inv: there is nothing to check.
-  if (invariant && !defs.has("q::inv")) throw new Unsupported("no invariant to check: Quint defines no q::inv when the invariant is `true`");
+  const entries = invariantEntries(defs.get("q::inv"), invariants);
   if (vars.size === 0) throw new Unsupported("a module with no state variables");
   const reserved = [...vars, ...defs.keys()].find((n) => mangle(n).startsWith("QTS__"));
   if (reserved !== undefined) throw new Unsupported(`the name ${reserved}, whose prefix QTS__ quint-ts reserves for the names it generates`);
@@ -383,7 +388,7 @@ export function translate(ir: Ex, invariant: boolean): Translation {
   // a definition's helpers go just before it, after what they use.
   for (const d of main.declarations.filter((x: Ex) => x.kind === "def")) {
     if (d.qualifier === "run" || d.qualifier === "temporal") throw new Unsupported(`the ${d.qualifier} definition ${d.name}`);
-    if (d.name === "q::inv" && !invariant) continue;
+    if (d.name === "q::inv") continue;
     const mode = d.name === "q::init" ? "init" : d.qualifier === "action" ? "action" : "state";
     if (d.qualifier === "action" && d.name !== "q::init" && d.name !== "q::step" && onlyInInit(d.name, defs)) continue;
     const helpers: string[] = [];
@@ -393,15 +398,41 @@ export function translate(ir: Ex, invariant: boolean): Translation {
       : `${mangle(d.name)} ==\n  ${mode === "init" ? initBody(d, [], ctx) : expr(d.expr, ctx)}`;
     body.push(...helpers, text);
   }
+  // After every other definition: an invariant may use any of them.
+  entries.forEach((entry, k) => {
+    const helpers: string[] = [];
+    const ctx: Ctx = { defs, vars, mode: "state", helpers, counter, locals: new Set() };
+    const text = `${invariantName(k)} ==\n  ${expr(entry, ctx)}`;
+    body.push(...helpers, text);
+  });
   const tla = ["---- MODULE Q ----", "EXTENDS Integers, Sequences, FiniteSets, TLC", `VARIABLES ${[...vars].map(mangle).join(", ")}`,
     ...PRELUDE, ...body, "===="].join("\n\n");
   const short = (n: string): string => n.split("::").at(-1) ?? n;
   return {
     tla,
-    cfg: ["INIT q_init", "NEXT q_step", ...invariant ? ["INVARIANT q_inv"] : []].join("\n"),
+    cfg: ["INIT q_init", "NEXT q_step", ...invariants.map((_, k) => `INVARIANT ${invariantName(k)}`)].join("\n"),
     variables: new Map([...vars].map((v) => [mangle(v), short(v)])),
     names: new Map([...defs.keys()].map((n) => [mangle(n), short(n)])),
+    invariants: new Map(invariants.map((entry, k) => [invariantName(k), entry])),
   };
+}
+
+/** The TLA+ name of the k-th invariant, counting from 0. */
+const invariantName = (k: number): string => `q_inv_${k + 1}`;
+
+/**
+ * The expression of each invariant, taken from `q::inv`, which must be the `and` of one `and` per entry.
+ * Quint reads an entry's top-level commas as arguments of `and`, so an entry such as `a), and(b` would
+ * change the count, and the names with it: nothing is checked then, rather than the wrong invariants.
+ */
+function invariantEntries(inv: Def | undefined, invariants: readonly string[]): Ex[] {
+  if (invariants.length === 0) return [];
+  const body = inv?.expr;
+  const wrapped: Ex[] | undefined = body?.kind === "app" && body.opcode === "and" ? body.args : undefined;
+  if (wrapped === undefined || wrapped.length !== invariants.length || !wrapped.every((a) => a.kind === "app" && a.opcode === "and")) {
+    throw new Unsupported(`invariants that Quint reads as ${wrapped?.length ?? 0} where ${invariants.length} were given, so the one that failed couldn't be named`);
+  }
+  return wrapped;
 }
 
 /** An action that only init uses is inlined there and not emitted: as an action it would hold primed equalities. */

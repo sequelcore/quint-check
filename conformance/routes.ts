@@ -20,12 +20,16 @@ export interface RouteRun {
   readonly outcome: Outcome;
   /** The line that decided the outcome, kept so a disagreement can be read without rerunning. */
   readonly detail: string;
+  /** For a violation the simulator reports: every invariant the violating state breaks, in the order given. */
+  readonly broken?: readonly string[];
 }
 
 export interface Target {
   readonly file: string;
   readonly main: string;
   readonly invariant: string;
+  /** The invariants as separate entries, when there are several; `invariant` is then their conjunction. */
+  readonly invariants?: readonly [string, ...string[]];
 }
 
 export const APALACHE_VERSION = "0.62.4";
@@ -50,11 +54,14 @@ export async function quintTs(t: Target, timeoutMs = 60_000): Promise<RouteRun> 
 
 /** `quint run` with one sample of `steps` steps: exact on a case with a single behavior. */
 export function evaluator(t: Target, backend: "typescript" | "rust", steps = 1, samples = 1): RouteRun {
-  const ran = quint(["run", `--backend=${backend}`, `--main=${t.main}`, `--invariant=${t.invariant}`,
+  const ran = quint(["run", `--backend=${backend}`, `--main=${t.main}`,
+    ...t.invariants === undefined ? [`--invariant=${t.invariant}`] : ["--invariants", ...t.invariants],
     `--max-samples=${samples}`, `--max-steps=${steps}`, "--seed=0x1", t.file]);
   const out = `${ran.stdout}${ran.stderr}`;
   if (/^\[ok\]/m.test(out)) return { outcome: "passed", detail: firstLine(out, /^\[ok\]/) };
-  if (/^\[violation\]/m.test(out)) return { outcome: "violated", detail: firstLine(out, /^\[violation\]/) };
+  if (/^\[violation\]/m.test(out)) {
+    return { outcome: "violated", detail: firstLine(out, /^\[violation\]/), broken: [...out.matchAll(/^\s*❌ (.+?)\s*$/gmu)].map((m) => m[1] ?? "") };
+  }
   return { outcome: "error", detail: firstLine(out, /Error \[QNT|^error|Error/) };
 }
 

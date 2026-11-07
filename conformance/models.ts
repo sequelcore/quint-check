@@ -6,6 +6,10 @@ export interface ModelCase {
   readonly expect: "passed" | "violated" | "unsupported";
   /** The invariant to check; `inv` when unset. */
   readonly invariant?: string;
+  /** Several invariants, in the order given, instead of `invariant`; the official route checks their conjunction. */
+  readonly invariants?: readonly [string, ...string[]];
+  /** For a violated case with `invariants`: the one the result names, which the simulator must also report as broken. */
+  readonly names?: string;
   /** The IR opcodes the model exercises; the harness checks they appear in its IR. */
   readonly ops: readonly string[];
   readonly note: string;
@@ -53,4 +57,15 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["or", "and", "implies", "iff", "eq", "neq", "not", "assign", "actionAll"], note: "Quint's examples: booleans.qnt; b or not(b) holds" },
   { id: "public-booleans-flips", file: "conformance/public/booleans_check.qnt", main: "booleans_flips", expect: "violated",
     ops: ["not", "assign", "actionAll"], note: "Quint's examples: booleans.qnt; b breaks after the first step" },
+  // Several invariants: a result names the first one, in the order given, that the first violating state breaks.
+  { id: "invariants-same-state", file: "conformance/models/invariants.qnt", main: "invariants", invariants: ["below2", "doubleBelow4"], names: "below2",
+    expect: "violated", ops: ["ilt"], note: "both invariants break at x = 2: the first given is named" },
+  { id: "invariants-same-state-reversed", file: "conformance/models/invariants.qnt", main: "invariants", invariants: ["doubleBelow4", "below2"], names: "doubleBelow4",
+    expect: "violated", ops: ["ilt"], note: "the same state with the order reversed: the other one is named" },
+  { id: "invariants-only-second", file: "conformance/models/invariants.qnt", main: "invariants", invariants: ["nonNegative", "below3"], names: "below3",
+    expect: "violated", ops: ["ilt"], note: "only the second breaks" },
+  { id: "invariants-first-fails-later", file: "conformance/models/invariants.qnt", main: "invariants", invariants: ["below4", "below2"], names: "below2",
+    expect: "violated", ops: ["ilt"], note: "the first given breaks later (x = 4) than the second (x = 2): the one at the first violating state is named" },
+  { id: "invariants-all-hold", file: "conformance/models/invariants.qnt", main: "invariants", invariants: ["nonNegative", "atMostFive", "x >= 0 and x <= 5"], expect: "passed",
+    ops: ["ilte", "igte", "and"], note: "three invariants, all hold in every state" },
 ];

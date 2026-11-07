@@ -208,13 +208,19 @@ try {
   console.log("models");
   const modelRows = await mapInOrder(MODEL_CASES, async (m) => {
     console.log(`- ${m.id}`);
-    const invariant = m.invariant ?? "inv";
+    const invariants: readonly [string, ...string[]] = m.invariants ?? [m.invariant ?? "inv"];
+    const invariant = invariants.join(",");
     const used = irOpcodes(m.file, m.main, invariant);
     for (const op of m.ops) if (!used.has(op)) fail(`${m.id}: declares ${op}, which its IR doesn't use`);
-    const target = { file: m.file, main: m.main, invariant };
-    const result = await check(m.file, { main: m.main, invariants: [invariant] });
+    const target = { file: m.file, main: m.main, invariant, ...m.invariants === undefined ? {} : { invariants: m.invariants } };
+    const result = await check(m.file, { main: m.main, invariants });
     if (result.status !== m.expect) fail(`${m.id}: quint-ts ${result.status}, expected ${m.expect}`);
+    if (result.status === "violated" && result.invariant !== (m.names ?? (m.invariants === undefined ? invariant : undefined))) {
+      fail(`${m.id}: quint-ts names ${result.invariant}, expected ${m.names ?? invariant}`);
+    }
     const sampled = evaluator(target, "typescript", 6, 300);
+    // Quint lists every invariant the violating state breaks, in the order given; the one quint-ts names is the first of them.
+    if (m.names !== undefined && sampled.broken?.[0] !== m.names) fail(`${m.id}: the simulator reports ${JSON.stringify(sampled.broken)} broken, expected ${m.names} first`);
     // The simulator samples, so its pass proves nothing; its violation contradicts a quint-ts pass.
     if (sampled.outcome === "violated" && result.status === "passed") fail(`${m.id}: the simulator finds a violation quint-ts doesn't`);
     const off = withOfficial ? official(target) : undefined;

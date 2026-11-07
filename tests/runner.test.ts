@@ -169,7 +169,7 @@ test("a result that is missing, partial or malformed is never a result", () => {
 });
 
 /** A translation with no names to map, for results that don't depend on one. */
-const noNames = { tla: "", cfg: "", variables: new Map<string, string>(), names: new Map<string, string>() };
+const noNames = { tla: "", cfg: "", variables: new Map<string, string>(), names: new Map<string, string>(), invariants: new Map<string, string>() };
 const success: CheckerResult = { kind: "checked", status: "success", distinctStates: 20, queuedStates: 0, initialStates: 1 };
 
 test("a success is passed only with an initial state, a distinct state and no state left queued", () => {
@@ -184,6 +184,19 @@ test("a success is passed only with an initial state, a distinct state and no st
     const r = verdict({ ...success, ...counts } as CheckerResult, noNames);
     expect(r.status, JSON.stringify(counts)).toBe(status);
     expect(r.guarantee.scope, JSON.stringify(counts)).not.toBe("complete");
+  }
+});
+
+test("a violation names the invariant the user gave, from the checker's name for it", () => {
+  const step = { label: null, state: { x: "0" } };
+  const violated = (name: string): CheckerResult => ({ ...success, status: "invariant-violation", violation: { name, trace: [step] } });
+  const translation = { ...noNames, invariants: new Map([["q_inv_1", "small"], ["q_inv_2", "x >= 0, x <= 5"]]) };
+  expect(verdict(violated("q_inv_1"), translation)).toMatchObject({ status: "violated", invariant: "small" });
+  // The text is the entry as the caller wrote it, commas included.
+  expect(verdict(violated("q_inv_2"), translation)).toMatchObject({ status: "violated", invariant: "x >= 0, x <= 5" });
+  // A name the translation didn't define, such as a plain q_inv, is never read as a violation.
+  for (const name of ["q_inv", "q_inv_3", "Other"]) {
+    expect(verdict(violated(name), translation), name).toMatchObject({ status: "error", stage: "checker" });
   }
 });
 
