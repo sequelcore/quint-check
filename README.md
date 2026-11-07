@@ -112,10 +112,12 @@ The [demo](demo/README.md) shows the three kinds of answer on one model.
 | Status | Meaning |
 | --- | --- |
 | `passed` | Every reachable state was explored and the invariants hold in each. `guarantee.scope` is `complete`. |
-| `violated` | An invariant breaks; `trace` is a shortest counterexample, in Quint's names. |
+| `violated` | An invariant breaks. `invariant` is the one you passed, as you wrote it; `trace` is a shortest counterexample, in Quint's names. |
 | `unsupported` | The model uses a construct outside the subset (`where: "translation"`), or a reachable state needs an operation whose result Quint leaves undefined or disputed, or an integer outside the checker's 32-bit range (`where: "reached-state"`). Nothing was proved. |
 | `inconclusive` | The search stopped before exploring every state (time limit), or there was no initial state. |
 | `error` | The Quint frontend rejected the model, or the checker failed. `stage: "translation"` is a quint-ts defect. |
+
+`invariant` names the first invariant, in the order you gave them, that the first violating state the search found breaks. It is not the first invariant that fails anywhere in the model: when `["a", "b"]` is checked and `b` breaks in an earlier state than `a`, the result names `b`. An entry with a comma, such as `"x >= 0, x <= 5"`, is one invariant, named whole.
 
 A `passed` rests on the counts tla-ts's library reports: a `success` status,
 at least one initial state, at least one distinct state, and no state left in

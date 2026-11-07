@@ -105,19 +105,21 @@ export interface GraphRoutes {
   readonly routes: Record<string, Graph>;
 }
 
-const cfg = "INIT q_init\nNEXT q_step\nINVARIANT q_inv\n";
+/** Apalache's translation defines one invariant, q_inv: the conjunction of those given. */
+const officialCfg = "INIT q_init\nNEXT q_step\nINVARIANT q_inv\n";
 
 export function graphs(t: Target): GraphRoutes | { error: string } {
-  const translated = translateFile(t.file, { main: t.main, invariants: [t.invariant] });
+  const translated = translateFile(t.file, { main: t.main, invariants: t.invariants ?? [t.invariant] });
   if (translated.kind !== "translated") return { error: `${translated.kind}: ${"reason" in translated ? translated.reason : translated.output}` };
   const translation = translated.translation;
+  const cfg = `${translation.cfg}\n`;
   const routes: Record<string, Graph> = { "qts/tla-ts": explore(translation.tla, "Q", cfg, translation, "tla-ts") };
   if (javaAvailable()) {
     routes["qts/tlc"] = explore(translation.tla, "Q", cfg, translation, "tlc");
     const compiled = runQuint(["compile", "--target", "tlaplus", `--main=${t.main}`, `--invariant=${t.invariant}`, t.file], { timeoutMs: 300_000 });
     const moduleName = /^-+ MODULE (\S+) -+/m.exec(compiled.stdout)?.[1];
     routes["official/tlc"] = compiled.status === 0 && moduleName !== undefined
-      ? explore(compiled.stdout, moduleName, cfg, translation, "tlc")
+      ? explore(compiled.stdout, moduleName, officialCfg, translation, "tlc")
       : { complete: false, why: `Apalache's translation failed: ${compiled.stderr.split("\n").find((l) => /error|Error/.test(l)) ?? ""}`,
         init: new Set(), states: new Set(), edges: new Set(), violating: new Set() };
   }

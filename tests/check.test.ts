@@ -80,3 +80,29 @@ test("a construct outside the subset is unsupported at translation", async () =>
   expect(result.status).toBe("unsupported");
   if (result.status === "unsupported") expect(result.where).toBe("translation");
 }, 60_000);
+
+const invariantsModel = (invariants: readonly [string, ...string[]]) => check(model("invariants"), { main: "invariants", invariants });
+
+test("a violation names the first invariant given that the first violating state breaks", async () => {
+  // Both break at x = 2, so the order given decides.
+  const both = await invariantsModel(["below2", "doubleBelow4"]);
+  expect(both).toMatchObject({ status: "violated", invariant: "below2" });
+  expect(await invariantsModel(["doubleBelow4", "below2"])).toMatchObject({ status: "violated", invariant: "doubleBelow4" });
+  // Only the second breaks.
+  expect(await invariantsModel(["nonNegative", "below3"])).toMatchObject({ status: "violated", invariant: "below3" });
+  // The first given breaks later (x = 4) than the second (x = 2): the search stops at x = 2, so the second is named.
+  expect(await invariantsModel(["below4", "below2"])).toMatchObject({ status: "violated", invariant: "below2" });
+}, 120_000);
+
+test("several invariants that hold pass, and an entry with a comma is one invariant", async () => {
+  const result = await invariantsModel(["nonNegative", "atMostFive", "x >= 0, x <= 5"]);
+  expect(result).toMatchObject({ status: "passed", states: 6 });
+  // The entry's comma joins its pieces, as in `quint compile --invariant`; the entry is named whole.
+  expect(await invariantsModel(["nonNegative", "x >= 0, x < 3"])).toMatchObject({ status: "violated", invariant: "x >= 0, x < 3" });
+}, 60_000);
+
+test("an entry that would change the number of invariants is never checked", async () => {
+  // The parentheses close the wrapper early, so Quint would read two invariants where one was given.
+  const result = await invariantsModel(["nonNegative", "x >= 0), and(x < 3"]);
+  expect(result).toMatchObject({ status: "unsupported", where: "translation" });
+}, 60_000);
