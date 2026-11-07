@@ -27,8 +27,7 @@ From an installed package, the same models ship in it:
 npx quint-ts check node_modules/quint-ts/demo/mutex.qnt --main mutex --invariant inv
 ```
 
-In development, `bun demo/run.ts` runs all three and prints a summary; its
-output is in [output.txt](output.txt). None of these needs Java, and the
+In development, `bun demo/run.ts` runs all three and prints a summary. None of these needs Java, and the
 installed package doesn't need Bun (`npm run pack:check` checks it).
 
 ## Reading the results

@@ -5,9 +5,9 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore: ["**/*.md", "bench/results/**", "bench/profile/results/**", "conformance/results/**"]
+    paths-ignore: ["**/*.md", "bench/results/**", "conformance/results/**"]
   pull_request:
-    paths-ignore: ["**/*.md", "bench/results/**", "bench/profile/results/**", "conformance/results/**"]
+    paths-ignore: ["**/*.md", "bench/results/**", "conformance/results/**"]
 
 permissions:
   contents: read
