@@ -109,7 +109,7 @@ function routesFor(m: BenchModel, work: string, cacheDir: string): Route[] {
   writeFileSync(join(qts, "Q.cfg"), translated.translation.cfg);
   const tlcArgs = (dir: string, module: string): string[] => ["tlc2.TLC", "-workers", "1", "-deadlock", "-metadir", join(dir, "states"),
     "-config", `${module}.cfg`, `${module}.tla`];
-  const check = [process.execPath, join(root, "src", "cli.ts"), "check", join(root, m.file), "--main", m.main, "--invariant", "inv", "--timeout", "1800000"];
+  const check = [process.execPath, join(root, "src", "cli.ts"), "check", join(root, m.file), "--main", m.main, "--invariant", "inv", "--timeout-ms", "1800000"];
   const routes: Route[] = [
     { id: "quint-ts", what: "quint-ts end to end, tla-ts's compile cache warm", checkerOnly: false, cwd: root, command: check,
       env: { QUINT_TS_CACHE_DIR: cacheDir } },
