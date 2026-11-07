@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { check, frontend, sourceChanged, tools } from "../src/check.ts";
+import { check, frontend, sourceChanged, tools, translateFile } from "../src/check.ts";
 import { compare, graphs, traceInGraph } from "./graph.ts";
 import { MODEL_CASES } from "./models.ts";
 import { OPERATOR_CASES, UNSUPPORTED_CASES } from "./operators.ts";
@@ -188,13 +188,12 @@ try {
     }),
     ...PUBLIC_REFUSED.map((c) => {
       console.log(`- ${c.id}`);
-      // No invariant: these refusals happen at translation, before any invariant matters.
-      const result = check(c.file, { main: c.main, invariants: [] });
-      const reason = "reason" in result ? result.reason : "output" in result ? result.output.slice(0, 200) : "";
-      if (result.status !== "unsupported" || result.where !== "translation" || reason !== c.reason) {
-        fail(`public ${c.id}: quint-ts ${result.status} (${reason}), expected unsupported at translation (${c.reason})`);
-      }
-      return { id: c.id, group: "refused", expected: `unsupported: ${c.reason}`, status: result.status, reason };
+      // The translation alone, which check runs first: these refusals happen before any invariant matters.
+      const t = translateFile(c.file, { main: c.main, invariants: [] });
+      const status = t.kind;
+      const reason = t.kind === "unsupported" ? t.reason : t.kind === "frontend-error" ? t.output.slice(0, 200) : "";
+      if (t.kind !== "unsupported" || reason !== c.reason) fail(`public ${c.id}: quint-ts ${status} (${reason}), expected unsupported at translation (${c.reason})`);
+      return { id: c.id, group: "refused", expected: `unsupported: ${c.reason}`, status, reason };
     }),
   ];
 

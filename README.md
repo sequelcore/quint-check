@@ -77,8 +77,12 @@ fully pinned install is the development one, `bun install
 --frozen-lockfile` (see [Developing](#developing)).
 
 `check` prints the result as JSON and exits 0 only when the check passed.
-`--invariant` takes the names of the invariants, separated by commas, and
-`--timeout` the time limit in milliseconds (60 000 by default).
+It needs at least one `--invariant`, an invariant of the model as `quint
+compile --invariant` takes it; give the flag again for more. A blank
+invariant or `true` checks nothing, so `check` refuses it, as it refuses an
+unknown or incomplete flag: a usage error prints a message and exits 2.
+`--timeout` is the time limit in milliseconds, from 1 to 2 147 483 647 (60 000
+by default).
 
 From TypeScript or JavaScript:
 
@@ -89,6 +93,9 @@ const result = check("spec.qnt", { main: "spec", invariants: ["inv"] });
 if (result.status === "passed") console.log(`${result.states} states, scope ${result.guarantee.scope}`);
 if (result.status === "violated") console.log(result.trace);
 ```
+
+`check` throws a `TypeError`, and checks nothing, when `invariants` is
+empty or holds a blank entry or `true`.
 
 The [demo](demo/README.md) shows the three kinds of answer on one model.
 

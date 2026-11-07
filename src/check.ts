@@ -43,13 +43,33 @@ export interface TraceStep {
   readonly state: Readonly<Record<string, string>>;
 }
 
-export interface CheckOptions {
+/** What the frontend and the translation take; a translation may have no invariant. */
+export interface TranslateOptions {
   readonly main?: string;
-  /** The invariant expressions, as `quint verify --invariant` takes them; combined with `and`. */
+  /** The invariant expressions, as `quint compile --invariant` takes them; combined with `and`. */
   readonly invariants: readonly string[];
   readonly init?: string;
   readonly step?: string;
+}
+
+export interface CheckOptions extends TranslateOptions {
+  /** At least one, none blank or `true`: a check with nothing to check would pass vacuously. */
+  readonly invariants: readonly [string, ...string[]];
   readonly timeoutMs?: number;
+}
+
+/**
+ * Why `invariants` can't be checked, or undefined when it can. An empty list, a blank entry
+ * and `true` (which Quint drops) each check nothing, so a complete search would `pass` without
+ * having checked a property. Quint reads an entry's commas as arguments of `and`, so an entry
+ * whose comma-separated pieces are all blank or `true` checks nothing either; one with a real
+ * piece, such as `inRange(x, 3)`, is kept. A tautology written some other way isn't detected.
+ */
+export function invariantProblem(invariants: readonly string[]): string | undefined {
+  if (invariants.length === 0) return "a check needs at least one invariant";
+  const empty = invariants.find((i) => i.split(",").every((piece) => piece.trim() === "" || piece.trim() === "true"));
+  if (empty !== undefined) return `invariant ${JSON.stringify(empty)} checks nothing; give an invariant of the model`;
+  return undefined;
 }
 
 /** Node, which runs Quint's CLI: this process when it is Node, else `node` from PATH (under Bun, in development). */
@@ -76,7 +96,7 @@ export function runQuint(args: readonly string[], options: { cwd?: string; timeo
 }
 
 /** The IR the official Quint frontend produces for `file`, flattened, with q::init, q::step and q::inv added. */
-export function frontend(file: string, options: CheckOptions): { ok: true; ir: unknown } | { ok: false; output: string } {
+export function frontend(file: string, options: TranslateOptions): { ok: true; ir: unknown } | { ok: false; output: string } {
   const ran = runQuint(["compile", "--target", "json",
     ...options.main === undefined ? [] : ["--main", options.main],
     ...options.init === undefined ? [] : ["--init", options.init],
@@ -87,7 +107,7 @@ export function frontend(file: string, options: CheckOptions): { ok: true; ir: u
 }
 
 /** The TLA+ translation of `file`, or why there is none. */
-export function translateFile(file: string, options: CheckOptions):
+export function translateFile(file: string, options: TranslateOptions):
   { kind: "translated"; translation: Translation } | { kind: "unsupported"; reason: string } | { kind: "frontend-error"; output: string } {
   const front = frontend(file, options);
   if (!front.ok) return { kind: "frontend-error", output: front.output };
@@ -148,8 +168,13 @@ export function parseState(text: string, translation: Translation): Record<strin
   return state;
 }
 
-/** Check `file` with `options`: the official Quint frontend, the translation, then tla-ts. */
+/**
+ * Check `file` with `options`: the official Quint frontend, the translation, then tla-ts.
+ * Throws a TypeError when `options.invariants` would check nothing (see `invariantProblem`).
+ */
 export function check(file: string, options: CheckOptions): CheckResult {
+  const problem = invariantProblem(options.invariants);
+  if (problem !== undefined) throw new TypeError(problem);
   const guarantee = (scope: Guarantee["scope"]): Guarantee => ({ method: "explicit-state", property: "safety-invariant", scope,
     deadlock: "not-checked", backend: `tla-ts ${tools.tlaTsVersion}`, frontend: `quint ${tools.quintVersion}` });
   const translated = translateFile(file, options);

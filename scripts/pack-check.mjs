@@ -58,6 +58,10 @@ try {
     const result = JSON.parse(ran.stdout);
     expect(result.status === status && ran.status === code, `CLI ${name}: ${result.status}, exit ${ran.status} (expected ${status}, exit ${code})`);
   }
+  // A misspelled flag is a usage error under Node too, never a check without an invariant.
+  const typo = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invarient", "inv"],
+    { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+  expect(typo.status === 2 && typo.stdout === "" && typo.stderr.includes("--invarient"), `CLI --invarient: exit ${typo.status} (expected a usage error, exit 2)`);
   writeFileSync(join(project, "api.mjs"), `import { check } from "quint-ts";
 const r = check("node_modules/quint-ts/demo/mutex.qnt", { main: "mutex", invariants: ["inv"] });
 console.log(JSON.stringify({ status: r.status, states: r.states, scope: r.guarantee.scope }));
