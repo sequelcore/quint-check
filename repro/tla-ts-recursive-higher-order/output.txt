@@ -1,0 +1,24 @@
+tla-ts 0.0.8-dev.8067c48
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+
+$ tla-ts tlc2.TLC -config Recursive.cfg Recursive.tla
+line 6, col 64 to line 6, col 65 of module Recursive
+The operator Op requires 2 arguments.
+Error: Parsing or semantic analysis failed.
+exit 150
+$ java -cp tla2tools.jar tlc2.TLC -config Recursive.cfg Recursive.tla
+Model checking completed. No error has been found.
+  because two distinct states had the same fingerprint:
+2 states generated, 1 distinct states found, 0 states left on queue.
+exit 0
+
+$ tla-ts tlc2.TLC -config NonRecursive.cfg NonRecursive.tla
+Model checking completed. No error has been found.
+  because two distinct states had the same fingerprint:
+2 states generated, 1 distinct states found, 0 states left on queue.
+exit 0
+$ java -cp tla2tools.jar tlc2.TLC -config NonRecursive.cfg NonRecursive.tla
+Model checking completed. No error has been found.
+  because two distinct states had the same fingerprint:
+2 states generated, 1 distinct states found, 0 states left on queue.
+exit 0

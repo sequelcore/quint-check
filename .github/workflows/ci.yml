@@ -1,0 +1,59 @@
+name: CI
+
+# Windows and Linux on every push to main and every pull request. macOS has its own workflow,
+# started by hand, since its minutes cost ten times Linux's on a private repository.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**/*.md", "bench/results/**", "bench/profile/results/**", "conformance/results/**"]
+  pull_request:
+    paths-ignore: ["**/*.md", "bench/results/**", "bench/profile/results/**", "conformance/results/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 20 || 12 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # No step pushes, so the token needn't stay in .git/config, where a pull request's code could read it.
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.22.1
+      # Java runs only Quint's official route, which the conformance harness compares against.
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: 25.0.5+8
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - name: Fetch Apalache
+        run: node node_modules/@informalsystems/quint/dist/src/cli.js verify --backend=tlc --main=reserve3 --invariant=inv conformance/models/reserve.qnt
+      - run: bun run conformance
+      # The package as npm would install it: packed, installed into a new project, run with Node only.
+      - name: Package check
+        run: node scripts/pack-check.mjs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: conformance-${{ matrix.os }}
+          path: |
+            conformance/results/
+            conformance/MATRIX.md
+          if-no-files-found: warn
+          retention-days: 14

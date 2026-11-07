@@ -1,0 +1,27 @@
+quint-ts
+Copyright 2026 Sequel
+
+This product is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+quint-ts bundles no third-party code. It runs these dependencies, which are
+installed separately and keep their own licenses:
+
+- Quint (@informalsystems/quint, https://github.com/quint-co/quint),
+  Apache License 2.0: its frontend produces the IR quint-ts translates.
+- tla-ts (https://github.com/aidenybai/tla-ts), MIT: it checks the TLA+
+  quint-ts produces.
+
+conformance/public/ holds Quint models copied unchanged from Quint's examples
+(https://github.com/quint-co/quint/tree/07d7a1a69c2093b5bc656caf3b5dfefa0d766cd0/examples),
+by Quint's authors (its source files name Informal Systems), Apache License 2.0:
+booleans.qnt, instances.qnt, weakFairness.qnt, coin.qnt, ewd426_3.qnt,
+two_phase_commit.qnt, tictactoe.qnt, BinSearch.qnt, generate.qnt,
+counters.qnt, bakery.qnt, play_rock_paper_scissors.qnt, ewd426.qnt, ewd840.qnt,
+prisoners.qnt, games/secret-santa/secret_santa.qnt and spells/basicSpells.qnt.
+
+The conformance harness also runs, when present, Apalache
+(https://github.com/apalache-mc/apalache, Apache License 2.0), which Quint
+downloads. The translator
+was written against Apalache's Quint converter as a reference for Quint's
+operators; no code was copied from it.

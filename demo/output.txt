@@ -1,0 +1,20 @@
+no java on PATH
+
+mutex.qnt: a correct model: three processes, one lock, at most one in the critical section
+  result: passed (expected passed); search scope: complete; deadlock: not-checked
+  every one of 20 reachable states satisfies inv
+
+mutex_bug.qnt: the same model with a deliberate bug: enter doesn't check the lock
+  result: violated (expected violated); search scope: partial; deadlock: not-checked
+  counterexample:
+    1. init: state = [ p1 |-> [Idle |-> [tag |-> "UNIT"]], p2 |-> [Idle |-> [tag |-> "UNIT"]], p3 |-> [Idle |-> [tag |-> "UNIT"]] ], lockFree = TRUE
+    2. request: state = [ p1 |-> [Waiting |-> [tag |-> "UNIT"]], p2 |-> [Idle |-> [tag |-> "UNIT"]], p3 |-> [Idle |-> [tag |-> "UNIT"]] ], lockFree = TRUE
+    3. enter: state = [ p1 |-> [Critical |-> [tag |-> "UNIT"]], p2 |-> [Idle |-> [tag |-> "UNIT"]], p3 |-> [Idle |-> [tag |-> "UNIT"]] ], lockFree = FALSE
+    4. request: state = [ p1 |-> [Critical |-> [tag |-> "UNIT"]], p2 |-> [Waiting |-> [tag |-> "UNIT"]], p3 |-> [Idle |-> [tag |-> "UNIT"]] ], lockFree = FALSE
+    5. enter: state = [ p1 |-> [Critical |-> [tag |-> "UNIT"]], p2 |-> [Critical |-> [tag |-> "UNIT"]], p3 |-> [Idle |-> [tag |-> "UNIT"]] ], lockFree = FALSE
+
+mutex_records.qnt: the correct model with the lock as a record, outside quint-ts's subset
+  result: unsupported (expected unsupported); search scope: none; deadlock: not-checked
+  why: operator Rec; nothing was proved
+
+every result is the expected one; Quint 0.33.1 as the frontend, tla-ts 0.0.8-dev.8067c48 as the checker

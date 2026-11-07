@@ -1,0 +1,47 @@
+{
+  "name": "quint-ts",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "A Java-free Quint model checker for TypeScript, powered by tla-ts. Experimental.",
+  "type": "module",
+  "bin": {
+    "quint-ts": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "demo/*.qnt",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "bun test tests",
+    "conformance": "bun conformance/run.ts",
+    "bench": "bun bench/run.ts",
+    "bench:compare": "bun bench/compare.ts",
+    "check": "bun run typecheck && bun run test",
+    "prepack": "tsc -p tsconfig.build.json",
+    "pack:check": "node scripts/pack-check.mjs"
+  },
+  "dependencies": {
+    "@informalsystems/quint": "0.33.1",
+    "tla-ts": "0.0.8-dev.8067c48"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "@types/node": "24.10.0",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+// node scripts/pack-check.mjs
+//
+// Packs quint-ts with npm, installs the tarball into a new project outside
+// this repository, and checks the three demo models through the installed
+// CLI and API, with Node only: the check fails if Bun or Java is on PATH,
+// and if a development dependency got installed. Exits non-zero on any
+// unexpected result.
+import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { delimiter, dirname, join, resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..");
+const work = mkdtempSync(join(tmpdir(), "quint-ts-pack-"));
+const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+// On Windows, PATH holds only Node's folder and System32, so neither Bun nor Java can be found. Elsewhere the
+// system folders can hold Java (Ubuntu runners do), so stand-ins for java and bun come first on PATH and leave a
+// mark if anything runs them; the check requires no mark.
+const windows = process.platform === "win32";
+const shims = join(work, "shims");
+const used = join(work, "used");
+const system = windows ? [join(process.env.SystemRoot ?? "C:\\Windows", "System32")] : [shims, "/usr/bin", "/bin"];
+if (!windows) {
+  mkdirSync(shims);
+  for (const tool of ["java", "bun"]) {
+    writeFileSync(join(shims, tool), `#!/bin/sh\necho ${tool} >> "${used}"\nexit 97\n`, { mode: 0o755 });
+  }
+}
+const env = { ...process.env, PATH: (windows ? [dirname(process.execPath), ...system] : [shims, dirname(process.execPath), ...system.slice(1)]).join(delimiter) };
+// npm and npx are .cmd scripts on Windows, which only a shell can start; Node itself starts directly.
+const shellFor = (cmd) => cmd.endsWith(".cmd");
+const run = (cmd, args, cwd) => execFileSync(cmd, args, { cwd, env, encoding: "utf8", shell: shellFor(cmd) });
+let failures = 0;
+const expect = (ok, what) => { console.log(`${ok ? "ok  " : "FAIL"} ${what}`); if (!ok) failures += 1; };
+
+try {
+  if (windows) {
+    for (const tool of ["bun", "java"]) {
+      const found = spawnSync("where", [tool], { env, encoding: "utf8" }).status === 0;
+      expect(!found, `${tool} is not on PATH`);
+    }
+  }
+  const packed = run(npm, ["pack", "--pack-destination", work, "--silent"], root).trim().split(/\r?\n/).at(-1);
+  const tarball = join(work, packed);
+  expect(existsSync(tarball), `npm pack wrote ${packed}`);
+  const project = join(work, "consumer");
+  mkdirSync(project);
+  run(npm, ["init", "-y"], project);
+  run(npm, ["install", "--no-audit", "--no-fund", tarball], project);
+  for (const dev of ["typescript", "@types/bun"]) expect(!existsSync(join(project, "node_modules", dev)), `development dependency ${dev} is not installed`);
+
+  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 1], ["mutex_records", "unsupported", 1]];
+  for (const [name, status, code] of demos) {
+    const ran = spawnSync(npx, ["--no-install", "quint-ts", "check", `node_modules/quint-ts/demo/${name}.qnt`, "--main", name, "--invariant", "inv"],
+      { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+    const result = JSON.parse(ran.stdout);
+    expect(result.status === status && ran.status === code, `CLI ${name}: ${result.status}, exit ${ran.status} (expected ${status}, exit ${code})`);
+  }
+  writeFileSync(join(project, "api.mjs"), `import { check } from "quint-ts";
+const r = check("node_modules/quint-ts/demo/mutex.qnt", { main: "mutex", invariants: ["inv"] });
+console.log(JSON.stringify({ status: r.status, states: r.states, scope: r.guarantee.scope }));
+`);
+  const api = JSON.parse(run(process.execPath, ["api.mjs"], project));
+  expect(api.status === "passed" && api.states === 20 && api.scope === "complete", `API mutex: ${api.status}, ${api.states} states, scope ${api.scope}`);
+  if (!windows) expect(!existsSync(used), "nothing ran java or bun");
+} finally {
+  rmSync(work, { recursive: true, force: true });
+}
+console.log(failures === 0 ? "the installed package works with Node only" : `${failures} failure(s)`);
+process.exit(failures === 0 ? 0 : 1);

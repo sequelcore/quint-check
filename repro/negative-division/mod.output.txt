@@ -1,0 +1,39 @@
+$ quint --version
+0.33.1
+$ node --version
+v24.15.0
+$ java -version
+openjdk version "25.0.5" 2026-10-20 LTS
+
+$ quint run --backend=typescript --invariant=inv --max-samples=1 --max-steps=1 --seed=0x1 mod.qnt
+An example execution:
+[State 0] { x: 0 }
+[State 1] { x: -1 }
+[ok] No violation found (9ms at 111 traces/second).
+Trace length statistics: max=2, min=2, average=2.00
+
+$ quint run --backend=rust --invariant=inv --max-samples=1 --max-steps=1 --seed=0x1 mod.qnt
+An example execution:
+[State 0] { x: 0 }
+[State 1] { x: -1 }
+[ok] No violation found (19ms at 53 traces/second).
+Trace length statistics: max=2, min=2, average=2.00
+
+$ quint verify --backend=tlc --invariant=inv mod.qnt   # Apalache 0.62.4 translation, TLC from apalache.jar
+[TLC] Compiling to TLA+ (via Apalache)...
+[TLC] Running TLC model checker...
+Error: Invariant q_inv is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+x = 0
+State 2: <:= line 14, col 9 to line 14, col 20 of module mod>
+x = 1
+[violation] Found an issue (626ms).
+error: found a counterexample
+
+$ quint verify --invariant=inv mod.qnt   # Apalache 0.62.4, symbolic (SMT), its default backend
+State 0: Checking 1 state invariants                              I@01:25:01.454
+State 0: state invariant 0 holds.                                 I@01:25:01.461
+State 1: Checking 1 state invariants                              I@01:25:01.472
+State 1: state invariant 0 holds.                                 I@01:25:01.474
+[ok] No violation found (4363ms).

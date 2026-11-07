@@ -1,0 +1,30 @@
+$ quint --version
+0.33.1
+$ node --version
+v24.15.0
+$ java -version
+openjdk version "25.0.5" 2026-10-20 LTS
+
+$ quint run --backend=typescript --invariant=inv --max-samples=1 --max-steps=1 --seed=0x1 fold.qnt
+An example execution:
+[State 0] { x: 123 }
+[State 1] { x: 123 }
+[ok] No violation found (7ms at 143 traces/second).
+Trace length statistics: max=2, min=2, average=2.00
+
+$ quint run --backend=rust --invariant=inv --max-samples=1 --max-steps=1 --seed=0x1 fold.qnt
+An example execution:
+[State 0] { x: 213 }
+[violation] Found an issue (12ms at 83 traces/second).
+error: Invariant violated
+
+$ quint verify --backend=tlc --invariant=inv fold.qnt   # Apalache 0.62.4 translation, TLC from apalache.jar
+[TLC] Compiling to TLA+ (via Apalache)...
+[TLC] Running TLC model checker...
+  calculated (optimistic):  val = 5.4E-20
+[ok] No violation found (640ms).
+
+$ quint verify --invariant=inv fold.qnt   # Apalache 0.62.4, symbolic (SMT), its default backend
+State 0: Checking 1 state invariants                              I@01:25:26.570
+State 0: state invariant 0 holds.                                 I@01:25:26.574
+[ok] No violation found (4731ms).

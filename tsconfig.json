@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedDeclarations": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "erasableSyntaxOnly": true,
+    "types": [
+      "node",
+      "bun"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "conformance/**/*.ts",
+    "bench/**/*.ts",
+    "tests/**/*.ts"
+  ]
+}
