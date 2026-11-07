@@ -180,6 +180,12 @@ const checkerScript = join(dirname(here), `checker${extname(here)}`);
 /** The largest result file read; a check's result is far smaller. */
 const MAX_RESULT_BYTES = 64 * 1024 * 1024;
 
+/** What a result covers, with `scope` saying how much of the state space. */
+function guarantee(scope: Guarantee["scope"]): Guarantee {
+  return { method: "explicit-state", property: "safety-invariant", scope, deadlock: "not-checked",
+    backend: `tla-ts ${tools.tlaTsVersion}`, frontend: `quint ${tools.quintVersion}` };
+}
+
 /** Throw a TypeError or a RangeError when `options` can't be checked. */
 function validate(options: CheckOptions): void {
   const problem = invariantProblem(options.invariants);
@@ -229,8 +235,6 @@ export async function check(file: string, options: CheckOptions): Promise<CheckR
   validate(options);
   options.signal?.throwIfAborted();
   const deadline = performance.now() + (options.timeoutMs ?? 60_000);
-  const guarantee = (scope: Guarantee["scope"]): Guarantee => ({ method: "explicit-state", property: "safety-invariant", scope,
-    deadlock: "not-checked", backend: `tla-ts ${tools.tlaTsVersion}`, frontend: `quint ${tools.quintVersion}` });
   // Folders left by checks whose process died. It never rejects, and this check doesn't wait for it.
   void sweepStaleRunDirs();
   const dir = await makeRunDir();
@@ -252,27 +256,36 @@ export async function check(file: string, options: CheckOptions): Promise<CheckR
     // quint verify --backend=tlc doesn't check deadlock, and neither does quint-ts.
     const job: CheckerJob = { source: translation.tla, config: `${translation.cfg}\nCHECK_DEADLOCK FALSE`, ...cacheDir === undefined ? {} : { cacheDir } };
     await writeFile(join(dir, JOB_FILE), JSON.stringify(job));
-    const outcome = await runProcess(process.execPath, [checkerScript, dir], { stdout: "ignore", deadline, signal: options.signal });
-    if (outcome.kind === "time-limit") {
-      return { status: "inconclusive", reason: "the checker stopped at the time limit before exploring every state", guarantee: guarantee("partial") };
-    }
-    if (outcome.kind === "spawn-failed") {
-      return { status: "error", stage: "checker", output: `the checker couldn't start: ${outcome.message}`, guarantee: guarantee("none") };
-    }
-    const result = outcome.kind === "exited" && outcome.code === 0 ? await readResult(dir) : undefined;
-    if (result === undefined) {
-      const how = outcome.kind === "signaled" ? `was ended by ${outcome.signal}`
-        : outcome.code === 0 ? "wrote no complete result" : `exited with code ${outcome.code}`;
-      return { status: "error", stage: "checker", output: `the checker ${how}. ${outcome.stderr.split(/\r?\n/).slice(-20).join("\n")}`.trim(),
-        guarantee: guarantee("partial") };
-    }
-    return verdict(result, translation, guarantee);
+    return await runChecker(checkerScript, dir, translation, deadline, options.signal);
   } finally {
     await removeRunDir(dir);
   }
 }
 
-/** What a complete checker run establishes. A `passed` needs a finished search from at least one initial state. */
+/**
+ * Run the checker child `script` on the job in `dir` by `deadline`, and read what it established. Its
+ * result counts only when it exits 0 and leaves a complete, well-formed result. Internal: `check` runs
+ * the real checker, and the tests run stand-ins for the paths where a result mustn't count.
+ */
+export async function runChecker(script: string, dir: string, translation: Translation, deadline: number, signal?: AbortSignal):
+  Promise<CheckResult> {
+  const outcome = await runProcess(process.execPath, [script, dir], { stdout: "ignore", deadline, signal });
+  if (outcome.kind === "time-limit") {
+    return { status: "inconclusive", reason: "the checker stopped at the time limit before exploring every state", guarantee: guarantee("partial") };
+  }
+  if (outcome.kind === "spawn-failed") {
+    return { status: "error", stage: "checker", output: `the checker couldn't start: ${outcome.message}`, guarantee: guarantee("none") };
+  }
+  const result = outcome.kind === "exited" && outcome.code === 0 ? await readResult(dir) : undefined;
+  if (result === undefined) {
+    const how = outcome.kind === "signaled" ? `was ended by ${outcome.signal}`
+      : outcome.code === 0 ? "wrote no complete result" : `exited with code ${outcome.code}`;
+    return { status: "error", stage: "checker", output: `the checker ${how}. ${outcome.stderr.split(/\r?\n/).slice(-20).join("\n")}`.trim(),
+      guarantee: guarantee("partial") };
+  }
+  return verdict(result, translation);
+}
+
 /** Why a failure the checker reported is quint-ts's `unsupported`, not an error: a marker the translation planted, or 32-bit integers. */
 function unsupportedFailure(message: string): string | undefined {
   const marker = new RegExp(`"${MARKER} ([^"]*)"`).exec(message);
@@ -283,7 +296,11 @@ function unsupportedFailure(message: string): string | undefined {
   return undefined;
 }
 
-function verdict(r: CheckerResult, translation: Translation, guarantee: (scope: Guarantee["scope"]) => Guarantee): CheckResult {
+/**
+ * What a complete checker run establishes. A `passed` needs a finished search from at least one initial
+ * state: tla-ts's success, at least one initial and one distinct state, and no state left queued.
+ */
+export function verdict(r: CheckerResult, translation: Translation): CheckResult {
   // tla-ts reports some failures by throwing (a literal past 32 bits) and others in its result (a computation past them).
   const failure = r.kind === "threw" ? (r.error === "other" ? r.message : undefined) : r.status === "error" ? r.failure ?? "" : undefined;
   const unsupported = failure === undefined ? undefined : unsupportedFailure(failure);

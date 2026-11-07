@@ -3,8 +3,8 @@ import { spawn } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { check } from "../src/check.ts";
-import { parseCheckerResult } from "../src/checker-result.ts";
+import { check, runChecker, verdict, type CheckResult } from "../src/check.ts";
+import { parseCheckerResult, type CheckerResult } from "../src/checker-result.ts";
 import { isAlive } from "../src/process.ts";
 import { removeRunDir, sweepStaleRunDirs } from "../src/workdir.ts";
 
@@ -147,3 +147,45 @@ test("a result that is missing, partial or malformed is never a result", () => {
   ];
   for (const text of broken) expect(parseCheckerResult(text), text).toBeUndefined();
 });
+
+/** A translation with no names to map, for results that don't depend on one. */
+const noNames = { tla: "", cfg: "", variables: new Map<string, string>(), names: new Map<string, string>() };
+const success: CheckerResult = { kind: "checked", status: "success", distinctStates: 20, queuedStates: 0, initialStates: 1 };
+
+test("a success is passed only with an initial state, a distinct state and no state left queued", () => {
+  expect(verdict(success, noNames)).toMatchObject({ status: "passed", states: 20, guarantee: { scope: "complete" } });
+  const notPassed: [Partial<CheckerResult>, CheckResult["status"]][] = [
+    [{ initialStates: 0 }, "inconclusive"],
+    [{ distinctStates: 0 }, "inconclusive"],
+    [{ initialStates: 0, distinctStates: 0 }, "inconclusive"],
+    [{ queuedStates: 3 }, "error"],
+  ];
+  for (const [counts, status] of notPassed) {
+    const r = verdict({ ...success, ...counts } as CheckerResult, noNames);
+    expect(r.status, JSON.stringify(counts)).toBe(status);
+    expect(r.guarantee.scope, JSON.stringify(counts)).not.toBe("complete");
+  }
+});
+
+test("the checker's result counts only when it exits 0 and writes a complete, well-formed one", async () => {
+  const fake = join(import.meta.dir, "fixtures", "fake-checker.mjs");
+  const noResult = "the checker wrote no complete result.";
+  const cases: [string, CheckResult["status"], string?][] = [
+    ["pass", "passed"],
+    ["exit-3", "error", "the checker exited with code 3."],
+    // Windows has no signals: TerminateProcess shows as exit code 1.
+    ["killed", "error", posix ? "the checker was ended by SIGKILL." : "the checker exited with code 1."],
+    ["no-result", "error", noResult],
+    ["partial", "error", noResult],
+    ["malformed", "error", noResult],
+  ];
+  for (const [mode, status, output] of cases) {
+    const dir = mkdtempSync(join(tmpdir(), "quint-ts-checker-test-"));
+    try {
+      writeFileSync(join(dir, "mode"), mode);
+      const r = await runChecker(fake, dir, noNames, performance.now() + 30_000);
+      expect(r.status, mode).toBe(status);
+      if (output !== undefined) expect(r.status === "error" && r.output, mode).toBe(output);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  }
+}, 60_000);
