@@ -18,7 +18,8 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { cpus, totalmem, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { distinctStates, runQuint, sourceChanged, tools, translateFile } from "../src/check.ts";
+import { sourceChanged } from "../conformance/source-changed.ts";
+import { distinctStates, runQuint, tools, translateFile } from "../src/check.ts";
 import { APALACHE_VERSION, apalacheJar, javaAvailable } from "../conformance/routes.ts";
 
 const reportOnly = process.argv.includes("--report-only");
