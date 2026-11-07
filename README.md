@@ -177,8 +177,8 @@ after the process that made it.
 - **The sweep** tells a stale folder by its owner's process id. Processes in
   different PID namespaces, such as containers, that share one temporary
   folder can therefore remove each other's live folders. A check whose folder
-  is removed fails closed: it reports `error`, or rejects with the file-system
-  error, and never reports `passed`.
+  is removed fails closed: it reports `error` from the stage that
+  lost its output, and never reports `passed`.
 - **The time limit** covers the whole check. Creating and removing the folder
   happen outside it, and can add a little time to a check that ran up to its
   limit. Reading Quint's output (`frontend.json`) and translating it run in the

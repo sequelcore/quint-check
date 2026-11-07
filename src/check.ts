@@ -210,7 +210,12 @@ async function runFrontend(file: string, options: CheckOptions, dir: string, dea
     case "time-limit": return "time-limit";
     case "spawn-failed": return { ok: false, output: `Quint's frontend couldn't start: ${outcome.message}` };
     case "signaled": return { ok: false, output: `Quint's frontend was ended by ${outcome.signal}. ${outcome.stderr}`.trim() };
-    case "exited": return readFrontend(outcome.code, await readFile(path, "utf8"), outcome.stderr);
+    case "exited": {
+      // The folder can be removed under a running check (see the README's sweep), and then there is no output to read.
+      const stdout = await readFile(path, "utf8").catch((e: unknown) => e instanceof Error ? e : new Error(String(e)));
+      return stdout instanceof Error ? { ok: false, output: `Quint's frontend output couldn't be read: ${stdout.message}` }
+        : readFrontend(outcome.code, stdout, outcome.stderr);
+    }
   }
 }
 

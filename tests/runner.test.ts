@@ -62,6 +62,26 @@ test("an already aborted signal rejects before anything runs", async () => {
   expect(myRunDirs()).toEqual([]);
 });
 
+test("a run folder removed while Quint's frontend runs is an error from the frontend, never a rejection or passed", async () => {
+  const pending = check("demo/mutex.qnt", { main: "mutex", invariants: ["inv"] });
+  let removed = false;
+  for (const end = performance.now() + 30_000; !removed && performance.now() < end; await Bun.sleep(5)) {
+    for (const dir of myRunDirs()) {
+      const file = join(dir, "frontend.json");
+      try {
+        if (!existsSync(file)) continue;
+        rmSync(file);
+        removed = !existsSync(file);
+      } catch { /* the frontend still holds it; retry */ }
+    }
+  }
+  expect(removed).toBe(true);
+  const result = await pending;
+  expect(result.status).toBe("error");
+  expect(result.status === "error" && result.stage).toBe("frontend");
+  expect(myRunDirs()).toEqual([]);
+}, 60_000);
+
 test("every kind of result leaves no run folder behind", async () => {
   const outcomes = [
     await check("demo/mutex.qnt", { main: "mutex", invariants: ["inv"] }),
