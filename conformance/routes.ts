@@ -40,8 +40,8 @@ const quint = (args: readonly string[], timeoutMs = 120_000) => runQuint(args, {
 
 const firstLine = (text: string, pattern: RegExp): string => text.split(/\r?\n/).find((l) => pattern.test(l))?.trim() ?? "";
 
-export function quintTs(t: Target, timeoutMs = 60_000): RouteRun {
-  const result = check(t.file, { main: t.main, invariants: [t.invariant], timeoutMs });
+export async function quintTs(t: Target, timeoutMs = 60_000): Promise<RouteRun> {
+  const result = await check(t.file, { main: t.main, invariants: [t.invariant], timeoutMs });
   const detail = result.status === "unsupported" || result.status === "inconclusive" ? result.reason
     : result.status === "error" ? `${result.stage}: ${result.output.split("\n").find((l) => /Error|error/.test(l)) ?? ""}`
       : `${result.states} states`;

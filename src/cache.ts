@@ -1,11 +1,12 @@
 /**
  * The folder tla-ts keeps its compile cache in between checks.
  *
- * tla-ts compiles its own JavaScript into a Node compile cache inside the
- * folder it gets as `-Djava.io.tmpdir`, and writes nothing else there
- * (tla-ts `src/cli.ts`, `enableCompileCache`). The cache holds code of
- * tla-ts, never anything about a model or a check, so reusing it can't
- * change a result; a check's own files stay in its own folder (`-metadir`).
+ * Node keeps tla-ts's compiled code in a compile cache inside this folder:
+ * the checker child enables it before loading tla-ts, as tla-ts's own CLI does
+ * with the folder it gets as `-Djava.io.tmpdir` (tla-ts `src/cli.ts`,
+ * `enableCompileCache`). The cache holds code of tla-ts, never anything about
+ * a model or a check, so reusing it can't change a result; a check's own files
+ * stay in its own run folder.
  *
  * The folder is per user, under the platform's cache location, and
  * separate for each tla-ts version, runtime, platform and architecture.

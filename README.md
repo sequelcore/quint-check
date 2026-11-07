@@ -89,13 +89,16 @@ From TypeScript or JavaScript:
 ```ts
 import { check } from "quint-ts";
 
-const result = check("spec.qnt", { main: "spec", invariants: ["inv"] });
+const result = await check("spec.qnt", { main: "spec", invariants: ["inv"] });
 if (result.status === "passed") console.log(`${result.states} states, scope ${result.guarantee.scope}`);
 if (result.status === "violated") console.log(result.trace);
 ```
 
-`check` throws a `TypeError`, and checks nothing, when `invariants` is
-empty or holds a blank entry or `true`.
+`check` returns a promise. It rejects with a `TypeError`, and checks nothing,
+when `invariants` is empty or holds a blank entry or `true`; with a
+`RangeError` when `timeoutMs` isn't a whole number from 1 to 2147483647;
+and with the signal's reason when `signal` aborts. `timeoutMs` bounds the
+whole check, Quint's frontend included.
 
 The [demo](demo/README.md) shows the three kinds of answer on one model.
 
@@ -135,6 +138,32 @@ Of Quint's 77 public examples, 6 translate today, and 4 get a definitive
 verdict with their authors' own invariants (3 passed after a complete search, 1
 violated with a counterexample). The count, and what would extend it, is in
 [conformance/public/README.md](conformance/public/README.md).
+
+## Processes and temporary files
+
+A check runs two child processes, one after the other: Quint's frontend, then
+the checker, which runs tla-ts in a Worker thread. Each check works in its own
+folder under the system's temporary directory, named `quint-ts-run-<pid>-...`
+after the process that made it.
+
+- **When a check settles**, every process it started has exited and its folder
+  is gone. That holds when it passes, fails, times out or is cancelled. A
+  folder that can't be removed, for example because another program holds a
+  file in it, is reported as a process warning with the code
+  `QUINT_TS_CLEANUP`, never thrown.
+- **Stopping** sends SIGTERM and, 2 seconds later, SIGKILL. On Linux and macOS
+  it signals the child's whole process group, so nothing it started outlives
+  it. On Windows the child is ended with TerminateProcess; a Node child's own
+  processes end with it, through the job object that libuv gives it.
+- **If the process running `check` is killed** (SIGKILL, a crash, the
+  operating system ending it), the checker notices that its standard input has
+  closed and exits within moments. Its folder stays behind, and the next check
+  in any process removes the folders of processes that no longer exist. A
+  power failure leaves both the folder and nothing running; the same sweep
+  removes the folder.
+- **The time limit** covers the whole check. Creating and removing the folder
+  happen outside it, and can add a little time to a check that ran up to its
+  limit.
 
 ## The checker cache
 

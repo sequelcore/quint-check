@@ -28,10 +28,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "tsc -p tsconfig.build.json",
     "test": "bun test tests",
+    "test:node": "node --test tests/process.test.ts",
     "conformance": "bun conformance/run.ts",
     "bench": "bun bench/run.ts",
     "bench:compare": "bun bench/compare.ts",
-    "check": "bun run typecheck && bun run test",
+    "check": "bun run typecheck && bun run test && bun run test:node",
     "prepack": "tsc -p tsconfig.build.json",
     "pack:check": "node scripts/pack-check.mjs"
   },

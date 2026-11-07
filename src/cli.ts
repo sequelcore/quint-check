@@ -84,7 +84,7 @@ if (timeout !== undefined && (!/^[1-9]\d*$/.test(timeout) || !Number.isSafeInteg
   const shown = timeout.length > 24 ? `${timeout.slice(0, 24)}… (${timeout.length} characters)` : JSON.stringify(timeout);
   usage(`--timeout takes a whole number of milliseconds from 1 to ${MAX_TIMEOUT_MS}, not ${shown}`);
 }
-const result = check(file, {
+const result = await check(file, {
   ...selected,
   invariants: [first, ...others],
   ...timeoutMs === undefined ? {} : { timeoutMs },
