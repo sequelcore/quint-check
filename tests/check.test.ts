@@ -62,11 +62,18 @@ test("a check without an invariant is rejected, never passed", () => {
 });
 
 test("a blank invariant or a literal `true` is rejected, never passed", () => {
-  // Each one checks nothing: Quint drops `true`, and a blank entry names no property.
-  for (const entry of ["", " ", "true", " true "]) {
+  // Each one checks nothing: Quint drops `true`, a blank entry names no property, and Quint reads commas
+  // as the arguments of `and`, so pieces that are all blank or `true` check nothing either.
+  for (const entry of ["", " ", "true", " true ", ",", " , ", "true,"]) {
     expect(() => check("demo/mutex.qnt", { main: "mutex", invariants: ["inv", entry] }), JSON.stringify(entry)).toThrow(TypeError);
   }
 });
+
+test("an invariant whose commas belong to an expression is still accepted", () => {
+  // `inRange(x, 3)`'s comma separates arguments of a call, not invariants: the check must run.
+  const result = check("tests/fixtures/in_range.qnt", { main: "in_range", invariants: ["inRange(x, 3)"] });
+  expect(result.status).toBe("passed");
+}, 60_000);
 
 test("a construct outside the subset is unsupported at translation", () => {
   const result = check("tests/fixtures/temporal.qnt", { main: "temp", invariants: ["inv"] });

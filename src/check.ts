@@ -61,11 +61,13 @@ export interface CheckOptions extends TranslateOptions {
 /**
  * Why `invariants` can't be checked, or undefined when it can. An empty list, a blank entry
  * and `true` (which Quint drops) each check nothing, so a complete search would `pass` without
- * having checked a property. A tautology written some other way isn't detected.
+ * having checked a property. Quint reads an entry's commas as arguments of `and`, so an entry
+ * whose comma-separated pieces are all blank or `true` checks nothing either; one with a real
+ * piece, such as `inRange(x, 3)`, is kept. A tautology written some other way isn't detected.
  */
 export function invariantProblem(invariants: readonly string[]): string | undefined {
   if (invariants.length === 0) return "a check needs at least one invariant";
-  const empty = invariants.find((i) => i.trim() === "" || i.trim() === "true");
+  const empty = invariants.find((i) => i.split(",").every((piece) => piece.trim() === "" || piece.trim() === "true"));
   if (empty !== undefined) return `invariant ${JSON.stringify(empty)} checks nothing; give an invariant of the model`;
   return undefined;
 }

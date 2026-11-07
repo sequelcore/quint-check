@@ -190,7 +190,7 @@ try {
       console.log(`- ${c.id}`);
       // The translation alone, which check runs first: these refusals happen before any invariant matters.
       const t = translateFile(c.file, { main: c.main, invariants: [] });
-      const status = t.kind === "unsupported" ? "unsupported" : t.kind;
+      const status = t.kind;
       const reason = t.kind === "unsupported" ? t.reason : t.kind === "frontend-error" ? t.output.slice(0, 200) : "";
       if (t.kind !== "unsupported" || reason !== c.reason) fail(`public ${c.id}: quint-ts ${status} (${reason}), expected unsupported at translation (${c.reason})`);
       return { id: c.id, group: "refused", expected: `unsupported: ${c.reason}`, status, reason };
