@@ -21,9 +21,10 @@ interface Run { outcome?: ProcessOutcome; rejected?: unknown; ms: number; record
 const recorded = (file: string): Recorded | undefined => (existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) as Recorded : undefined);
 
 /** Run the stand-in in `mode`; return how it ended, or why it was rejected, and the pids it recorded. */
-async function run(mode: string, options: { timeoutMs?: number; signal?: AbortSignal; command?: string; args?: string[] } = {}): Promise<Run> {
+async function run(mode: string, options: { timeoutMs?: number; signal?: AbortSignal; command?: string; args?: string[]; onPidFile?: (file: string) => void } = {}): Promise<Run> {
   const dir = mkdtempSync(join(tmpdir(), "quint-ts-process-test-"));
   const pidFile = join(dir, "pids.json");
+  options.onPidFile?.(pidFile);
   const start = performance.now();
   try {
     const outcome = await runProcess(options.command ?? process.execPath, options.args ?? [fake, mode, pidFile],
@@ -41,6 +42,13 @@ async function gone(pid: number | undefined, ms = 2_000): Promise<boolean> {
   if (pid === undefined) return true;
   for (const end = performance.now() + ms; performance.now() < end; await sleep(50)) if (!isAlive(pid)) return true;
   return !isAlive(pid);
+}
+
+/** Whether every file in `files` holds a recorded pid within `ms`. */
+async function allRecorded(files: string[], ms: number): Promise<boolean> {
+  const written = (file: string): boolean => { try { return recorded(file) !== undefined; } catch { return false; } };
+  for (const end = performance.now() + ms; performance.now() < end; await sleep(50)) if (files.every(written)) return true;
+  return files.every(written);
 }
 
 /** The child it recorded is gone; a run that never recorded one fails the test. */
@@ -180,8 +188,11 @@ test("18. twenty runs sharing one signal all stop on one abort, with no listener
   process.on("warning", onWarning);
   try {
     const ac = new AbortController();
-    const runs = Array.from({ length: 20 }, () => run("hang", { signal: ac.signal }));
-    setTimeout(() => ac.abort(new Error("all")), 1_500);
+    const pidFiles: string[] = [];
+    const runs = Array.from({ length: 20 }, () => run("hang", { signal: ac.signal, onPidFile: (file) => pidFiles.push(file) }));
+    // Abort only once every child is running, so each run has a pid whose end the test can check.
+    try { assert.ok(await allRecorded(pidFiles, 3_000), "every child recorded its pid before the abort"); }
+    finally { ac.abort(new Error("all")); }
     for (const r of await Promise.all(runs)) {
       assert.equal(reason(r), "all");
       childGone(r);
