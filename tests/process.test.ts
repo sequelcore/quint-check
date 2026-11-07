@@ -102,9 +102,15 @@ test("5. an abort right after the child starts still stops it", async () => {
 });
 
 test("6. a CPU-bound child at the time limit resolves time-limit, and is gone", async () => {
-  const r = await run("hang", { timeoutMs: 500 });
-  assert.deepEqual(r.outcome, { kind: "time-limit" });
-  childGone(r);
+  // On a busy machine Node can take longer than the limit to start the child and have it record its pid; a run
+  // that stopped it before then has no child to check, so the limit grows until a run's child did record one.
+  let r: Run | undefined;
+  for (const timeoutMs of [500, 2_000, 8_000]) {
+    r = await run("hang", { timeoutMs });
+    assert.deepEqual(r.outcome, { kind: "time-limit" });
+    if (r.recorded !== undefined) break;
+  }
+  childGone(r!);
 });
 
 test("7. a deadline already past resolves time-limit without starting the child", async () => {
