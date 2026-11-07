@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { spawn, spawnSync } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { isAlive } from "../src/process.ts";
 
@@ -18,7 +18,7 @@ test("usage errors exit 2 with a message, and run no check", () => {
     { args: ["check", ...mutex, "--invariant"], says: /--invariant/ },
     { args: ["check", ...mutex, "--invariant", ""], says: /invariant/ },
     { args: ["check", ...mutex, "--invariant", "true"], says: /true/ },
-    { args: ["check", ...mutex, "--invariant", "inv", "--timeout", "abc"], says: /--timeout/ },
+    { args: ["check", ...mutex, "--invariant", "inv", "--timeout-ms", "abc"], says: /--timeout-ms takes a whole number.*"abc"/ },
     { args: ["check", ...mutex, "--invariant", "inv", "extra"], says: /extra/ },
     { args: ["translate", ...mutex, "--invarient", "inv"], says: /--invarient/ },
   ];
@@ -33,16 +33,16 @@ test("usage errors exit 2 with a message, and run no check", () => {
 test("a timeout too large for a timer is a usage error, not a crash or a time limit", () => {
   // Node's timers hold at most 2^31 - 1 ms; past that a timer fires after 1 ms, and past 2^53 the number isn't exact.
   for (const timeout of ["9".repeat(400), "9007199254740993", "2147483648"]) {
-    const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout", timeout);
+    const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout-ms", timeout);
     expect(ran.code, timeout.slice(0, 20)).toBe(2);
     expect(ran.stdout, timeout.slice(0, 20)).toBe("");
-    expect(ran.stderr, timeout.slice(0, 20)).toMatch(/--timeout/);
+    expect(ran.stderr, timeout.slice(0, 20)).toMatch(/--timeout-ms/);
     expect(ran.stderr, timeout.slice(0, 20)).not.toMatch(/RangeError|\n\s+at /);
   }
 }, 60_000);
 
 test("the largest timeout a timer can hold is accepted", () => {
-  const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout", "2147483647");
+  const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout-ms", "2147483647");
   expect(ran.code).toBe(0);
   expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed" });
 }, 60_000);
@@ -58,6 +58,101 @@ test("translate needs no invariant", () => {
   expect(ran.code).toBe(0);
   expect(ran.stdout).toContain("INIT q_init");
   expect(ran.stdout).not.toContain("INVARIANT");
+}, 60_000);
+
+const packageVersion = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
+
+test("--help and -h print help on stdout, examples first, and exit 0, anywhere on the line", () => {
+  const cases: { args: string[]; usage: string }[] = [
+    { args: ["--help"], usage: "Usage: quint-ts <command>" },
+    { args: ["-h"], usage: "Usage: quint-ts <command>" },
+    { args: ["--help", "--bogus"], usage: "Usage: quint-ts <command>" },
+    { args: ["check", "--help"], usage: "Usage: quint-ts check <file.qnt>" },
+    { args: ["check", ...mutex, "--invariant", "inv", "-h"], usage: "Usage: quint-ts check <file.qnt>" },
+    { args: ["translate", "--help"], usage: "Usage: quint-ts translate <file.qnt>" },
+    { args: ["cache", "--help"], usage: "Usage: quint-ts cache path|clear" },
+  ];
+  for (const { args, usage } of cases) {
+    const ran = cli(...args);
+    expect(ran.code, args.join(" ")).toBe(0);
+    expect(ran.stderr, args.join(" ")).toBe("");
+    expect(ran.stdout, args.join(" ")).toContain(usage);
+    expect(ran.stdout.indexOf("Examples:"), args.join(" ")).toBeGreaterThanOrEqual(0);
+    expect(ran.stdout.indexOf("Examples:"), args.join(" ")).toBeLessThan(ran.stdout.indexOf("Usage:"));
+    expect(ran.stdout, args.join(" ")).toContain("Exit codes");
+  }
+  expect(cli("check", "--help").stdout).toContain("--timeout-ms <ms>");
+}, 60_000);
+
+test("--version prints the package version on stdout and exits 0", () => {
+  const ran = cli("--version");
+  expect(ran.code).toBe(0);
+  expect(ran.stdout).toBe(`${packageVersion}\n`);
+  expect(ran.stderr).toBe("");
+}, 60_000);
+
+test("a missing or unknown command is a usage error that names the next step", () => {
+  for (const [args, says] of [[[], /no command given.*quint-ts --help/], [["frobnicate"], /unknown command frobnicate.*quint-ts --help/]] as const) {
+    const ran = cli(...args);
+    expect(ran.code, args.join(" ")).toBe(2);
+    expect(ran.stdout, args.join(" ")).toBe("");
+    expect(ran.stderr.startsWith("usage: quint-ts"), args.join(" ")).toBe(true);
+    expect(ran.stderr.trimEnd().split("\n").at(-1), args.join(" ")).toMatch(says);
+  }
+}, 60_000);
+
+test("--timeout is refused with a hint to --timeout-ms, and is not an alias", () => {
+  const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout", "5000");
+  expect(ran.code).toBe(2);
+  expect(ran.stdout).toBe("");
+  expect(ran.stderr.trimEnd().split("\n").at(-1)).toBe("quint-ts: unknown option --timeout; the time limit is --timeout-ms <ms>");
+}, 60_000);
+
+test("a single-value flag given twice is a usage error", () => {
+  const base = ["check", "demo/mutex.qnt", "--invariant", "inv"];
+  for (const [flag, first, second] of [["--main", "mutex", "mutex"], ["--init", "init", "init"], ["--step", "step", "step"], ["--timeout-ms", "5000", "6000"]]) {
+    const ran = cli(...base, flag ?? "", first ?? "", flag ?? "", second ?? "");
+    expect(ran.code, flag).toBe(2);
+    expect(ran.stdout, flag).toBe("");
+    expect(ran.stderr.trimEnd().split("\n").at(-1), flag).toBe(`quint-ts: ${flag} given twice; give it once`);
+  }
+}, 60_000);
+
+test("check exits with a code per status, and still prints the result as JSON", () => {
+  const cases: { args: string[]; code: number; status: string }[] = [
+    { args: ["check", ...mutex, "--invariant", "inv"], code: 0, status: "passed" },
+    { args: ["check", "demo/mutex_bug.qnt", "--main", "mutex_bug", "--invariant", "inv"], code: 20, status: "violated" },
+    { args: ["check", "demo/mutex_records.qnt", "--main", "mutex_records", "--invariant", "inv"], code: 21, status: "unsupported" },
+    { args: ["check", ...mutex, "--invariant", "inv", "--timeout-ms", "1"], code: 22, status: "inconclusive" },
+    { args: ["check", ...mutex, "--invariant", "nope"], code: 23, status: "error" },
+  ];
+  for (const { args, code, status } of cases) {
+    const ran = cli(...args);
+    expect(ran.code, args.join(" ")).toBe(code);
+    expect(JSON.parse(ran.stdout), args.join(" ")).toMatchObject({ status });
+  }
+}, 120_000);
+
+test("translate failures are text on stderr: exit 21 when unsupported, 23 on a frontend error", () => {
+  const unsupported = cli("translate", "demo/mutex_records.qnt", "--main", "mutex_records");
+  expect(unsupported.code).toBe(21);
+  expect(unsupported.stdout).toBe("");
+  expect(unsupported.stderr).toMatch(/^quint-ts: unsupported: .*operator Rec/m);
+  expect(unsupported.stderr).not.toMatch(/^\s*[{[]/);
+  const rejected = cli("translate", ...mutex, "--invariant", "nope");
+  expect(rejected.code).toBe(23);
+  expect(rejected.stdout).toBe("");
+  expect(rejected.stderr).toContain("QNT404");
+  expect(rejected.stderr.trimEnd().split("\n").at(-1)).toMatch(/^quint-ts: error: Quint's frontend rejected the model/);
+}, 120_000);
+
+test("usage errors lead with the usage line and end with the problem", () => {
+  const ran = cli("check", ...mutex, "--invarient", "inv");
+  expect(ran.stderr.startsWith("usage: quint-ts check <file.qnt> --invariant <expr>")).toBe(true);
+  expect(ran.stderr.trimEnd().split("\n").at(-1)).toBe("quint-ts: unknown option --invarient; run quint-ts check --help for the options");
+  expect(cli("check", ...mutex).stderr.trimEnd().split("\n").at(-1)).toBe("quint-ts: check needs at least one --invariant, such as --invariant inv");
+  expect(cli("check", ...mutex, "--invariant", "true").stderr.trimEnd().split("\n").at(-1))
+    .toBe('quint-ts: --invariant "true" checks nothing; give an invariant of the model, such as --invariant inv');
 }, 60_000);
 
 const posix = process.platform !== "win32";

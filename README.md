@@ -76,12 +76,17 @@ To check your own model, run `npx quint-ts check spec.qnt --main spec
 fully pinned install is the development one, `bun install
 --frozen-lockfile` (see [Developing](#developing)).
 
-`check` prints the result as JSON and exits 0 only when the check passed.
+`check` prints the result as JSON. Its exit code says what happened: 0 passed,
+20 violated, 21 unsupported, 22 inconclusive, 23 error, 2 usage error, 1 crash,
+130 interrupted (SIGINT) and 143 terminated (SIGTERM). `quint-ts --help`,
+`quint-ts <command> --help` and `quint-ts --version` print help and the
+version.
 It needs at least one `--invariant`, an invariant of the model as `quint
 compile --invariant` takes it; give the flag again for more. A blank
 invariant or `true` checks nothing, so `check` refuses it, as it refuses an
-unknown or incomplete flag: a usage error prints a message and exits 2.
-`--timeout` is the time limit in milliseconds, from 1 to 2 147 483 647 (60 000
+unknown or incomplete flag, or a single-value flag given twice: a usage error
+prints a message and exits 2.
+`--timeout-ms` is the time limit in milliseconds, from 1 to 2 147 483 647 (60 000
 by default).
 
 From TypeScript or JavaScript:

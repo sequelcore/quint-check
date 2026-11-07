@@ -7,11 +7,12 @@
 // and if a development dependency got installed. Exits non-zero on any
 // unexpected result.
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
+const packageVersion = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
 const work = mkdtempSync(join(tmpdir(), "quint-ts-pack-"));
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -51,13 +52,21 @@ try {
   run(npm, ["install", "--no-audit", "--no-fund", tarball], project);
   for (const dev of ["typescript", "@types/bun"]) expect(!existsSync(join(project, "node_modules", dev)), `development dependency ${dev} is not installed`);
 
-  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 1], ["mutex_records", "unsupported", 1]];
+  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_records", "unsupported", 21]];
   for (const [name, status, code] of demos) {
     const ran = spawnSync(npx, ["--no-install", "quint-ts", "check", `node_modules/quint-ts/demo/${name}.qnt`, "--main", name, "--invariant", "inv"],
       { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
     const result = JSON.parse(ran.stdout);
     expect(result.status === status && ran.status === code, `CLI ${name}: ${result.status}, exit ${ran.status} (expected ${status}, exit ${code})`);
   }
+  // The old name of the time limit is refused with a hint, never accepted.
+  const oldName = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invariant", "inv", "--timeout", "5000"],
+    { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+  expect(oldName.status === 2 && oldName.stdout === "" && oldName.stderr.includes("--timeout-ms"), `CLI --timeout: exit ${oldName.status} (expected a usage error naming --timeout-ms, exit 2)`);
+  const help = spawnSync(npx, ["--no-install", "quint-ts", "check", "--help"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+  expect(help.status === 0 && help.stderr === "" && help.stdout.includes("--timeout-ms <ms>"), `CLI check --help: exit ${help.status}`);
+  const version = spawnSync(npx, ["--no-install", "quint-ts", "--version"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+  expect(version.status === 0 && version.stdout.trim() === packageVersion, `CLI --version: ${version.stdout.trim()}, exit ${version.status} (expected ${packageVersion})`);
   // A misspelled flag is a usage error under Node too, never a check without an invariant.
   const typo = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invarient", "inv"],
     { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
