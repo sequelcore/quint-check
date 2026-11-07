@@ -30,6 +30,7 @@
     "test": "bun test tests",
     "test:node": "node --test tests/process.test.ts",
     "conformance": "bun conformance/run.ts",
+    "survey": "bun conformance/survey.ts",
     "bench": "bun bench/run.ts",
     "bench:compare": "bun bench/compare.ts",
     "check": "bun run typecheck && bun run test && bun run test:node",
