@@ -27,6 +27,23 @@ test("usage errors exit 2 with a message, and run no check", () => {
   }
 }, 60_000);
 
+test("a timeout too large for a timer is a usage error, not a crash or a time limit", () => {
+  // Node's timers hold at most 2^31 - 1 ms; past that a timer fires after 1 ms, and past 2^53 the number isn't exact.
+  for (const timeout of ["9".repeat(400), "9007199254740993", "2147483648"]) {
+    const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout", timeout);
+    expect(ran.code, timeout.slice(0, 20)).toBe(2);
+    expect(ran.stdout, timeout.slice(0, 20)).toBe("");
+    expect(ran.stderr, timeout.slice(0, 20)).toMatch(/--timeout/);
+    expect(ran.stderr, timeout.slice(0, 20)).not.toMatch(/RangeError|\n\s+at /);
+  }
+}, 60_000);
+
+test("the largest timeout a timer can hold is accepted", () => {
+  const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout", "2147483647");
+  expect(ran.code).toBe(0);
+  expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed" });
+}, 60_000);
+
 test("a valid check still prints its result and exits 0 when it passed", () => {
   const ran = cli("check", ...mutex, "--invariant", "inv");
   expect(ran.code).toBe(0);

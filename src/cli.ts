@@ -76,12 +76,18 @@ if (command === "translate") {
 const problem = invariantProblem(invariants);
 const [first, ...others] = invariants;
 if (problem !== undefined || first === undefined) usage(`${problem ?? "a check needs at least one invariant"} (--invariant)`);
+// The largest delay a Node timer holds: past it a timer fires after 1 ms.
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 const timeout = values.timeout;
-if (timeout !== undefined && !/^[1-9]\d*$/.test(timeout)) usage(`--timeout takes a whole number of milliseconds, not ${JSON.stringify(timeout)}`);
+const timeoutMs = timeout === undefined ? undefined : Number(timeout);
+if (timeout !== undefined && (!/^[1-9]\d*$/.test(timeout) || !Number.isSafeInteger(timeoutMs) || (timeoutMs ?? 0) > MAX_TIMEOUT_MS)) {
+  const shown = timeout.length > 24 ? `${timeout.slice(0, 24)}… (${timeout.length} characters)` : JSON.stringify(timeout);
+  usage(`--timeout takes a whole number of milliseconds from 1 to ${MAX_TIMEOUT_MS}, not ${shown}`);
+}
 const result = check(file, {
   ...selected,
   invariants: [first, ...others],
-  ...timeout === undefined ? {} : { timeoutMs: Number(timeout) },
+  ...timeoutMs === undefined ? {} : { timeoutMs },
 });
 console.log(JSON.stringify(result, null, 2));
 process.exit(result.status === "passed" ? 0 : 1);

@@ -81,7 +81,8 @@ It needs at least one `--invariant`, an invariant of the model as `quint
 compile --invariant` takes it; give the flag again for more. A blank
 invariant or `true` checks nothing, so `check` refuses it, as it refuses an
 unknown or incomplete flag: a usage error prints a message and exits 2.
-`--timeout` is the time limit in milliseconds (60 000 by default).
+`--timeout` is the time limit in milliseconds, from 1 to 2 147 483 647 (60 000
+by default).
 
 From TypeScript or JavaScript:
 
