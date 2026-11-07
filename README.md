@@ -89,13 +89,16 @@ From TypeScript or JavaScript:
 ```ts
 import { check } from "quint-ts";
 
-const result = check("spec.qnt", { main: "spec", invariants: ["inv"] });
+const result = await check("spec.qnt", { main: "spec", invariants: ["inv"] });
 if (result.status === "passed") console.log(`${result.states} states, scope ${result.guarantee.scope}`);
 if (result.status === "violated") console.log(result.trace);
 ```
 
-`check` throws a `TypeError`, and checks nothing, when `invariants` is
-empty or holds a blank entry or `true`.
+`check` returns a promise. It rejects with a `TypeError`, and checks nothing,
+when `invariants` is empty or holds a blank entry or `true`; with a
+`RangeError` when `timeoutMs` isn't a whole number from 1 to 2147483647;
+and with the signal's reason when `signal` aborts. `timeoutMs` bounds the
+whole check, Quint's frontend included.
 
 The [demo](demo/README.md) shows the three kinds of answer on one model.
 
@@ -108,6 +111,11 @@ The [demo](demo/README.md) shows the three kinds of answer on one model.
 | `unsupported` | The model uses a construct outside the subset (`where: "translation"`), or a reachable state needs an operation whose result Quint leaves undefined or disputed, or an integer outside the checker's 32-bit range (`where: "reached-state"`). Nothing was proved. |
 | `inconclusive` | The search stopped before exploring every state (time limit), or there was no initial state. |
 | `error` | The Quint frontend rejected the model, or the checker failed. `stage: "translation"` is a quint-ts defect. |
+
+A `passed` rests on the counts tla-ts's library reports: a `success` status,
+at least one initial state, at least one distinct state, and no state left in
+the queue. tla-ts's result has no field that says how many invariants it
+evaluated, so quint-ts can't confirm that from the result itself.
 
 Every result carries `guarantee`: the method (`explicit-state`), the property
 (`safety-invariant`), the scope (`complete`, `partial`, `none`), the backend
@@ -135,6 +143,47 @@ Of Quint's 77 public examples, 6 translate today, and 4 get a definitive
 verdict with their authors' own invariants (3 passed after a complete search, 1
 violated with a counterexample). The count, and what would extend it, is in
 [conformance/public/README.md](conformance/public/README.md).
+
+## Processes and temporary files
+
+A check runs two child processes, one after the other: Quint's frontend, then
+the checker, which runs tla-ts in a Worker thread. Each check works in its own
+folder under the system's temporary directory, named `quint-ts-run-<pid>-...`
+after the process that made it.
+
+- **When a check settles**, every process it started has exited and its folder
+  is gone. That holds when it passes, fails, times out or is cancelled. A
+  folder that can't be removed, for example because another program holds a
+  file in it, is reported as a process warning with the code
+  `QUINT_TS_CLEANUP`, never thrown.
+- **Stopping** sends SIGTERM and, 2 seconds later, SIGKILL. On Linux and macOS
+  it signals the child's whole process group, so nothing it started outlives
+  it. On Windows the child is ended with TerminateProcess. Processes a Node
+  child starts without `detached` end with it, through the job object libuv
+  puts every Node process in; processes started with `detached` leave that job
+  and don't. quint-ts's own children start none.
+- **The CLI** turns Ctrl-C (SIGINT) and SIGTERM into a cancel: the check stops
+  every process it started, and `quint-ts` exits with 130 or 143. On Linux and
+  macOS the children run in their own process group, so the terminal's signal
+  reaches only the CLI.
+- **If the process running `check` is killed** (SIGKILL, a crash, the
+  operating system ending it), the checker notices that its standard input has
+  closed and exits within moments. Quint's frontend has no such check: on Linux
+  and macOS, where it runs in its own process group, it keeps running until its
+  compile finishes and then exits. Either way the folder stays behind, and the
+  next check in any process removes the folders of processes that no longer
+  exist. A power failure leaves both the folder and nothing running; the same
+  sweep removes the folder.
+- **The sweep** tells a stale folder by its owner's process id. Processes in
+  different PID namespaces, such as containers, that share one temporary
+  folder can therefore remove each other's live folders. A check whose folder
+  is removed fails closed: it reports `error` from the stage that
+  lost its output, and never reports `passed`.
+- **The time limit** covers the whole check. Creating and removing the folder
+  happen outside it, and can add a little time to a check that ran up to its
+  limit. Reading Quint's output (`frontend.json`) and translating it run in the
+  process that called `check`; neither `timeoutMs` nor the signal interrupts
+  them, and the check stops only once they finish.
 
 ## The checker cache
 

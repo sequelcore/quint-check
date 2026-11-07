@@ -29,7 +29,14 @@ export interface Graph {
   readonly violating: ReadonlySet<string>;
 }
 
-const canon = (state: Record<string, string>): string => Object.keys(state).sort().map((k) => `${k} = ${state[k]}`).join("; ");
+/**
+ * A TLA+ value with the whitespace outside its string literals removed. Whitespace there means nothing,
+ * and printers differ in it: TLC wraps long values (`[ p1 |-> ...`), tla-ts's `formatValue` doesn't.
+ */
+const squeeze = (value: string): string =>
+  value.split(/("(?:[^"\\]|\\.)*")/).map((part, k) => (k % 2 === 1 ? part : part.replace(/\s+/g, ""))).join("");
+
+const canon = (state: Record<string, string>): string => Object.keys(state).sort().map((k) => `${k} = ${squeeze(state[k] ?? "")}`).join("; ");
 
 function unescapeDot(label: string): string {
   return label.replace(/\\(.)/g, (_, c: string) => (c === "n" ? "\n" : c));

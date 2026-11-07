@@ -139,17 +139,24 @@ if (process.argv.includes("--report-only")) {
   process.exit(0);
 }
 
+/** `f` over `items` one at a time, in order, as the harness runs its cases. */
+async function mapInOrder<T, R>(items: readonly T[], f: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = [];
+  for (const item of items) out.push(await f(item));
+  return out;
+}
+
 const server = withOfficial ? await startApalache() : undefined;
 try {
   console.log("operator cases");
-  const operatorRows = OPERATOR_CASES.map((c) => {
+  const operatorRows = await mapInOrder(OPERATOR_CASES, async (c) => {
     console.log(`- ${c.id}`);
     const file = caseFile(c.id, `${c.decls === undefined ? "" : `${c.decls}\n`}var ok: bool\naction init = ok' = (${c.expr})\naction step = ok' = ok\nval inv = ok`);
     const target = { file, main: c.id.replaceAll("-", "_"), invariant: "inv" };
     const used = irOpcodes(file, target.main);
     for (const op of c.ops) if (!used.has(op)) fail(`${c.id}: declares ${op}, which its IR doesn't use`);
     const routes: Record<string, RouteRun> = {
-      "quint-ts": quintTs(target),
+      "quint-ts": await quintTs(target),
       "evaluator-ts": evaluator(target, "typescript"),
       "evaluator-rust": evaluator(target, "rust"),
       ...withOfficial ? { official: official(target) } : {},
@@ -169,10 +176,10 @@ try {
   });
 
   console.log("unsupported cases");
-  const unsupportedRows = UNSUPPORTED_CASES.map((c) => {
+  const unsupportedRows = await mapInOrder(UNSUPPORTED_CASES, async (c) => {
     console.log(`- ${c.id}`);
     const file = caseFile(`u-${c.id}`, c.module);
-    const result = check(file, { main: `u_${c.id.replaceAll("-", "_")}`, invariants: ["inv"] });
+    const result = await check(file, { main: `u_${c.id.replaceAll("-", "_")}`, invariants: ["inv"] });
     const ok = result.status === "unsupported" && result.where === "translation";
     if (!ok) fail(`unsupported ${c.id}: quint-ts ${result.status}${"reason" in result ? ` (${result.reason})` : ""}${"output" in result ? ` (${result.output.slice(0, 200)})` : ""}`);
     return { id: c.id, status: result.status, reason: "reason" in result ? result.reason : "output" in result ? result.output.slice(0, 300) : "" };
@@ -180,9 +187,9 @@ try {
 
   console.log("public models without a complete verdict");
   const publicRows = [
-    ...PUBLIC_PARTIAL.map((c) => {
+    ...await mapInOrder(PUBLIC_PARTIAL, async (c) => {
       console.log(`- ${c.id}`);
-      const result = check(c.file, { main: c.main, invariants: ["inv"], timeoutMs: c.timeoutMs });
+      const result = await check(c.file, { main: c.main, invariants: ["inv"], timeoutMs: c.timeoutMs });
       if (result.status !== "inconclusive" || result.guarantee.scope === "complete") fail(`public ${c.id}: quint-ts ${result.status}, expected inconclusive (${c.why})`);
       return { id: c.id, group: "partially supported", expected: "inconclusive", status: result.status, reason: "reason" in result ? result.reason : c.why };
     }),
@@ -198,13 +205,13 @@ try {
   ];
 
   console.log("models");
-  const modelRows = MODEL_CASES.map((m) => {
+  const modelRows = await mapInOrder(MODEL_CASES, async (m) => {
     console.log(`- ${m.id}`);
     const invariant = m.invariant ?? "inv";
     const used = irOpcodes(m.file, m.main, invariant);
     for (const op of m.ops) if (!used.has(op)) fail(`${m.id}: declares ${op}, which its IR doesn't use`);
     const target = { file: m.file, main: m.main, invariant };
-    const result = check(m.file, { main: m.main, invariants: [invariant] });
+    const result = await check(m.file, { main: m.main, invariants: [invariant] });
     if (result.status !== m.expect) fail(`${m.id}: quint-ts ${result.status}, expected ${m.expect}`);
     const sampled = evaluator(target, "typescript", 6, 300);
     // The simulator samples, so its pass proves nothing; its violation contradicts a quint-ts pass.

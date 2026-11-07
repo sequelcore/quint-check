@@ -62,12 +62,22 @@ try {
   const typo = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invarient", "inv"],
     { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
   expect(typo.status === 2 && typo.stdout === "" && typo.stderr.includes("--invarient"), `CLI --invarient: exit ${typo.status} (expected a usage error, exit 2)`);
-  writeFileSync(join(project, "api.mjs"), `import { check } from "quint-ts";
-const r = check("node_modules/quint-ts/demo/mutex.qnt", { main: "mutex", invariants: ["inv"] });
-console.log(JSON.stringify({ status: r.status, states: r.states, scope: r.guarantee.scope }));
+  writeFileSync(join(project, "api.mjs"), `import { readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { check } from "quint-ts";
+const model = "node_modules/quint-ts/demo/mutex.qnt";
+const r = await check(model, { main: "mutex", invariants: ["inv"] });
+const message = (p) => p.then(() => "resolved", (e) => e.name + ": " + e.message);
+const aborted = await message(check(model, { main: "mutex", invariants: ["inv"], signal: AbortSignal.timeout(300) }));
+const badTimeout = await message(check(model, { main: "mutex", invariants: ["inv"], timeoutMs: Infinity }));
+const left = readdirSync(tmpdir()).filter((n) => n.startsWith("quint-ts-run-" + process.pid + "-")).length;
+console.log(JSON.stringify({ status: r.status, states: r.states, scope: r.guarantee.scope, aborted, badTimeout, left }));
 `);
   const api = JSON.parse(run(process.execPath, ["api.mjs"], project));
   expect(api.status === "passed" && api.states === 20 && api.scope === "complete", `API mutex: ${api.status}, ${api.states} states, scope ${api.scope}`);
+  expect(api.aborted.includes("TimeoutError"), `API abort through a signal: ${api.aborted}`);
+  expect(api.badTimeout.startsWith("RangeError"), `API timeoutMs: Infinity: ${api.badTimeout}`);
+  expect(api.left === 0, `API checks left ${api.left} run folders`);
   if (!windows) expect(!existsSync(used), "nothing ran java or bun");
 } finally {
   rmSync(work, { recursive: true, force: true });
