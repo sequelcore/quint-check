@@ -190,7 +190,8 @@ test("18. twenty runs sharing one signal all stop on one abort, with no listener
   try {
     const ac = new AbortController();
     const pidFiles: string[] = [];
-    const runs = Array.from({ length: 20 }, () => run("hang", { signal: ac.signal, onPidFile: (file) => pidFiles.push(file) }));
+    // Idle children: twenty CPU-bound ones would slow each other's start (test 6 covers a CPU-bound child).
+    const runs = Array.from({ length: 20 }, () => run("idle", { signal: ac.signal, onPidFile: (file) => pidFiles.push(file) }));
     // Abort only once every child is running, so each run has a pid whose end the test can check.
     try { assert.ok(await allRecorded(pidFiles, 3_000), "every child recorded its pid before the abort"); }
     finally { ac.abort(new Error("all")); }

@@ -13,6 +13,7 @@ switch (mode) {
   case "ok": record(); process.exit(0); break;
   case "crash": record(); process.stderr.write("partial output", () => process.exit(3)); break;
   case "hang": record(); busy(); break;
+  case "idle": record(); setInterval(() => {}, 60_000); break; // runs until stopped, without using the CPU
   case "ignore-term": record(); process.on("SIGTERM", () => {}); setImmediate(busy); break;
   case "selfkill": record(); process.kill(process.pid, "SIGKILL"); busy(); break;
   case "big-stderr": record(); process.stderr.write("x".repeat(20 * 1024 * 1024), () => process.exit(0)); break;
