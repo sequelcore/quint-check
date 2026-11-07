@@ -2,7 +2,7 @@
 // with node:test so the same file runs under Bun (`bun test`) and under Node, which runs quint-ts once
 // installed (`node --test tests/process.test.ts`).
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -44,9 +44,10 @@ async function gone(pid: number | undefined, ms = 2_000): Promise<boolean> {
   return !isAlive(pid);
 }
 
-/** Whether every file in `files` holds a recorded pid within `ms`. */
+/** Whether every pid file in `files` is written within `ms`. It checks only their size: on Windows, reading
+ * a file while its child writes it slows that child down. */
 async function allRecorded(files: string[], ms: number): Promise<boolean> {
-  const written = (file: string): boolean => { try { return recorded(file) !== undefined; } catch { return false; } };
+  const written = (file: string): boolean => (statSync(file, { throwIfNoEntry: false })?.size ?? 0) > 0;
   for (const end = performance.now() + ms; performance.now() < end; await sleep(50)) if (files.every(written)) return true;
   return files.every(written);
 }
