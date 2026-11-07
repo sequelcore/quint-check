@@ -44,9 +44,9 @@ async function gone(pid: number | undefined, ms = 2_000): Promise<boolean> {
   return !isAlive(pid);
 }
 
-/** Whether every pid file in `files` is written within `ms`. It checks only their size: on Windows, reading
+/** Whether every file in `files` is written within `ms`. It checks only their size: on Windows, reading
  * a file while its child writes it slows that child down. */
-async function allRecorded(files: string[], ms: number): Promise<boolean> {
+async function allWritten(files: string[], ms: number): Promise<boolean> {
   const written = (file: string): boolean => (statSync(file, { throwIfNoEntry: false })?.size ?? 0) > 0;
   for (const end = performance.now() + ms; performance.now() < end; await sleep(50)) if (files.every(written)) return true;
   return files.every(written);
@@ -175,9 +175,15 @@ test("16. an abort after the child exited doesn't undo its result", async () => 
 
 test("17. the caller's abort during the time limit's grace period wins", async () => {
   const ac = new AbortController();
-  setTimeout(() => ac.abort(new Error("during grace")), 1_000);
-  const r = await run("ignore-term", { timeoutMs: 500, signal: ac.signal });
-  // Windows ends the child at once, so there the time limit settles before the abort arrives.
+  let pidFile = "";
+  const pending = run("note-term", { timeoutMs: 500, signal: ac.signal, onPidFile: (file) => { pidFile = file; } });
+  // Windows has no grace period: the time limit ends the child at once, so there is nothing to abort into.
+  if (posix) {
+    // The child got the time limit's SIGTERM, so the grace period is running.
+    assert.ok(await allWritten([`${pidFile}.term`], 3_000), "the child got SIGTERM");
+    ac.abort(new Error("during grace"));
+  }
+  const r = await pending;
   if (posix) assert.equal(reason(r), "during grace");
   else assert.deepEqual(r.outcome, { kind: "time-limit" });
   childGone(r);
@@ -193,7 +199,7 @@ test("18. twenty runs sharing one signal all stop on one abort, with no listener
     // Idle children: twenty CPU-bound ones would slow each other's start (test 6 covers a CPU-bound child).
     const runs = Array.from({ length: 20 }, () => run("idle", { signal: ac.signal, onPidFile: (file) => pidFiles.push(file) }));
     // Abort only once every child is running, so each run has a pid whose end the test can check.
-    try { assert.ok(await allRecorded(pidFiles, 3_000), "every child recorded its pid before the abort"); }
+    try { assert.ok(await allWritten(pidFiles, 3_000), "every child recorded its pid before the abort"); }
     finally { ac.abort(new Error("all")); }
     for (const r of await Promise.all(runs)) {
       assert.equal(reason(r), "all");

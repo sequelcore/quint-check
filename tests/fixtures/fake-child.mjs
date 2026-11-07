@@ -15,6 +15,8 @@ switch (mode) {
   case "hang": record(); busy(); break;
   case "idle": record(); setInterval(() => {}, 60_000); break; // runs until stopped, without using the CPU
   case "ignore-term": record(); process.on("SIGTERM", () => {}); setImmediate(busy); break;
+  // Ignores SIGTERM and writes <pid file>.term when it arrives; idle, so the handler can run.
+  case "note-term": record(); process.on("SIGTERM", () => writeFileSync(`${pidFile}.term`, "SIGTERM")); setInterval(() => {}, 60_000); break;
   case "selfkill": record(); process.kill(process.pid, "SIGKILL"); busy(); break;
   case "big-stderr": record(); process.stderr.write("x".repeat(20 * 1024 * 1024), () => process.exit(0)); break;
   case "grandchild-detached": record(grandchild("ignore")); busy(); break;
