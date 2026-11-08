@@ -3,6 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { check } from "../src/check.ts";
 import { isAlive } from "../src/process.ts";
 
 const cli = (...args: string[]): { code: number | null; stdout: string; stderr: string } => {
@@ -43,15 +44,24 @@ test("a timeout too large for a timer is a usage error, not a crash or a time li
 }, 60_000);
 
 test("the largest timeout a timer can hold is accepted", () => {
-  const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout-ms", "2147483647");
+  const ran = cli("check", ...mutex, "--invariant", "inv", "--timeout-ms", "2147483647", "--json");
   expect(ran.code).toBe(0);
   expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed" });
 }, 60_000);
 
-test("a valid check still prints its result and exits 0 when it passed", () => {
+test("a valid check prints a summary with the verdict last, nothing on stderr off a terminal, and exits 0 when it passed", () => {
   const ran = cli("check", ...mutex, "--invariant", "inv");
   expect(ran.code).toBe(0);
-  expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed", search: { distinctStates: 20 }, guarantee: { scope: "complete" } });
+  expect(ran.stdout).toStartWith("search: complete, 20 distinct states from 1 initial state; deadlock not checked\n");
+  expect(ran.stdout).toEndWith("\npassed: inv holds in all 20 reachable states\n");
+  expect(ran.stderr).toBe("");
+}, 60_000);
+
+test("--json prints the result the check() API returns, and nothing else", async () => {
+  const ran = cli("check", ...mutexBug, "--json");
+  expect(ran.code).toBe(20);
+  expect(JSON.parse(ran.stdout)).toEqual(await check("demo/mutex_bug.qnt", { main: "mutex_bug", invariants: ["inv"] }));
+  expect(ran.stderr).toBe("");
 }, 60_000);
 
 test("translate needs no invariant", () => {
@@ -120,7 +130,7 @@ test("a single-value flag given twice is a usage error", () => {
   }
 }, 60_000);
 
-test("check exits with a code per status, and still prints the result as JSON", () => {
+test("check exits with a code per status, in the summary and with --json alike", () => {
   const cases: { args: string[]; code: number; status: string }[] = [
     { args: ["check", ...mutex, "--invariant", "inv"], code: 0, status: "passed" },
     { args: ["check", "demo/mutex_bug.qnt", "--main", "mutex_bug", "--invariant", "inv"], code: 20, status: "violated" },
@@ -131,7 +141,10 @@ test("check exits with a code per status, and still prints the result as JSON", 
   for (const { args, code, status } of cases) {
     const ran = cli(...args);
     expect(ran.code, args.join(" ")).toBe(code);
-    expect(JSON.parse(ran.stdout), args.join(" ")).toMatchObject({ status });
+    expect(ran.stdout.trimEnd().split("\n").at(-1), args.join(" ")).toStartWith(`${status}: `);
+    const json = cli(...args, "--json");
+    expect(json.code, args.join(" ")).toBe(code);
+    expect(JSON.parse(json.stdout), args.join(" ")).toMatchObject({ status });
   }
 }, 120_000);
 
@@ -196,7 +209,7 @@ test("--out-itf writes a violation's counterexample, the same ITF as the result'
   const dir = mkdtempSync(join(tmpdir(), "quint-ts-out-itf-"));
   try {
     const out = join(dir, "cex.itf.json");
-    const ran = cli("check", ...mutexBug, "--out-itf", out);
+    const ran = cli("check", ...mutexBug, "--out-itf", out, "--json");
     expect(ran.code).toBe(20);
     const written = JSON.parse(readFileSync(out, "utf8"));
     expect(written).toEqual(JSON.parse(ran.stdout).trace);
@@ -212,7 +225,7 @@ test("--out-itf writes nothing, and keeps an existing file, when there is no vio
     writeFileSync(out, "earlier");
     const ran = cli("check", ...mutex, "--invariant", "inv", "--out-itf", out);
     expect(ran.code).toBe(0);
-    expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed" });
+    expect(ran.stdout).toEndWith("passed: inv holds in all 20 reachable states\n");
     expect(ran.stderr.trimEnd()).toBe(`quint-ts: no counterexample; nothing written to ${out}`);
     expect(readFileSync(out, "utf8")).toBe("earlier");
   } finally { rmSync(dir, { recursive: true, force: true }); }
@@ -225,6 +238,8 @@ test("--out-itf in a missing folder, empty or - is a usage error before any chec
     [["check", ...mutexBug, "--out-itf", "-"], /--out-itf takes a file/],
     [["check", ...mutexBug, "--out-itf="], /--out-itf takes a file/],
     [["translate", ...mutex, "--out-itf", "x.json"], /unknown option --out-itf/],
+    [["translate", ...mutex, "--json"], /unknown option --json/],
+    [["check", ...mutexBug, "--json", "--json"], /--json given twice; give it once/],
   ] as const) {
     const ran = cli(...args);
     expect(ran.code, args.join(" ")).toBe(2);
@@ -242,7 +257,7 @@ test("a counterexample that can't be written exits 23, with the result still pri
     mkdirSync(out);
     const ran = cli("check", ...mutexBug, "--out-itf", out);
     expect(ran.code).toBe(23);
-    expect(JSON.parse(ran.stdout)).toMatchObject({ status: "violated" });
+    expect(ran.stdout).toEndWith("violated: inv breaks in state 4 of the trace above\n");
     expect(ran.stderr).toContain(`quint-ts: error: the counterexample couldn't be written to ${out}`);
     expect(readdirSync(dir)).toEqual(["taken"]);
   } finally { rmSync(dir, { recursive: true, force: true }); }

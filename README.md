@@ -67,8 +67,7 @@ later, npm and Git. You don't need Bun or Java.
    npx quint-ts check node_modules/quint-ts/demo/mutex.qnt --main mutex --invariant inv
    ```
 
-   The result is JSON, with `"status": "passed"`, `"distinctStates": 20` and
-   `"scope": "complete"`.
+   The last line it prints is `passed: inv holds in all 20 reachable states`.
 
 To check your own model, run `npx quint-ts check spec.qnt --main spec
 --invariant inv`. The direct dependencies are pinned to exact versions in
@@ -76,7 +75,13 @@ To check your own model, run `npx quint-ts check spec.qnt --main spec
 fully pinned install is the development one, `bun install
 --frozen-lockfile` (see [Developing](#developing)).
 
-`check` prints the result as JSON. Its exit code says what happened: 0 passed,
+`check` prints a summary on stdout, with the verdict on the last line: the
+search, the tools, and for a violation the counterexample in Quint's syntax:
+its first state whole, then only the variables each step changed (the whole
+states are in `--json` and `--out-itf`).
+When there is a next command, such as a rerun with more time, it goes to
+stderr. `--json` prints the result as JSON instead, the same object the
+TypeScript API returns. Its exit code says what happened: 0 passed,
 20 violated, 21 unsupported, 22 inconclusive, 23 error, 2 usage error, 1 crash,
 130 interrupted (SIGINT) and 143 terminated (SIGTERM). `quint-ts --help`,
 `quint-ts <command> --help` and `quint-ts --version` print help and the

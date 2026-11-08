@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>] [--timeout-ms <ms>] [--out-itf <file>]
+ * quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>] [--timeout-ms <ms>] [--out-itf <file>] [--json]
  * quint-ts translate <file.qnt> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>]
  * quint-ts cache path|clear
  * quint-ts --help | --version        quint-ts <command> --help
- * `check` prints the result as JSON. Exit codes: 0 passed, 20 violated, 21 unsupported, 22 inconclusive,
+ * `check` prints a summary, or with --json the result as JSON. Exit codes: 0 passed, 20 violated, 21 unsupported, 22 inconclusive,
  * 23 error, 2 usage error, 1 crash, 130 SIGINT, 143 SIGTERM. `translate` prints the TLA+, or on failure
  * a message on stderr and exit 21 (unsupported) or 23 (error).
  */
@@ -13,6 +13,7 @@ import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { cacheRoot, clearCaches } from "./cache.js";
 import { check, invariantProblem, translateFile } from "./check.js";
+import { render } from "./render.js";
 
 const CHECK_USAGE = "quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [options]";
 const TRANSLATE_USAGE = "quint-ts translate <file.qnt> [--invariant <expr>...] [options]";
@@ -27,7 +28,7 @@ const TOP_HELP = `Check Quint models without Java: Quint's own frontend, then th
 Examples:
   quint-ts check spec.qnt --main spec --invariant inv
   quint-ts check spec.qnt --invariant safe --invariant "balance >= 0" --timeout-ms 120000
-  quint-ts check spec.qnt --invariant inv --timeout-ms 300000
+  quint-ts check spec.qnt --invariant inv --json
 
 Usage: ${TOP_USAGE}
 
@@ -60,9 +61,10 @@ Options:
   --step <action>        The step action (default: step)
   --timeout-ms <ms>      Time limit for the whole check, 1 to 2147483647 (default: 60000)
   --out-itf <file>       On a violation, also write the counterexample to <file> as ITF; nothing otherwise
+  --json                 Print the result as JSON, the same object the check() API returns
   -h, --help             Print this help
 
-The result is printed as JSON; a violation's trace is the counterexample as ITF.
+The summary goes to stdout with the verdict last, and the next command, if any, to stderr.
 ${CHECK_EXIT_CODES}
 `;
 
@@ -153,6 +155,7 @@ try {
       invariant: { type: "string", multiple: true },
       "timeout-ms": { type: "string" },
       "out-itf": { type: "string" },
+      json: { type: "boolean" },
     },
   });
 } catch (err) {
@@ -170,10 +173,10 @@ try {
   throw err;
 }
 const { values, positionals, tokens } = parsed;
-for (const name of ["timeout-ms", "out-itf"] as const) {
+for (const name of ["timeout-ms", "out-itf", "json"] as const) {
   if (command === "translate" && values[name] !== undefined) fail(`unknown option --${name}; run quint-ts translate --help for the options`);
 }
-for (const name of ["main", "init", "step", "timeout-ms", "out-itf"]) {
+for (const name of ["main", "init", "step", "timeout-ms", "out-itf", "json"]) {
   const times = tokens.filter((t) => t.kind === "option" && t.name === name).length;
   if (times > 1) fail(`--${name} given ${times === 2 ? "twice" : `${times} times`}; give it once`);
 }
@@ -232,6 +235,10 @@ if (outItf !== undefined) {
 const SIGNAL_EXIT = { SIGINT: 130, SIGTERM: 143 } as const;
 const STATUS_EXIT = { passed: 0, violated: 20, unsupported: 21, inconclusive: 22, error: 23 } as const;
 const stop = new AbortController();
+// Only a person watching a terminal needs to know a check started; a script or a log doesn't.
+if (process.stderr.isTTY) {
+  console.error(`quint-ts: checking ${file} (${invariants.length === 1 ? "1 invariant" : `${invariants.length} invariants`}, time limit ${timeoutMs ?? 60_000} ms)`);
+}
 for (const name of ["SIGINT", "SIGTERM"] as const) process.once(name, () => stop.abort(name));
 const result = await check(file, {
   ...selected,
@@ -242,7 +249,13 @@ const result = await check(file, {
   if (stop.signal.aborted) process.exit(SIGNAL_EXIT[stop.signal.reason as keyof typeof SIGNAL_EXIT]);
   throw err;
 });
-console.log(JSON.stringify(result, null, 2));
+if (values.json === true) {
+  console.log(JSON.stringify(result, null, 2));
+} else {
+  const shown = render(result, { file, ...selected, invariants, ...timeoutMs === undefined ? {} : { timeoutMs } });
+  process.stdout.write(shown.stdout);
+  process.stderr.write(shown.stderr);
+}
 if (outItf !== undefined) {
   if (result.status !== "violated") {
     console.error(`quint-ts: no counterexample; nothing written to ${outItf}`);

@@ -54,10 +54,13 @@ try {
 
   const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_list", "unsupported", 21]];
   for (const [name, status, code] of demos) {
-    const ran = spawnSync(npx, ["--no-install", "quint-ts", "check", `node_modules/quint-ts/demo/${name}.qnt`, "--main", name, "--invariant", "inv"],
-      { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
-    const result = JSON.parse(ran.stdout);
-    expect(result.status === status && ran.status === code, `CLI ${name}: ${result.status}, exit ${ran.status} (expected ${status}, exit ${code})`);
+    const args = ["--no-install", "quint-ts", "check", `node_modules/quint-ts/demo/${name}.qnt`, "--main", name, "--invariant", "inv"];
+    const ran = spawnSync(npx, args, { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+    const verdict = ran.stdout.trimEnd().split("\n").at(-1) ?? "";
+    expect(verdict.startsWith(`${status}: `) && ran.status === code, `CLI ${name}: "${verdict}", exit ${ran.status} (expected ${status}, exit ${code})`);
+    const json = spawnSync(npx, [...args, "--json"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+    const result = JSON.parse(json.stdout);
+    expect(result.status === status && json.status === code, `CLI ${name} --json: ${result.status}, exit ${json.status} (expected ${status}, exit ${code})`);
   }
   // The old name of the time limit is refused with a hint, never accepted.
   const oldName = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invariant", "inv", "--timeout", "5000"],
