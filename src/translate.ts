@@ -412,6 +412,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   if (vars.size === 0) throw new Unsupported("a module with no state variables");
   const reserved = [...vars, ...defs.keys()].find((n) => mangle(n).startsWith("QTS__"));
   if (reserved !== undefined) throw new Unsupported(`the name ${reserved}, whose prefix QTS__ quint-ts reserves for the names it generates`);
+  uniqueTlaNames(vars, defs, invariants.length);
   // Name the first operator outside the subset before any other check, so the reason is the construct itself.
   for (const d of defs.values()) {
     const op = firstUnsupported(d.expr, defs);
@@ -454,6 +455,25 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
     names: new Map([...defs.keys()].map((n) => [mangle(n), short(n)])),
     invariants: new Map(invariants.map((entry, k) => [invariantName(k), entry])),
   };
+}
+
+/**
+ * Refuse two names that become one TLA+ name: the variables, the definitions and the invariants' generated
+ * names, which share TLA+'s one namespace. `mangle` turns `::` into `_`, so `a::b_c` and `a_b::c`, or an
+ * instance's `a::x` and a module's `a_x`, would be declared twice and leave a state half assigned. Locals
+ * aren't compared: Quint's frontend gives each a name of its own (`k` becomes `k_19`).
+ */
+function uniqueTlaNames(vars: ReadonlySet<string>, defs: ReadonlyMap<string, Def>, invariantCount: number): void {
+  const taken = new Map<string, string>();
+  const named: [string, string][] = [
+    ...[...vars, ...[...defs.keys()].filter((n) => n !== "q::inv")].map((n): [string, string] => [mangle(n), n]),
+    ...Array.from({ length: invariantCount }, (_, k): [string, string] => [invariantName(k), `invariant number ${k + 1}`]),
+  ];
+  for (const [tla, quint] of named) {
+    const other = taken.get(tla);
+    if (other !== undefined) throw new Unsupported(`the names ${other} and ${quint}, which would both become the TLA+ name ${tla}`);
+    taken.set(tla, quint);
+  }
 }
 
 /** The TLA+ name of the k-th invariant, counting from 0. */

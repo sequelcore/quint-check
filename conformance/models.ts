@@ -83,4 +83,15 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["assign", "actionAll", "Set", "iadd", "ite"], note: "only assignments and nondet choices over constants" },
   { id: "init-unreached-read", file: "conformance/models/init_reads.qnt", main: "init_unreached_read", expect: "passed",
     ops: ["assign", "ite"], note: "a read in a branch init never takes, which Quint's evaluators skip too" },
+  // Distinct Quint names that would become one TLA+ name, since `::` becomes `_`: refused at translation.
+  { id: "collisions-instances", file: "conformance/models/collisions.qnt", main: "collisions_instances", expect: "unsupported",
+    ops: ["assign", "actionAll"], note: "a::b_c and a_b::c" },
+  { id: "collisions-variable", file: "conformance/models/collisions.qnt", main: "collisions_variable", expect: "unsupported",
+    ops: ["assign", "actionAll"], note: "the instance's a::x and the module's a_x" },
+  { id: "collisions-generated", file: "conformance/models/collisions.qnt", main: "collisions_generated", expect: "unsupported",
+    ops: ["assign"], note: "the model's q_step and the generated q::step" },
+  { id: "collisions-invariant", file: "conformance/models/collisions.qnt", main: "collisions_invariant", expect: "unsupported",
+    ops: ["assign"], note: "the model's q_inv_1 and the first invariant's name" },
+  { id: "collisions-bound", file: "conformance/models/collisions.qnt", main: "collisions_bound", expect: "violated",
+    ops: ["exists", "or", "ilte"], note: "a bound a_lim beside a::lim: Quint's flattener renames the local, so nothing collides" },
 ];
