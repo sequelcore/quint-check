@@ -25,6 +25,7 @@ export const SUPPORTED_OPCODES: readonly string[] = [
   "ite", "assign", "actionAll", "actionAny",
   "variant", "matchVariant",
   "Rec", "field", "with", "fieldNames",
+  "Tup", "item", "tuples",
 ];
 
 // The IR is JSON; its shapes are checked where they are read.
@@ -181,6 +182,14 @@ function app(ex: Ex, ctx: Ctx): string {
     // Quint's type checker rejects a field the record lacks, so the EXCEPT always replaces one.
     case "with": return `[${e(0)} EXCEPT !.${fieldName(a[1])} = ${e(2)}]`;
     case "fieldNames": return `DOMAIN ${e(0)}`;
+    case "Tup": return tuple(a, ctx);
+    case "item": return `(${e(0)})[${itemIndex(a[1])}]`;
+    // S_1 \X ... \X S_n with n >= 2 is the set of n-tuples, not nested pairs. Each factor is parenthesized:
+    // \X binds tighter than DOMAIN, so `DOMAIN m \X S` would be `DOMAIN (m \X S)`.
+    case "tuples": {
+      if (a.length < 2) throw new Unsupported(`tuples of ${a.length} set(s): Quint's documentation defines it as S_1 \\X ... \\X S_n, and its official route rejects fewer than two`);
+      return `(${a.map((x) => `(${expr(x, ctx)})`).join(" \\X ")})`;
+    }
     case "assign": {
       if (a[0]?.kind !== "name" || !ctx.vars.has(a[0].name)) throw new Unsupported("an assignment to something other than a state variable");
       if (ctx.mode === "state") throw new Unsupported("an assignment in a state expression");
@@ -285,6 +294,23 @@ function record(a: Ex[], ctx: Ctx): string {
   for (let k = 0; k < a.length; k += 2) fields.push(`${fieldName(a[k])} |-> ${expr(a[k + 1], ctx)}`);
   if (new Set(a.filter((_, k) => k % 2 === 0).map((f) => f.value)).size !== fields.length) throw new Unsupported("a record with a repeated field");
   return `[${fields.join(", ")}]`;
+}
+
+/**
+ * A tuple as a TLA+ tuple, `<<a, b>>`, as Quint's documentation and its official route write it. A tuple
+ * type has at least two items; the empty tuple, outside a variant's payload, is `<<>>` by the documentation
+ * and `[tag |-> "UNIT"]` by the official route, so it is refused.
+ */
+function tuple(a: Ex[], ctx: Ctx): string {
+  if (a.length === 0) throw new Unsupported("the empty tuple, which Quint's documentation writes << >> and its official route [tag |-> \"UNIT\"]");
+  if (a.length === 1) throw new Unsupported("a tuple of one item, which Quint's documentation doesn't define (a tuple type has at least two)");
+  return `<<${a.map((x) => expr(x, ctx)).join(", ")}>>`;
+}
+
+/** `item`'s index: Quint's type checker requires a literal within the tuple, counting from 1, as TLA+ does. */
+function itemIndex(ex: Ex): string {
+  if (ex?.kind !== "int" || BigInt(ex.value) < 1n) throw new Unsupported("a tuple index that isn't a positive literal");
+  return String(ex.value);
 }
 
 /** Only literal, distinct keys: Quint's rule for a repeated key isn't established. */

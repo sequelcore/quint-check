@@ -135,13 +135,15 @@ Safety invariants over finite models: integers (within TLC's 32-bit range),
 Booleans, strings, sets, maps (literals with literal keys, `get`, `set`,
 `put`, `setBy`, `keys`, `mapBy`, `setOfMaps`), records (`{ a: 1 }`,
 `r.a`, `r.with("a", v)`, `{ ...r, a: v }`, `fieldNames`, nested, and in
-sets, maps and variants), sum types (variants) and `match`, `fold` as a
+sets, maps and variants), tuples of two or more items (`(a, b)`, `Tup`,
+`t._1`, `item`, `tuples`, unpacking as in `((a, b)) => a + b`, nested, and
+in sets, maps, records and variants), sum types (variants) and `match`, `fold` as a
 sum, `all`, `any`, `nondet … oneOf`, `if`, parameterized actions and
 instances with constants. `src/translate.ts` lists
 the operators (`SUPPORTED_OPCODES`); an operator joins it only with a
 conformance case that passes.
 
-Outside the subset, and refused: temporal properties, tuples, lists,
+Outside the subset, and refused: temporal properties, lists,
 `Bool` and the other built-in sets, `then`, `powerset`, `ipow`,
 `chooseSome`, a non-sum `fold`, uninstantiated constants, and `/` or `%`
 on negative operands (Quint's sources disagree on their value,
@@ -160,11 +162,18 @@ identifier, such as `Rec("a b", 1)`, or a TLA+ reserved word, such as
 `DOMAIN`) are refused at translation; Quint's official route rejects both too.
 In a counterexample, a record is TLA+ text, `[a |-> 1, b |-> 2]`, with its
 fields in the order the checker keeps them, which need not be the model's.
+A tuple is TLA+ text too, `(1, "a")` as `<<1, "a">>`. TLA+ doesn't tell a
+tuple from a function on `1..n`, so a map whose keys are `1` to `n` prints
+as a tuple as well: `Set(1, 2).mapBy(_ => 0)` is `<<0, 0>>`.
+The empty tuple `()` outside a variant's payload, which Quint's documentation
+writes `<<>>` and its official route `[tag |-> "UNIT"]`, a tuple of one item,
+which the documentation doesn't define, and `tuples` of fewer than two sets,
+which the official route rejects, are refused at translation.
 Two names that would become one TLA+ name are refused at translation:
 quint-ts writes `::` as `_`, so `a::b_c` and `a_b::c`, or an instance's
 `a::x` and a module's `a_x`, can't both be checked.
 
-Of Quint's 77 public examples, 9 translate today, and 5 get a definitive
+Of Quint's 77 public examples, 12 translate today, and 5 get a definitive
 verdict with their authors' own invariants (4 passed after a complete search, 1
 violated with a counterexample). The count, and what would extend it, is in
 [conformance/public/README.md](conformance/public/README.md).

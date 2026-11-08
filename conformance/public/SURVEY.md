@@ -6,29 +6,29 @@ Each file's last module is the main module, and each value of that file named as
 | Outcome | Files |
 | --- | ---: |
 | All | 77 |
-| Translated | 9 |
+| Translated | 12 |
 | … a definitive verdict with the authors' invariant | 5 |
-| … no invariant of the authors to check | 3 |
-| … inconclusive | 1 |
+| … no invariant of the authors to check | 5 |
+| … inconclusive | 2 |
 | … checked with an error | 0 |
-| Refused by quint-ts | 41 |
+| Refused by quint-ts | 38 |
 | Rejected by Quint's frontend with the last module as main | 1 |
 | Without `init` or `step` | 26 |
 
 | File | Main module | Outcome | Detail |
 | --- | --- | --- | --- |
-| `classic/distributed/Bakery/bakery.qnt` | `understanding` | refused | operator item |
+| `classic/distributed/Bakery/bakery.qnt` | `understanding` | refused | unresolved name Nat |
 | `classic/distributed/ClockSync/clockSync6.qnt` | `clock_sync4` | refused | operator clock_sync4::clock_sync::f_1118 |
 | `classic/distributed/ConsensusAlgorithm/ConsensusAlg.qnt` | `badValues` | refused | operator powerset |
 | `classic/distributed/ConsensusAlgorithm/KSetAgreementConsensus.qnt` | `KSetProperValues` | refused | operator powerset |
-| `classic/distributed/DiningPhilosophers/DiningPhilosophers5.qnt` | `DiningPhilosophers5` | refused | operator Tup |
+| `classic/distributed/DiningPhilosophers/DiningPhilosophers5.qnt` | `DiningPhilosophers5` | no-invariant | translated; no invariant of the authors to check |
 | `classic/distributed/LamportMutex/LamportMutex.qnt` | `LamportMutex_3_10` | no-init-step | no init |
 | `classic/distributed/Paxos/Paxos.qnt` | `Paxos_val2_accept3_quorum2` | no-init-step | no init |
 | `classic/distributed/Paxos/Voting.qnt` | `Voting` | no-init-step | no init |
 | `classic/distributed/ReadersWriters/ReadersWriters.qnt` | `ReadersWriters_5` | no-init-step | no init |
 | `classic/distributed/ReliableBroadcast/reliablebc.qnt` | `reliablebc` | refused | operator powerset |
-| `classic/distributed/TeachingConcurrency/mutex.qnt` | `mutex` | refused | operator tuples |
-| `classic/distributed/TeachingConcurrency/teaching.qnt` | `teaching` | refused | operator tuples |
+| `classic/distributed/TeachingConcurrency/mutex.qnt` | `mutex` | refused | unresolved name Int |
+| `classic/distributed/TeachingConcurrency/teaching.qnt` | `teaching` | inconclusive | IndInv: inconclusive |
 | `classic/distributed/TwoLayeredCache/two_layered_cache.qnt` | `two_layered_cache` | refused | operator append |
 | `classic/distributed/TwoPhaseCommit/two_phase_commit.qnt` | `two_phase_commit_3` | refused | operator then |
 | `classic/distributed/TwoPhaseCommit/two_phase_commit_modules.qnt` | `two_phase_commit_tests` | frontend-error | Error: Internal error while flattening [QNT404] Name 'two_phase_commit_tests::two_phase_commit::msg::init' not found,[QNT404] Name 'two_phase_commit_tests::two_ |
@@ -41,8 +41,8 @@ Each file's last module is the main module, and each value of that file named as
 | `cosmos/bank/bankTest.qnt` | `bankTest` | refused | operator expect |
 | `cosmos/ics20/bank.qnt` | `bankTests` | refused | operator List |
 | `cosmos/ics20/base.qnt` | `base` | no-init-step | no init |
-| `cosmos/ics20/denomTrace.qnt` | `properChannelsTests` | refused | operator tuples |
-| `cosmos/ics20/ics20.qnt` | `properChannelsTests` | refused | operator tuples |
+| `cosmos/ics20/denomTrace.qnt` | `properChannelsTests` | refused | operator List |
+| `cosmos/ics20/ics20.qnt` | `properChannelsTests` | refused | operator List |
 | `cosmos/ics23/ics23.qnt` | `trees` | no-init-step | no init |
 | `cosmos/lightclient/Blockchain.qnt` | `Blockchain` | no-init-step | no init |
 | `cosmos/lightclient/LCVerificationApi.qnt` | `LCVerificationApi` | no-init-step | no init |
@@ -58,7 +58,7 @@ Each file's last module is the main module, and each value of that file named as
 | `games/mafia_werewolf/play_mafia.qnt` | `play_mafia` | refused | operator play_mafia::mafia::f_1296 |
 | `games/rock_paper_scissors/play_rock_paper_scissors.qnt` | `play_rock_paper_scissors` | definitive | winInv: passed, 19 states |
 | `games/secret-santa/secret_santa.qnt` | `quint_team_secret_santa` | definitive | inv: violated, 3 states in the counterexample |
-| `games/tictactoe/tictactoe.qnt` | `tictactoe` | refused | operator Tup |
+| `games/tictactoe/tictactoe.qnt` | `tictactoe` | refused | operator eventually |
 | `language-features/booleans.qnt` | `booleans` | no-invariant | translated; no invariant of the authors to check |
 | `language-features/counters.qnt` | `counters` | refused | operator then |
 | `language-features/generate.qnt` | `gen` | refused | operator apalache::generate |
@@ -74,7 +74,7 @@ Each file's last module is the main module, and each value of that file named as
 | `language-features/records.qnt` | `records` | no-invariant | translated; no invariant of the authors to check |
 | `language-features/sets.qnt` | `sets` | refused | operator powerset |
 | `language-features/strongFairness.qnt` | `strongFairness` | refused | operator weakFair |
-| `language-features/tuples.qnt` | `tuples` | refused | operator Tup |
+| `language-features/tuples.qnt` | `tuples` | no-invariant | translated; no invariant of the authors to check |
 | `language-features/weakFairness.qnt` | `weakFairness` | refused | operator leadsTo |
 | `puzzles/prisoners/prisoners.qnt` | `prisoners3` | refused | unresolved name Bool |
 | `puzzles/river/river.qnt` | `river` | refused | operator powerset |
