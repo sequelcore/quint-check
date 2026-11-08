@@ -67,7 +67,7 @@ later, npm and Git. You don't need Bun or Java.
    npx quint-ts check node_modules/quint-ts/demo/mutex.qnt --main mutex --invariant inv
    ```
 
-   The result is JSON, with `"status": "passed"`, `"states": 20` and
+   The result is JSON, with `"status": "passed"`, `"distinctStates": 20` and
    `"scope": "complete"`.
 
 To check your own model, run `npx quint-ts check spec.qnt --main spec
@@ -100,7 +100,7 @@ import { writeFile } from "node:fs/promises";
 import { check } from "quint-ts";
 
 const result = await check("spec.qnt", { main: "spec", invariants: ["inv"] });
-if (result.status === "passed") console.log(`${result.states} states, scope ${result.guarantee.scope}`);
+if (result.status === "passed") console.log(`${result.search.distinctStates} states, scope ${result.guarantee.scope}`);
 if (result.status === "violated") await writeFile("spec.itf.json", JSON.stringify(result.trace));
 ```
 
@@ -119,7 +119,7 @@ The [demo](demo/README.md) shows the three kinds of answer on one model.
 | `passed` | Every reachable state was explored and the invariants hold in each. `guarantee.scope` is `complete`. |
 | `violated` | An invariant breaks. `invariant` is the one you passed, as you wrote it; `trace` is a shortest counterexample, as ITF. |
 | `unsupported` | The model uses a construct outside the subset (`where: "translation"`), or a reachable state needs an operation whose result Quint leaves undefined or disputed, or an integer outside the checker's 32-bit range (`where: "reached-state"`). Nothing was proved. |
-| `inconclusive` | The search stopped before exploring every state (time limit), or there was no initial state. |
+| `inconclusive` | `reason: "timeout"`: the time limit ran out before every state was explored. `reason: "no-initial-state"`: init has no satisfying state, so nothing was checked. |
 | `error` | The Quint frontend rejected the model, or the checker failed. `stage: "translation"` is a quint-ts defect. |
 
 `invariant` names the first invariant, in the order you gave them, that the first violating state the search found breaks. It is not the first invariant that fails anywhere in the model: when `["a", "b"]` is checked and `b` breaks in an earlier state than `a`, the result names `b`. An entry with a comma, such as `"x >= 0, x <= 5"`, is one invariant, named whole.
@@ -129,10 +129,19 @@ at least one initial state, at least one distinct state, and no state left in
 the queue. tla-ts's result has no field that says how many invariants it
 evaluated, so quint-ts can't confirm that from the result itself.
 
+A `passed` or `violated` result also carries `search`, the counts tla-ts
+reports when its search ends: `initialStates`, `distinctStates` (initial ones
+included) and `queuedStates`, the states found but not yet explored. A
+`passed` has no state queued; a `violated` has the counts at the moment the
+search stopped at the violation. A search stopped by the time limit reports
+no counts.
+
 Every result carries `guarantee`: the method (`explicit-state`), the property
-(`safety-invariant`), the scope (`complete`, `partial`, `none`), the backend
-and frontend versions, and that deadlock is not checked, as
-`quint verify --backend=tlc` doesn't check it.
+(`safety-invariant`), the scope (`complete`, `partial`, `none`), the
+`frontend` and `checker` as `{ name, version }` (`quint` and `tla-ts`), and
+that deadlock is not checked, as `quint verify --backend=tlc` doesn't check
+it. The type narrows `scope` by status: `complete` on `passed`, `partial` on
+`violated`, and `none` or `partial` on the others.
 
 ## Counterexamples
 

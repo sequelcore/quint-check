@@ -204,7 +204,7 @@ try {
     ...await mapInOrder(PUBLIC_PARTIAL, async (c) => {
       console.log(`- ${c.id}`);
       const result = await check(c.file, { main: c.main, invariants: ["inv"], timeoutMs: c.timeoutMs });
-      if (result.status !== "inconclusive" || result.guarantee.scope === "complete") fail(`public ${c.id}: quint-ts ${result.status}, expected inconclusive (${c.why})`);
+      if (result.status !== "inconclusive") fail(`public ${c.id}: quint-ts ${result.status}, expected inconclusive (${c.why})`);
       return { id: c.id, group: "partially supported", expected: "inconclusive", status: result.status, reason: "reason" in result ? result.reason : c.why };
     }),
     ...PUBLIC_REFUSED.map((c) => {
@@ -278,7 +278,7 @@ try {
       for (const [what, verdict] of Object.entries(controlled)) if (verdict.startsWith("NOT")) fail(`${m.id}: control ${what} ${verdict}`);
       itf = { ...checks, ...m.apalacheItf === undefined ? {} : { apalacheKnown: m.apalacheItf }, controls: controlled };
     }
-    return { ...m, quintTs: result.status, detail: "reason" in result ? result.reason : "states" in result ? `${result.states} states` : "",
+    return { ...m, quintTs: result.status, detail: "reason" in result ? result.reason : "search" in result ? `${result.search.distinctStates} states` : "",
       simulator: sampled, official: off, graphs: summary, comparisons, trace, itf };
   });
 
