@@ -6,6 +6,8 @@ import { join } from "node:path";
 import { check, runChecker, verdict, type CheckResult } from "../src/check.ts";
 import { parseCheckerResult, type CheckerResult } from "../src/checker-result.ts";
 import { isAlive } from "../src/process.ts";
+import type { Dump } from "../src/itf.ts";
+import type { Translation } from "../src/translate.ts";
 import { removeRunDir, sweepStaleRunDirs } from "../src/workdir.ts";
 
 const posix = process.platform !== "win32";
@@ -153,6 +155,9 @@ test("a run folder that can't be removed is a warning, never a throw", async () 
 test("a result that is missing, partial or malformed is never a result", () => {
   const valid = { kind: "checked", status: "success", distinctStates: 20, queuedStates: 0, initialStates: 1 } as const;
   expect(parseCheckerResult(JSON.stringify(valid))).toEqual(valid);
+  const withTrace: CheckerResult = { ...valid, status: "invariant-violation",
+    violation: { name: "q_inv_1", trace: [{ label: null, state: { x: "{1}" }, values: { x: { set: [1, true, "a", { fn: [[1, { set: [] }]] }] } } }] } };
+  expect(parseCheckerResult(JSON.stringify(withTrace))).toEqual(withTrace);
   const broken = [
     "", "{", JSON.stringify(valid).slice(0, -5), "null", "[]",
     JSON.stringify({ ...valid, kind: "passed" }),
@@ -162,6 +167,12 @@ test("a result that is missing, partial or malformed is never a result", () => {
     JSON.stringify({ kind: "checked", status: "success", distinctStates: 20, queuedStates: 0 }),
     JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: 3, state: {} }] } }),
     JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: 1 } }] } }),
+    JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: "1" } }] } }),
+    JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: "1" }, values: { x: 1.5 } }] } }),
+    JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: "{}" }, values: { x: { set: 1 } } }] } }),
+    JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: "f" }, values: { x: { fn: [[1]] } } }] } }),
+    JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: "?" }, values: { x: { set: [], fn: [] } } }] } }),
+    JSON.stringify({ ...valid, violation: { name: "q_inv", trace: [{ label: null, state: { x: "?" }, values: { x: null } }] } }),
     JSON.stringify({ ...valid, failure: 7 }),
     JSON.stringify({ kind: "threw", error: "fatal", message: "x" }),
   ];
@@ -169,11 +180,11 @@ test("a result that is missing, partial or malformed is never a result", () => {
 });
 
 /** A translation with no names to map, for results that don't depend on one. */
-const noNames = { tla: "", cfg: "", variables: new Map<string, string>(), names: new Map<string, string>(), invariants: new Map<string, string>() };
+const noNames: Translation = { tla: "", cfg: "", variables: new Map(), names: new Map(), invariants: new Map() };
 const success: CheckerResult = { kind: "checked", status: "success", distinctStates: 20, queuedStates: 0, initialStates: 1 };
 
 test("a success is passed only with an initial state, a distinct state and no state left queued", () => {
-  expect(verdict(success, noNames)).toMatchObject({ status: "passed", states: 20, guarantee: { scope: "complete" } });
+  expect(verdict(success, noNames, "m.qnt")).toMatchObject({ status: "passed", states: 20, guarantee: { scope: "complete" } });
   const notPassed: [Partial<CheckerResult>, CheckResult["status"]][] = [
     [{ initialStates: 0 }, "inconclusive"],
     [{ distinctStates: 0 }, "inconclusive"],
@@ -181,22 +192,35 @@ test("a success is passed only with an initial state, a distinct state and no st
     [{ queuedStates: 3 }, "error"],
   ];
   for (const [counts, status] of notPassed) {
-    const r = verdict({ ...success, ...counts } as CheckerResult, noNames);
+    const r = verdict({ ...success, ...counts } as CheckerResult, noNames, "m.qnt");
     expect(r.status, JSON.stringify(counts)).toBe(status);
     expect(r.guarantee.scope, JSON.stringify(counts)).not.toBe("complete");
   }
 });
 
 test("a violation names the invariant the user gave, from the checker's name for it", () => {
-  const step = { label: null, state: { x: "0" } };
+  const step = { label: null, state: { x: "0" }, values: { x: 0 } };
   const violated = (name: string): CheckerResult => ({ ...success, status: "invariant-violation", violation: { name, trace: [step] } });
-  const translation = { ...noNames, invariants: new Map([["q_inv_1", "small"], ["q_inv_2", "x >= 0, x <= 5"]]) };
-  expect(verdict(violated("q_inv_1"), translation)).toMatchObject({ status: "violated", invariant: "small" });
+  const translation: Translation = { ...noNames, variables: new Map([["x", { name: "m::x", type: { kind: "int" } }]]),
+    invariants: new Map([["q_inv_1", "small"], ["q_inv_2", "x >= 0, x <= 5"]]) };
+  expect(verdict(violated("q_inv_1"), translation, "m.qnt")).toMatchObject({ status: "violated", invariant: "small" });
   // The text is the entry as the caller wrote it, commas included.
-  expect(verdict(violated("q_inv_2"), translation)).toMatchObject({ status: "violated", invariant: "x >= 0, x <= 5" });
+  expect(verdict(violated("q_inv_2"), translation, "m.qnt")).toMatchObject({ status: "violated", invariant: "x >= 0, x <= 5" });
   // A name the translation didn't define, such as a plain q_inv, is never read as a violation.
   for (const name of ["q_inv", "q_inv_3", "Other"]) {
-    expect(verdict(violated(name), translation), name).toMatchObject({ status: "error", stage: "checker" });
+    expect(verdict(violated(name), translation, "m.qnt"), name).toMatchObject({ status: "error", stage: "checker" });
+  }
+});
+
+test("a counterexample that doesn't fit the variables' types is an error, never a violation", () => {
+  const translation: Translation = { ...noNames, variables: new Map([["x", { name: "m::x", type: { kind: "int" } }]]), invariants: new Map([["q_inv_1", "small"]]) };
+  const withValues = (values: Record<string, Dump>): CheckerResult =>
+    ({ ...success, status: "invariant-violation", violation: { name: "q_inv_1", trace: [{ label: null, state: { x: "?" }, values }] } });
+  expect(verdict(withValues({ x: 0 }), translation, "m.qnt")).toMatchObject({
+    status: "violated", trace: { vars: ["m::x"], states: [{ "#meta": { index: 0, action: "init" }, "m::x": { "#bigint": "0" } }] } });
+  for (const values of [{ x: "zero" }, {}, { x: 0, y: 1 }] as Record<string, Dump>[]) {
+    expect(verdict(withValues(values), translation, "m.qnt"), JSON.stringify(values)).toMatchObject({
+      status: "error", stage: "checker", output: expect.stringContaining("quint-ts can't report the counterexample") });
   }
 });
 
@@ -216,7 +240,7 @@ test("the checker's result counts only when it exits 0 and writes a complete, we
     const dir = mkdtempSync(join(tmpdir(), "quint-ts-checker-test-"));
     try {
       writeFileSync(join(dir, "mode"), mode);
-      const r = await runChecker(fake, dir, noNames, performance.now() + 30_000);
+      const r = await runChecker(fake, dir, noNames, "m.qnt", performance.now() + 30_000);
       expect(r.status, mode).toBe(status);
       if (output !== undefined) expect(r.status === "error" && r.output, mode).toBe(output);
     } finally { rmSync(dir, { recursive: true, force: true }); }

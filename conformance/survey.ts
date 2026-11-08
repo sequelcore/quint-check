@@ -89,7 +89,7 @@ export async function classify(file: string): Promise<Row> {
     // A name `main` can't see (declared in a module it doesn't import) fails in the frontend, not in the model.
     if (result.status === "error" && result.stage === "frontend") continue;
     if (result.status === "passed") verdicts.push({ text: `${name}: passed, ${result.states} states`, kind: "definitive" });
-    else if (result.status === "violated") verdicts.push({ text: `${name}: violated, ${result.trace.length} states in the counterexample`, kind: "definitive" });
+    else if (result.status === "violated") verdicts.push({ text: `${name}: violated, ${result.trace.states.length} states in the counterexample`, kind: "definitive" });
     else if (result.status === "inconclusive") verdicts.push({ text: `${name}: inconclusive`, kind: "inconclusive" });
     else verdicts.push({ text: `${name}: ${result.status}`, kind: "error" });
   }

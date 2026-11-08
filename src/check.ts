@@ -6,8 +6,9 @@ import { tmpdir } from "node:os";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkerCache } from "./cache.js";
-import { JOB_FILE, RESULT_FILE, parseCheckerResult, type CheckerJob, type CheckerResult } from "./checker-result.js";
+import { JOB_FILE, RESULT_FILE, parseCheckerResult, type CheckerJob, type CheckerResult, type CheckerTraceStep } from "./checker-result.js";
 import { MAX_TIMEOUT_MS, runProcess } from "./process.js";
+import { EncodingError, type ItfState, type ItfTrace, toItf } from "./itf.js";
 import { MARKER, translate, type Translation, Unsupported } from "./translate.js";
 import { makeRunDir, removeRunDir, sweepStaleRunDirs } from "./workdir.js";
 
@@ -16,7 +17,8 @@ const quintPackage = require.resolve("@informalsystems/quint/package.json");
 const tlaTsPackage = require.resolve("tla-ts/package.json");
 
 /** Quint's CLI, which the frontend runs, and tla-ts's, which the harness and benchmarks run, at the versions the lockfile pins. */
-export const tools: { quintCli: string; quintVersion: string; tlaTsCli: string; tlaTsVersion: string } = {
+export const tools: { version: string; quintCli: string; quintVersion: string; tlaTsCli: string; tlaTsVersion: string } = {
+  version: (require("../package.json") as { version: string }).version,
   quintCli: join(dirname(quintPackage), "dist", "src", "cli.js"),
   quintVersion: (require(quintPackage) as { version: string }).version,
   tlaTsCli: join(dirname(tlaTsPackage), "dist", "cli.js"),
@@ -37,16 +39,10 @@ export interface Guarantee {
 
 export type CheckResult =
   | { readonly status: "passed"; readonly states: number; readonly guarantee: Guarantee }
-  | { readonly status: "violated"; readonly invariant: string; readonly states: number; readonly trace: readonly TraceStep[]; readonly guarantee: Guarantee }
+  | { readonly status: "violated"; readonly invariant: string; readonly states: number; readonly trace: ItfTrace; readonly guarantee: Guarantee }
   | { readonly status: "unsupported"; readonly reason: string; readonly where: "translation" | "reached-state"; readonly guarantee: Guarantee }
   | { readonly status: "inconclusive"; readonly reason: string; readonly guarantee: Guarantee }
   | { readonly status: "error"; readonly stage: "frontend" | "translation" | "checker"; readonly output: string; readonly guarantee: Guarantee };
-
-/** One state of a counterexample: the action that reached it, and every variable, in Quint's names. */
-export interface TraceStep {
-  readonly action: string;
-  readonly state: Readonly<Record<string, string>>;
-}
 
 /** What the frontend and the translation take; a translation may have no invariant. */
 export interface TranslateOptions {
@@ -165,7 +161,7 @@ export function parseState(text: string, translation: Translation): Record<strin
   for (const part of text.split(/^\/\\ /m).map((p) => p.trim()).filter((p) => p !== "")) {
     const eq = part.indexOf(" = ");
     const variable = part.slice(0, eq);
-    state[translation.variables.get(variable) ?? variable] = part.slice(eq + 3).replace(/\s+/g, " ");
+    state[translation.variables.get(variable)?.name ?? variable] = part.slice(eq + 3).replace(/\s+/g, " ");
   }
   return state;
 }
@@ -257,7 +253,7 @@ export async function check(file: string, options: CheckOptions): Promise<CheckR
     // quint verify --backend=tlc doesn't check deadlock, and neither does quint-ts.
     const job: CheckerJob = { source: translation.tla, config: `${translation.cfg}\nCHECK_DEADLOCK FALSE`, ...cacheDir === undefined ? {} : { cacheDir } };
     await writeFile(join(dir, JOB_FILE), JSON.stringify(job));
-    return await runChecker(checkerScript, dir, translation, deadline, options.signal);
+    return await runChecker(checkerScript, dir, translation, file, deadline, options.signal);
   } finally {
     await removeRunDir(dir);
   }
@@ -268,7 +264,7 @@ export async function check(file: string, options: CheckOptions): Promise<CheckR
  * result counts only when it exits 0 and leaves a complete, well-formed result. Internal: `check` runs
  * the real checker, and the tests run stand-ins for the paths where a result mustn't count.
  */
-export async function runChecker(script: string, dir: string, translation: Translation, deadline: number, signal?: AbortSignal):
+export async function runChecker(script: string, dir: string, translation: Translation, source: string, deadline: number, signal?: AbortSignal):
   Promise<CheckResult> {
   const outcome = await runProcess(process.execPath, [script, dir], { stdout: "ignore", deadline, signal });
   if (outcome.kind === "time-limit") {
@@ -284,7 +280,7 @@ export async function runChecker(script: string, dir: string, translation: Trans
     return { status: "error", stage: "checker", output: `the checker ${how}. ${outcome.stderr.split(/\r?\n/).slice(-20).join("\n")}`.trim(),
       guarantee: guarantee("partial") };
   }
-  return verdict(result, translation);
+  return verdict(result, translation, source);
 }
 
 /** Why a failure the checker reported is quint-ts's `unsupported`, not an error: a marker the translation planted, or 32-bit integers. */
@@ -298,10 +294,40 @@ function unsupportedFailure(message: string): string | undefined {
 }
 
 /**
- * What a complete checker run establishes. A `passed` needs a finished search from at least one initial
- * state: tla-ts's success, at least one initial and one distinct state, and no state left queued.
+ * Each violated result's counterexample as TLC prints its states, by full Quint name, for the conformance
+ * harness, which compares it with TLC's state graphs. Not part of the result: TLA+ text prints a map and
+ * a variant alike.
  */
-export function verdict(r: CheckerResult, translation: Translation): CheckResult {
+export const tlaStates: WeakMap<CheckResult, readonly Readonly<Record<string, string>>[]> = new WeakMap();
+
+/** The ITF of a counterexample whose structure the child reported, by the translation's variable types. */
+function itfTrace(steps: readonly CheckerTraceStep[], translation: Translation, source: string): ItfTrace {
+  const vars = [...translation.variables.values()];
+  const states = steps.map((step, k): ItfState => {
+    // The action TLC names first in its label, as `step line 65, ...` or `request("p1") line 38, ...`.
+    const name = step.label === null || k === 0 ? undefined : /^([^ >(]+)/.exec(step.label)?.[1];
+    const values = Object.fromEntries([...translation.variables].map(([tla, v]) => {
+      const value = step.values[tla];
+      if (value === undefined) throw new EncodingError(`state ${k} has no value for ${v.name}`);
+      return [v.name, toItf(value, v.type)];
+    }));
+    if (Object.keys(step.values).length !== vars.length) throw new EncodingError(`state ${k} has variables the translation doesn't declare`);
+    return { "#meta": { index: k, action: name === undefined ? "init" : translation.names.get(name) ?? name }, ...values };
+  });
+  return {
+    "#meta": { format: "ITF", "format-description": "https://apalache-mc.org/docs/adr/015adr-trace.html", source, status: "violation",
+      description: `Created by quint-ts ${tools.version}` },
+    vars: vars.map((v) => v.name),
+    states,
+  };
+}
+
+/**
+ * What a complete checker run establishes. A `passed` needs a finished search from at least one initial
+ * state: tla-ts's success, at least one initial and one distinct state, and no state left queued. A
+ * counterexample quint-ts can't encode as ITF is an error: the translation admits only types it encodes.
+ */
+export function verdict(r: CheckerResult, translation: Translation, source: string): CheckResult {
   // tla-ts reports some failures by throwing (a literal past 32 bits) and others in its result (a computation past them).
   const failure = r.kind === "threw" ? (r.error === "other" ? r.message : undefined) : r.status === "error" ? r.failure ?? "" : undefined;
   const unsupported = failure === undefined ? undefined : unsupportedFailure(failure);
@@ -325,15 +351,17 @@ export function verdict(r: CheckerResult, translation: Translation): CheckResult
   }
   const invariant = r.status === "invariant-violation" ? translation.invariants.get(r.violation?.name ?? "") : undefined;
   if (r.status === "invariant-violation" && invariant !== undefined && r.violation !== undefined && r.violation.trace.length > 0) {
-    const trace = r.violation.trace.map((step, k): TraceStep => {
-      // The action TLC names first in its label, as `step line 65, ...` or `request("p1") line 38, ...`.
-      const name = step.label === null || k === 0 ? undefined : /^([^ >(]+)/.exec(step.label)?.[1];
-      return {
-        action: name === undefined ? "init" : translation.names.get(name) ?? name,
-        state: Object.fromEntries(Object.entries(step.state).map(([v, x]) => [translation.variables.get(v) ?? v, x.replace(/\s+/g, " ")])),
-      };
-    });
-    return { status: "violated", invariant, states: r.distinctStates, trace, guarantee: guarantee("partial") };
+    let trace: ItfTrace;
+    try {
+      trace = itfTrace(r.violation.trace, translation, source);
+    } catch (err) {
+      if (!(err instanceof EncodingError)) throw err;
+      return { status: "error", stage: "checker", output: `quint-ts can't report the counterexample: ${err.message}`, guarantee: guarantee("partial") };
+    }
+    const result: CheckResult = { status: "violated", invariant, states: r.distinctStates, trace, guarantee: guarantee("partial") };
+    tlaStates.set(result, r.violation.trace.map((step) =>
+      Object.fromEntries(Object.entries(step.state).map(([v, x]) => [translation.variables.get(v)?.name ?? v, x.replace(/\s+/g, " ")]))));
+    return result;
   }
   return { status: "error", stage: "checker", output: `the checker returned ${r.status} without a result quint-ts can read`, guarantee: guarantee("partial") };
 }

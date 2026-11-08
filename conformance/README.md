@@ -54,6 +54,24 @@ translation.
 4. A counterexample from quint-ts must be a path of every graph: it starts in
    an initial state, takes only transitions of the graph, ends in its first
    violating state.
+5. Its ITF must be one Quint accepts ([itf.ts](itf.ts)), with the variables'
+   types taken from Quint's IR and Quint literals built from them, never
+   from quint-ts's converter:
+   - **replay:** the states, replayed through `quint run --init/--step`, give
+     the same ITF from Quint's own writer, with sets and maps sorted;
+   - **violation:** the replay breaks the invariant at the last state and no
+     earlier;
+   - **transitions:** Quint's simulator reaches the first state with the
+     model's init, and each next one with its step (1000 samples; a miss is
+     a failure to look at, not a proof of one);
+   - **apalache:** `quint verify --out-itf` finds a counterexample with the
+     same variables and as many states, unless the case records why it
+     can't be compared (`apalacheItf`).
+
+   Negative controls break one counterexample on purpose: a changed value,
+   Apalache's encoding of a unit payload, a variant written as a map, and
+   variables by their last name segment. Each must be caught by the check
+   named for it.
 
 ## Results
 
@@ -65,7 +83,7 @@ running nothing.
 
 ## Limits
 
-- The corpus is small: 77 operator cases, 44 model cases compared as whole
+- The corpus is small: 77 operator cases, 50 model cases compared as whole
   graphs (12 of them on Quint's public examples), and 12 more models (11 of
   them public, one the demo's) that quint-ts can't give a complete verdict
   on. Lists and temporal properties aren't translated, so they aren't
