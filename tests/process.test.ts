@@ -75,8 +75,12 @@ test("2. a crash resolves its exit code, with what it wrote to stderr", async ()
 
 test("3. the caller's abort rejects with its reason, and the child is gone when it settles", async () => {
   const ac = new AbortController();
-  setTimeout(() => ac.abort(new Error("cancelled by the caller")), 500);
-  const r = await run("hang", { signal: ac.signal });
+  let pidFile = "";
+  const pending = run("hang", { signal: ac.signal, onPidFile: (file) => { pidFile = file; } });
+  // Abort only once the child is running, so the run has a pid whose end the test can check.
+  try { assert.ok(await allWritten([pidFile], 3_000), "the child recorded its pid before the abort"); }
+  finally { ac.abort(new Error("cancelled by the caller")); }
+  const r = await pending;
   assert.equal(reason(r), "cancelled by the caller");
   childGone(r);
 });
