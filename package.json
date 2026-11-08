@@ -18,6 +18,7 @@
     "dist",
     "demo/*.qnt",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "NOTICE"
   ],
