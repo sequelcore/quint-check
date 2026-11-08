@@ -76,7 +76,9 @@ fully pinned install is the development one, `bun install
 --frozen-lockfile` (see [Developing](#developing)).
 
 `check` prints a summary on stdout, with the verdict on the last line: the
-search, the tools, and for a violation the counterexample in Quint's syntax.
+search, the tools, and for a violation the counterexample in Quint's syntax:
+its first state whole, then only the variables each step changed (the whole
+states are in `--json` and `--out-itf`).
 When there is a next command, such as a rerun with more time, it goes to
 stderr. `--json` prints the result as JSON instead, the same object the
 TypeScript API returns. Its exit code says what happened: 0 passed,

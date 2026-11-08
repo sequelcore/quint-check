@@ -21,23 +21,27 @@ test("a passed result ends with the verdict, after the search and the tools", ()
   expect(several.stdout).toEndWith("passed: each of the 2 invariants holds in the 1 reachable state\n");
 });
 
-test("a violated result prints the trace in Quint's syntax, then the search, then which invariant broke where", () => {
+test("a violated result prints the first state whole, then what each step changed, then the search and which invariant broke where", () => {
   const trace: ItfTrace = {
     "#meta": { format: "ITF", "format-description": "https://apalache-mc.org/docs/adr/015adr-trace.html", source: "spec.qnt", status: "violation", description: "Created by quint-ts 0.0.0" },
     vars: ["phase", "n"],
     states: [
       { "#meta": { index: 0, action: "init" }, phase: { tag: "Idle", value: { "#tup": [] } }, n: { "#bigint": "0" } },
-      { "#meta": { index: 1, action: "step" }, phase: { tag: "Busy", value: { "#bigint": "-2" } }, n: { "#bigint": "1" } },
+      { "#meta": { index: 1, action: "step" }, phase: { tag: "Busy", value: { "#bigint": "-2" } }, n: { "#bigint": "0" } },
+      { "#meta": { index: 2, action: "wait" }, phase: { tag: "Busy", value: { "#bigint": "-2" } }, n: { "#bigint": "0" } },
+      { "#meta": { index: 3, action: "step" }, phase: { tag: "Busy", value: { "#bigint": "-2" } }, n: { "#bigint": "1" } },
     ],
   };
   const violated: CheckResult = { status: "violated", invariant: "n < 1", trace, search: { initialStates: 1, distinctStates: 2, queuedStates: 3 }, guarantee: guarantee("partial") };
   expect(render(violated, request)).toEqual({
-    stdout: "trace:\n" +
+    stdout: "trace (each state after the first shows only what changed):\n" +
       "  state 0, init\n    phase = Idle\n    n = 0\n" +
-      "  state 1, step\n    phase = Busy(-2)\n    n = 1\n" +
+      "  state 1, step\n    phase = Busy(-2)\n" +
+      "  state 2, wait\n    no change\n" +
+      "  state 3, step\n    n = 1\n" +
       "search: stopped at the first violation, 2 distinct states, 3 still queued; deadlock not checked\n" +
       "checked with quint 0.33.1 and tla-ts 0.0.8\n" +
-      "violated: n < 1 breaks in state 1 of the trace above\n",
+      "violated: n < 1 breaks in state 3 of the trace above\n",
     stderr: "",
   });
 });

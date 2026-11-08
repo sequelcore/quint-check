@@ -87,12 +87,18 @@ export function render(result: CheckResult, request: Request): { readonly stdout
     }
     case "violated": {
       const { trace, search } = result;
-      const states = trace.states.flatMap((s) => [
-        `  state ${s["#meta"].index}, ${s["#meta"].action}`,
-        ...trace.vars.map((v) => `    ${v} = ${quintValue(s[v] as ItfValue)}`),
-      ]);
+      // After the first state, only the variables a step changed: the whole states are in --json and --out-itf.
+      // ITF sorts sets and maps, so equal values have equal JSON text.
+      const states = trace.states.flatMap((s, k) => {
+        const previous = trace.states[k - 1];
+        const changed = trace.vars.filter((v) => previous === undefined || JSON.stringify(s[v]) !== JSON.stringify(previous[v]));
+        return [
+          `  state ${s["#meta"].index}, ${s["#meta"].action}`,
+          ...changed.length === 0 ? ["    no change"] : changed.map((v) => `    ${v} = ${quintValue(s[v] as ItfValue)}`),
+        ];
+      });
       return {
-        stdout: lines("trace:", ...states,
+        stdout: lines("trace (each state after the first shows only what changed):", ...states,
           `search: stopped at the first violation, ${plural(search.distinctStates, "distinct state")}, ${search.queuedStates} still queued; deadlock not checked`,
           tools, `violated: ${result.invariant} breaks in state ${trace.states.length - 1} of the trace above`),
         stderr: "",
