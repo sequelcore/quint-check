@@ -16,7 +16,7 @@ conformance/public/ holds Quint models copied unchanged from Quint's examples
 (https://github.com/quint-co/quint/tree/07d7a1a69c2093b5bc656caf3b5dfefa0d766cd0/examples),
 by Quint's authors (its source files name Informal Systems), Apache License 2.0:
 booleans.qnt, instances.qnt, weakFairness.qnt, coin.qnt, ewd426_3.qnt,
-two_phase_commit.qnt, tictactoe.qnt, BinSearch.qnt, generate.qnt,
+ewd426_4.qnt, two_phase_commit.qnt, tictactoe.qnt, BinSearch.qnt, generate.qnt,
 counters.qnt, bakery.qnt, play_rock_paper_scissors.qnt, ewd426.qnt, ewd840.qnt,
 prisoners.qnt, games/secret-santa/secret_santa.qnt and spells/basicSpells.qnt.
 

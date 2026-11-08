@@ -33,6 +33,7 @@ export interface OperatorCase {
 const BUILTIN = "quint/src/builtin.qnt";
 const LANG_DIV = "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\")";
 const LESSON_DIV = "docs/content/docs/lessons/integers.md:242 (\"compute the integer part and the remainder\")";
+const RECORDS = "docs/content/docs/lang.md:1195 (Records)";
 const EVALUATORS_TRUNCATE = "Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)";
 
 export const OPERATOR_CASES: readonly OperatorCase[] = [
@@ -87,6 +88,24 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "set-of-maps-empty", ops: ["setOfMaps", "size"], expr: "Set(1).exclude(Set(1)).setOfMaps(Set(0, 1)).size() == 1 and Set(1).setOfMaps(Set(1).exclude(Set(1))).size() == 0", semantics: "defined", source: "quint/src/builtin.qnt:331 (setOfMaps: all maps from no keys is the one empty map; to no values, none)" },
   { id: "map-empty", ops: ["Map", "put"], expr: "Map().put(1, 2) == Map(1 -> 2) and Map(1 -> 2).keys().exclude(Set(1)).size() == 0", semantics: "defined", source: "docs/content/docs/lang.md Maps (Map() is the map with no keys)" },
   { id: "ite", ops: ["ite"], expr: "(if (1 < 2) 3 else 4) == 3 and (if (2 < 1) 3 else 4) == 4", semantics: "defined", source: "docs/content/docs/lang.md if-then-else" },
+  // Records. Each case also holds the operator false where it should be, so a translation that drops a field, an update or a name can't pass.
+  { id: "record-field", ops: ["Rec", "field"], expr: "{ a: 1, b: true }.a == 1 and { a: 1, b: true }.b and { a: 1, b: 2 }.field(\"b\") == 2 and { a: 1, b: 2 }.a != 2 and not({ a: 1, b: false }.b)", semantics: "defined", source: `${RECORDS}; ${BUILTIN}:973 (Rec), :987 (field)` },
+  { id: "record-eq", ops: ["Rec", "eq", "neq"], expr: "{ a: 1, b: 2 } == { b: 2, a: 1 } and { a: 1, b: 2 } != { a: 1, b: 3 } and not({ a: 1 } == { a: 2 }) and Rec(\"a\", 1) == { a: 1 }", semantics: "defined", source: `${RECORDS}; ${BUILTIN}:973 (Rec: a record is its fields and their values)` },
+  { id: "record-with", ops: ["with", "Rec", "field"], expr: "{ a: 1, b: 2 }.with(\"a\", 3) == { a: 3, b: 2 } and { a: 1, b: 2 }.with(\"a\", 3).b == 2 and { a: 1, b: 2 }.with(\"a\", 3) != { a: 1, b: 2 } and { a: 1, b: 2 }.with(\"a\", 1) == { a: 1, b: 2 }", semantics: "defined", source: `${BUILTIN}:1012 (with; the documentation's own example)` },
+  { id: "record-spread", ops: ["with", "Rec"], expr: "{ ...{ a: 1, b: 2, c: 3 }, a: 5, c: 6 } == { a: 5, b: 2, c: 6 } and { ...{ a: 1, b: 2 }, b: 7 }.a == 1 and { ...{ a: 1, b: 2 }, b: 7 } != { a: 1, b: 2 }", semantics: "defined", source: `${RECORDS} ({ f1: e1, fN: eN, ...r } is [r EXCEPT !.f1 = e1, !.fN = eN])` },
+  { id: "record-field-names", ops: ["fieldNames", "Rec"], expr: "{ a: 1, b: true }.fieldNames() == Set(\"a\", \"b\") and not({ a: 1, b: true }.fieldNames().contains(\"c\")) and { a: 1 }.with(\"a\", 2).fieldNames() == Set(\"a\")", semantics: "defined", source: `${BUILTIN}:1002 (fieldNames; the documentation's own example)` },
+  { id: "record-nested", ops: ["Rec", "field", "with"], expr: "{ a: { b: 1, c: 2 }, d: 3 }.a.c == 2 and { ...{ a: { b: 1, c: 2 }, d: 3 }, a: { ...{ b: 1, c: 2 }, b: 5 } } == { a: { b: 5, c: 2 }, d: 3 } and { a: { b: 1 } } != { a: { b: 2 } }", semantics: "defined", source: `${RECORDS}: a field's value may be a record` },
+  { id: "record-set", ops: ["Rec", "Set", "size", "filter", "field"], expr: "Set({ a: 1 }, { a: 1 }, { a: 2 }).size() == 2 and { a: 2 }.in(Set({ a: 1 }, { a: 2 })) and not({ a: 3 }.in(Set({ a: 1 }, { a: 2 }))) and Set({ a: 1, b: 0 }, { a: 2, b: 0 }).filter(r => r.a > 1) == Set({ a: 2, b: 0 })", semantics: "defined", source: `${RECORDS}; ${BUILTIN}:973 (records are values, so sets hold them)` },
+  { id: "record-map", ops: ["Rec", "mapBy", "get", "set", "field"], expr: "Set({ a: 1 }, { a: 2 }).mapBy(r => r.a).get({ a: 2 }) == 2 and Set(1, 2).mapBy(k => { n: k, on: false }).set(1, { n: 1, on: true }).get(1).on and not(Set(1, 2).mapBy(k => { n: k, on: false }).get(2).on)", semantics: "defined", source: `${RECORDS}; ${BUILTIN} mapBy, get, set (records as keys and as values)` },
+  { id: "record-variant", ops: ["variant", "matchVariant", "Rec", "field"], decls: "type T = A({ x: int, y: bool }) | B", expr: "(match A({ x: 1, y: true }) { | A(r) => r.x | B => 0 }) == 1 and A({ x: 1, y: true }) != A({ x: 1, y: false }) and A({ x: 1, y: true }) == A({ y: true, x: 1 })", semantics: "defined", source: `${RECORDS}; docs/content/docs/lang.md:1256 (Sum Types: a record as a constructor's payload)` },
+  { id: "record-odd-names", ops: ["Rec", "field", "with"], expr: "{ Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.Cardinality == 2 and { Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.with(\"Nat\", 5).Nat == 5 and { _a: 3, QTS__x: 4 }.QTS__x == 4", semantics: "defined", source: `${RECORDS}: field names are identifiers, so a TLA+ operator's name or quint-ts's prefix is a field name too` },
+  { id: "record-empty", ops: ["Rec"], expr: "Rec() == Rec()", semantics: "unspecified", source: `${RECORDS} ("Warning: n >= 1"): no record without fields` },
+  { id: "record-reserved-name", ops: ["Rec", "field"], expr: "{ DOMAIN: 1, IF: 2 }.DOMAIN == 1", semantics: "defined", source: `${RECORDS}: field names are identifiers`,
+    quintTs: "unsupported", quintTsWhy: "a TLA+ reserved word can't be a field of a TLA+ record, and Quint's official route rejects it too",
+    known: { official: { outcome: "error", why: "Apalache's translation names the field DOMAIN, which TLA+'s parser rejects" } } },
+  { id: "record-string-name", ops: ["Rec", "field"], expr: "Rec(\"a b\", 1).field(\"a b\") == 1", semantics: "defined", source: `${BUILTIN}:973 (Rec takes a string for each field name)`,
+    quintTs: "unsupported", quintTsWhy: "a field name that isn't an identifier can't be a field of a TLA+ record, and Quint's official route rejects it too",
+    known: { official: { outcome: "error", why: "Apalache's translation writes the field a b, which TLA+'s parser rejects" } } },
 ];
 
 /** Constructs outside the MVP: quint-ts must answer unsupported, at translation. */
@@ -94,10 +113,8 @@ export const UNSUPPORTED_CASES: readonly { id: string; module: string }[] = [
   { id: "temporal", module: "var x: int\naction init = x' = 0\naction step = x' = x\nval inv = true\ntemporal always0 = always(x == 0)" },
   { id: "then", module: "var x: int\naction init = x' = 0\naction inc = x' = x + 1\naction step = inc.then(inc)\nval inv = true" },
   { id: "choose-some", module: "var x: int\naction init = x' = Set(1, 2).chooseSome()\naction step = x' = x\nval inv = true" },
-  { id: "record", module: "var r: { a: int }\naction init = r' = { a: 0 }\naction step = r' = r.with(\"a\", 1)\nval inv = r.a >= 0" },
   { id: "tuple", module: "var p: (int, int)\naction init = p' = (0, 1)\naction step = p' = (p._2, p._1)\nval inv = p._1 >= 0" },
   { id: "list", module: "var l: List[int]\naction init = l' = [1, 2]\naction step = l' = l\nval inv = l[0] == 1" },
-  { id: "variant-record-payload", module: "type T = A({ x: int }) | B\nvar v: T\naction init = v' = A({ x: 1 })\naction step = v' = B\nval inv = true" },
   { id: "set-to-map", module: "var m: int -> int\naction init = m' = Set((1, 2)).setToMap()\naction step = m' = m\nval inv = true" },
   { id: "reps", module: "var x: int\naction init = x' = 0\naction step = 2.reps(_ => x' = x)\nval inv = true" },
   { id: "powerset", module: "var s: Set[Set[int]]\naction init = s' = Set(1, 2).powerset()\naction step = s' = s\nval inv = true" },

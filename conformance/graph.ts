@@ -36,7 +36,58 @@ export interface Graph {
 const squeeze = (value: string): string =>
   value.split(/("(?:[^"\\]|\\.)*")/).map((part, k) => (k % 2 === 1 ? part : part.replace(/\s+/g, ""))).join("");
 
-const canon = (state: Record<string, string>): string => Object.keys(state).sort().map((k) => `${k} = ${squeeze(state[k] ?? "")}`).join("; ");
+const CLOSERS: Readonly<Record<string, string>> = { "[": "]", "{": "}", "(": ")", "<<": ">>" };
+
+/**
+ * A TLA+ value as printed, squeezed, with each record's fields and each set's elements sorted, so two
+ * printings of one value compare equal. TLC and tla-ts print a record's fields in an order of their own,
+ * not the model's, which differs between two translations of one model, and a set's order can follow
+ * its records' fields. A tuple's and a function's order is kept.
+ */
+export function canonValue(value: string): string {
+  const s = squeeze(value);
+  let i = 0;
+  // The elements up to `close` (the end of the text when undefined), split at the commas of this level;
+  // each says whether it has a `|->` of its own, as a record's field does.
+  const group = (close: string | undefined): { text: string; maps: boolean }[] => {
+    const out: { text: string; maps: boolean }[] = [];
+    let text = "";
+    let maps = false;
+    while (i < s.length) {
+      if (close !== undefined && s.startsWith(close, i)) {
+        i += close.length;
+        break;
+      }
+      const c = s[i] ?? "";
+      const literal = c === "\"" ? /^"(?:[^"\\]|\\.)*"/.exec(s.slice(i))?.[0] : undefined;
+      const open = s.startsWith("<<", i) ? "<<" : "[{(".includes(c) ? c : undefined;
+      if (literal !== undefined) {
+        text += literal;
+        i += literal.length;
+      } else if (open !== undefined) {
+        i += open.length;
+        const inner = group(CLOSERS[open]);
+        const texts = inner.map((e) => e.text);
+        const unordered = open === "{" || (open === "[" && inner.every((e) => e.maps));
+        text += `${open}${(unordered ? texts.sort() : texts).join(",")}${CLOSERS[open] ?? ""}`;
+      } else if (c === ",") {
+        out.push({ text, maps });
+        text = "";
+        maps = false;
+        i += 1;
+      } else {
+        if (s.startsWith("|->", i)) maps = true;
+        text += c;
+        i += 1;
+      }
+    }
+    out.push({ text, maps });
+    return out;
+  };
+  return group(undefined).map((e) => e.text).join(",");
+}
+
+const canon = (state: Record<string, string>): string => Object.keys(state).sort().map((k) => `${k} = ${canonValue(state[k] ?? "")}`).join("; ");
 
 function unescapeDot(label: string): string {
   return label.replace(/\\(.)/g, (_, c: string) => (c === "n" ? "\n" : c));

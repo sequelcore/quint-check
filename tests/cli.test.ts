@@ -122,7 +122,7 @@ test("check exits with a code per status, and still prints the result as JSON", 
   const cases: { args: string[]; code: number; status: string }[] = [
     { args: ["check", ...mutex, "--invariant", "inv"], code: 0, status: "passed" },
     { args: ["check", "demo/mutex_bug.qnt", "--main", "mutex_bug", "--invariant", "inv"], code: 20, status: "violated" },
-    { args: ["check", "demo/mutex_records.qnt", "--main", "mutex_records", "--invariant", "inv"], code: 21, status: "unsupported" },
+    { args: ["check", "demo/mutex_tuple.qnt", "--main", "mutex_tuple", "--invariant", "inv"], code: 21, status: "unsupported" },
     { args: ["check", ...mutex, "--invariant", "inv", "--timeout-ms", "1"], code: 22, status: "inconclusive" },
     { args: ["check", ...mutex, "--invariant", "nope"], code: 23, status: "error" },
   ];
@@ -134,10 +134,10 @@ test("check exits with a code per status, and still prints the result as JSON", 
 }, 120_000);
 
 test("translate failures are text on stderr: exit 21 when unsupported, 23 on a frontend error", () => {
-  const unsupported = cli("translate", "demo/mutex_records.qnt", "--main", "mutex_records");
+  const unsupported = cli("translate", "demo/mutex_tuple.qnt", "--main", "mutex_tuple");
   expect(unsupported.code).toBe(21);
   expect(unsupported.stdout).toBe("");
-  expect(unsupported.stderr).toMatch(/^quint-ts: unsupported: .*operator Rec/m);
+  expect(unsupported.stderr).toMatch(/^quint-ts: unsupported: .*operator Tup/m);
   expect(unsupported.stderr).not.toMatch(/^\s*[{[]/);
   const rejected = cli("translate", ...mutex, "--invariant", "nope");
   expect(rejected.code).toBe(23);

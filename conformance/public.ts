@@ -10,7 +10,7 @@ export const PUBLIC_PARTIAL: readonly { id: string; file: string; main: string; 
     why: "its counters grow without bound, so an explicit-state search never finishes" },
 ];
 
-/** Accepted by Quint's frontend, refused by quint-ts at translation, naming the construct; Quint's examples, and the demo's model with records. */
+/** Accepted by Quint's frontend, refused by quint-ts at translation, naming the construct; Quint's examples, and the demo's model with a tuple. */
 export const PUBLIC_REFUSED: readonly { id: string; file: string; main: string; reason: string }[] = [
   { id: "weakFairness", file: "conformance/public/weakFairness.qnt", main: "weakFairness", reason: "operator leadsTo" },
   { id: "coin", file: "conformance/public/coin.qnt", main: "coin", reason: "operator ipow" },
@@ -22,5 +22,5 @@ export const PUBLIC_REFUSED: readonly { id: string; file: string; main: string; 
   { id: "generate", file: "conformance/public/generate.qnt", main: "gen", reason: "operator apalache::generate" },
   { id: "counters", file: "conformance/public/counters.qnt", main: "counters", reason: "operator then" },
   { id: "bakery", file: "conformance/public/bakery.qnt", main: "understanding", reason: "operator item" },
-  { id: "demo-mutex-records", file: "demo/mutex_records.qnt", main: "mutex_records", reason: "operator Rec" },
+  { id: "demo-mutex-tuple", file: "demo/mutex_tuple.qnt", main: "mutex_tuple", reason: "operator Tup" },
 ];

@@ -24,6 +24,7 @@ export const SUPPORTED_OPCODES: readonly string[] = [
   "Map", "mapBy", "get", "set", "keys", "put", "setBy", "setOfMaps",
   "ite", "assign", "actionAll", "actionAny",
   "variant", "matchVariant",
+  "Rec", "field", "with", "fieldNames",
 ];
 
 // The IR is JSON; its shapes are checked where they are read.
@@ -175,6 +176,11 @@ function app(ex: Ex, ctx: Ctx): string {
     // keys.setOfMaps(values): every map from keys to values, which is TLA+'s function set.
     case "setOfMaps": return `[${e(0)} -> ${e(1)}]`;
     case "setBy": return setBy(a, ctx);
+    case "Rec": return record(a, ctx);
+    case "field": return `(${e(0)}).${fieldName(a[1])}`;
+    // Quint's type checker rejects a field the record lacks, so the EXCEPT always replaces one.
+    case "with": return `[${e(0)} EXCEPT !.${fieldName(a[1])} = ${e(2)}]`;
+    case "fieldNames": return `DOMAIN ${e(0)}`;
     case "assign": {
       if (a[0]?.kind !== "name" || !ctx.vars.has(a[0].name)) throw new Unsupported("an assignment to something other than a state variable");
       if (ctx.mode === "state") throw new Unsupported("an assignment in a state expression");
@@ -245,6 +251,40 @@ function setBy(a: Ex[], ctx: Ctx): string {
   const value = `(LET ${mangle(params[0] ?? "")} == ${m}[${k}] IN ${expr(body, withLocals(ctx, params))})`;
   return `(LET ${m} == ${expr(a[0], ctx)}\n      ${k} == ${expr(a[1], ctx)}\n  IN IF ${k} \\in DOMAIN ${m} THEN [${m} EXCEPT ![${k}] = ${value}] ` +
     `ELSE QTS__unsupported("setBy with a key the map lacks"))`;
+}
+
+/** TLA+'s reserved words, which its parser never reads as a record's field. */
+const TLA_RESERVED = new Set([
+  "ACTION", "ASSUME", "ASSUMPTION", "AXIOM", "BOOLEAN", "BY", "CASE", "CHOOSE", "CONSTANT", "CONSTANTS", "COROLLARY",
+  "DEF", "DEFINE", "DEFS", "DOMAIN", "ELSE", "ENABLED", "EXCEPT", "EXTENDS", "FALSE", "HAVE", "HIDE", "IF", "IN",
+  "INSTANCE", "LAMBDA", "LEMMA", "LET", "LOCAL", "MODULE", "NEW", "OBVIOUS", "OMITTED", "ONLY", "OTHER", "PICK",
+  "PROOF", "PROPOSITION", "PROVE", "QED", "RECURSIVE", "STATE", "STRING", "SUBSET", "SUFFICES", "TAKE", "TEMPORAL",
+  "THEN", "THEOREM", "TRUE", "UNCHANGED", "UNION", "USE", "VARIABLE", "VARIABLES", "WITH", "WITNESS",
+]);
+
+/**
+ * A record's field name as a TLA+ field: a literal identifier that isn't a reserved word. Quint also
+ * takes any string (`Rec("a b", 1)`), which a TLA+ record can't hold and its official route rejects.
+ */
+function fieldName(ex: Ex): string {
+  if (ex?.kind !== "str") throw new Unsupported("a record field whose name isn't a literal");
+  const f: string = ex.value;
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(f) || !/[A-Za-z]/.test(f) || TLA_RESERVED.has(f) || /^(WF|SF)_/.test(f)) {
+    throw new Unsupported(`the record field ${JSON.stringify(f)}, which can't name a field of a TLA+ record`);
+  }
+  return f;
+}
+
+/**
+ * A record as a TLA+ record, `[a |-> 1, b |-> 2]`, as Quint's official route writes it, so states print
+ * the same in both. Quint's documentation defines records with at least one field.
+ */
+function record(a: Ex[], ctx: Ctx): string {
+  if (a.length === 0) throw new Unsupported("a record with no fields, which Quint's documentation doesn't define");
+  const fields: string[] = [];
+  for (let k = 0; k < a.length; k += 2) fields.push(`${fieldName(a[k])} |-> ${expr(a[k + 1], ctx)}`);
+  if (new Set(a.filter((_, k) => k % 2 === 0).map((f) => f.value)).size !== fields.length) throw new Unsupported("a record with a repeated field");
+  return `[${fields.join(", ")}]`;
 }
 
 /** Only literal, distinct keys: Quint's rule for a repeated key isn't established. */
