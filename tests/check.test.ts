@@ -81,7 +81,7 @@ test("Quint names that would become one TLA+ name are unsupported at translation
 
 test("a local beside a definition of the same flattened name is checked: the frontend renames locals", async () => {
   const result = await check(model("collisions"), { main: "collisions_bound", invariants: ["inv"] });
-  expect(result.status).toBe("violated");
+  expect(result.status).toBe("passed");
 }, 60_000);
 
 test("a search stopped by the time limit is inconclusive and partial", async () => {

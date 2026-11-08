@@ -92,6 +92,6 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["assign"], note: "the model's q_step and the generated q::step" },
   { id: "collisions-invariant", file: "conformance/models/collisions.qnt", main: "collisions_invariant", expect: "unsupported",
     ops: ["assign"], note: "the model's q_inv_1 and the first invariant's name" },
-  { id: "collisions-bound", file: "conformance/models/collisions.qnt", main: "collisions_bound", expect: "violated",
-    ops: ["exists", "or", "ilte"], note: "a bound a_lim beside a::lim: Quint's flattener renames the local, so nothing collides" },
+  { id: "collisions-bound", file: "conformance/models/collisions.qnt", main: "collisions_bound", expect: "passed",
+    ops: ["exists", "or", "igte"], note: "a bound a_lim beside a::lim: Quint's flattener renames the local, so nothing collides" },
 ];

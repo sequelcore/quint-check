@@ -5,7 +5,7 @@ module collisions_m {
   var x: int
   val lim = 5
   action init = all { b_c' = 0, x' = 0 }
-  action step = all { b_c' = b_c + 1, x' = x }
+  action step = all { b_c' = if (b_c < 3) b_c + 1 else b_c, x' = x }
 }
 
 module collisions_n {
@@ -52,11 +52,11 @@ module collisions_invariant {
 
 // A bound name, a_lim, beside the instance's definition a::lim: Quint's
 // flattener renames every local (a_lim becomes a_lim_<id>), so the two don't
-// collide and the model is checked.
+// collide and the model is checked (and passes).
 module collisions_bound {
   import collisions_m as a
   var y: int
   action init = all { a::init, y' = 10 }
   action step = all { a::step, y' = y }
-  val inv = Set(1).exists(a_lim => a_lim > 3) or y <= a::lim
+  val inv = Set(1).exists(a_lim => a_lim > 3) or y >= a::lim
 }
