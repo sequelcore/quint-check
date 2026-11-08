@@ -6,40 +6,40 @@ Each file's last module is the main module, and each value of that file named as
 | Outcome | Files |
 | --- | ---: |
 | All | 77 |
-| Translated | 6 |
-| … a definitive verdict with the authors' invariant | 4 |
-| … no invariant of the authors to check | 1 |
+| Translated | 9 |
+| … a definitive verdict with the authors' invariant | 5 |
+| … no invariant of the authors to check | 3 |
 | … inconclusive | 1 |
 | … checked with an error | 0 |
-| Refused by quint-ts | 44 |
+| Refused by quint-ts | 41 |
 | Rejected by Quint's frontend with the last module as main | 1 |
 | Without `init` or `step` | 26 |
 
 | File | Main module | Outcome | Detail |
 | --- | --- | --- | --- |
 | `classic/distributed/Bakery/bakery.qnt` | `understanding` | refused | operator item |
-| `classic/distributed/ClockSync/clockSync6.qnt` | `clock_sync4` | refused | operator Rec |
-| `classic/distributed/ConsensusAlgorithm/ConsensusAlg.qnt` | `badValues` | refused | operator Rec |
-| `classic/distributed/ConsensusAlgorithm/KSetAgreementConsensus.qnt` | `KSetProperValues` | refused | operator Rec |
+| `classic/distributed/ClockSync/clockSync6.qnt` | `clock_sync4` | refused | operator clock_sync4::clock_sync::f_1118 |
+| `classic/distributed/ConsensusAlgorithm/ConsensusAlg.qnt` | `badValues` | refused | operator powerset |
+| `classic/distributed/ConsensusAlgorithm/KSetAgreementConsensus.qnt` | `KSetProperValues` | refused | operator powerset |
 | `classic/distributed/DiningPhilosophers/DiningPhilosophers5.qnt` | `DiningPhilosophers5` | refused | operator Tup |
 | `classic/distributed/LamportMutex/LamportMutex.qnt` | `LamportMutex_3_10` | no-init-step | no init |
 | `classic/distributed/Paxos/Paxos.qnt` | `Paxos_val2_accept3_quorum2` | no-init-step | no init |
 | `classic/distributed/Paxos/Voting.qnt` | `Voting` | no-init-step | no init |
 | `classic/distributed/ReadersWriters/ReadersWriters.qnt` | `ReadersWriters_5` | no-init-step | no init |
-| `classic/distributed/ReliableBroadcast/reliablebc.qnt` | `reliablebc` | refused | operator field |
-| `classic/distributed/TeachingConcurrency/mutex.qnt` | `mutex` | refused | operator field |
-| `classic/distributed/TeachingConcurrency/teaching.qnt` | `teaching` | refused | operator field |
+| `classic/distributed/ReliableBroadcast/reliablebc.qnt` | `reliablebc` | refused | operator powerset |
+| `classic/distributed/TeachingConcurrency/mutex.qnt` | `mutex` | refused | operator tuples |
+| `classic/distributed/TeachingConcurrency/teaching.qnt` | `teaching` | refused | operator tuples |
 | `classic/distributed/TwoLayeredCache/two_layered_cache.qnt` | `two_layered_cache` | refused | operator append |
 | `classic/distributed/TwoPhaseCommit/two_phase_commit.qnt` | `two_phase_commit_3` | refused | operator then |
 | `classic/distributed/TwoPhaseCommit/two_phase_commit_modules.qnt` | `two_phase_commit_tests` | frontend-error | Error: Internal error while flattening [QNT404] Name 'two_phase_commit_tests::two_phase_commit::msg::init' not found,[QNT404] Name 'two_phase_commit_tests::two_ |
 | `classic/distributed/ewd426/ewd426.qnt` | `broken_ewd426` | definitive | tokenInv: passed, 16 states |
 | `classic/distributed/ewd426/ewd426_3.qnt` | `ewd426_3` | definitive | tokenInv: passed, 729 states |
-| `classic/distributed/ewd426/ewd426_4.qnt` | `ewd426_4` | refused | operator Rec |
+| `classic/distributed/ewd426/ewd426_4.qnt` | `ewd426_4` | definitive | tokenInv: passed, 1024 states |
 | `classic/distributed/ewd840/ewd840.qnt` | `ewd840_3` | refused | unresolved name Bool |
 | `classic/sequential/BinSearch/BinSearch.qnt` | `BinSearch10` | refused | operator List |
 | `cosmos/bank/bank.qnt` | `bank` | no-init-step | no init |
-| `cosmos/bank/bankTest.qnt` | `bankTest` | refused | operator Rec |
-| `cosmos/ics20/bank.qnt` | `bankTests` | refused | operator Rec |
+| `cosmos/bank/bankTest.qnt` | `bankTest` | refused | operator expect |
+| `cosmos/ics20/bank.qnt` | `bankTests` | refused | operator List |
 | `cosmos/ics20/base.qnt` | `base` | no-init-step | no init |
 | `cosmos/ics20/denomTrace.qnt` | `properChannelsTests` | refused | operator tuples |
 | `cosmos/ics20/ics20.qnt` | `properChannelsTests` | refused | operator tuples |
@@ -54,8 +54,8 @@ Each file's last module is the main module, and each value of that file named as
 | `cosmwasm/zero-to-hero/vote.qnt` | `state` | refused | operator foldl |
 | `cryptography/hashes/hashes.qnt` | `sha256` | no-init-step | no init |
 | `cryptography/hashes/hashesTest.qnt` | `sha256` | no-init-step | no init |
-| `cryptography/utxo/utxo.qnt` | `utxo` | refused | operator field |
-| `games/mafia_werewolf/play_mafia.qnt` | `play_mafia` | refused | operator Rec |
+| `cryptography/utxo/utxo.qnt` | `utxo` | refused | operator List |
+| `games/mafia_werewolf/play_mafia.qnt` | `play_mafia` | refused | operator play_mafia::mafia::f_1296 |
 | `games/rock_paper_scissors/play_rock_paper_scissors.qnt` | `play_rock_paper_scissors` | definitive | winInv: passed, 19 states |
 | `games/secret-santa/secret_santa.qnt` | `quint_team_secret_santa` | definitive | inv: violated, 3 states in the counterexample |
 | `games/tictactoe/tictactoe.qnt` | `tictactoe` | refused | operator Tup |
@@ -71,18 +71,18 @@ Each file's last module is the main module, and each value of that file named as
 | `language-features/maps.qnt` | `maps` | refused | operator setToMap |
 | `language-features/nondetEx.qnt` | `nondetEx` | refused | operator then |
 | `language-features/option.qnt` | `option` | refused | operator replaceAt |
-| `language-features/records.qnt` | `records` | refused | operator fieldNames |
+| `language-features/records.qnt` | `records` | no-invariant | translated; no invariant of the authors to check |
 | `language-features/sets.qnt` | `sets` | refused | operator powerset |
 | `language-features/strongFairness.qnt` | `strongFairness` | refused | operator weakFair |
 | `language-features/tuples.qnt` | `tuples` | refused | operator Tup |
 | `language-features/weakFairness.qnt` | `weakFairness` | refused | operator leadsTo |
 | `puzzles/prisoners/prisoners.qnt` | `prisoners3` | refused | unresolved name Bool |
 | `puzzles/river/river.qnt` | `river` | refused | operator powerset |
-| `solidity/ERC20/erc20.qnt` | `erc20Tests` | refused | operator field |
+| `solidity/ERC20/erc20.qnt` | `erc20Tests` | refused | operator ipow |
 | `solidity/GradualPonzi/gradualPonzi.qnt` | `gradualPonziTest` | refused | operator ipow |
 | `solidity/SimpleAuction/SimpleAuction.qnt` | `SimpleAuction` | no-init-step | no step |
 | `solidity/SimplePonzi/simplePonzi.qnt` | `simplePonziTest` | refused | the uninstantiated constant ADDR |
-| `solidity/icse23-fig7/lottery.qnt` | `lotteryTests` | refused | operator Rec |
+| `solidity/icse23-fig7/lottery.qnt` | `lotteryTests` | refused | operator List |
 | `spells/BoundedUInt.qnt` | `BoundedUInt32Test` | no-init-step | no init |
 | `spells/basicSpells.qnt` | `basicSpells` | no-init-step | no init |
 | `spells/commonSpells.qnt` | `commonSpells` | no-init-step | no init |
@@ -91,6 +91,6 @@ Each file's last module is the main module, and each value of that file named as
 | `tutorials/coin.qnt` | `coin` | refused | operator ipow |
 | `tutorials/hello.qnt` | `hello` | refused | operator then |
 | `tutorials/integers.qnt` | `integersLesson` | no-init-step | no init |
-| `tutorials/repl/kettle.qnt` | `kettle` | refused | operator Rec |
+| `tutorials/repl/kettle.qnt` | `kettle` | no-invariant | translated; no invariant of the authors to check |
 | `tutorials/sets.qnt` | `sets` | no-init-step | no init |
 | `verification/defaultOpNames.qnt` | `defaultOpNames` | refused | a module with no state variables |

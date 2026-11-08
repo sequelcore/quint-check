@@ -47,6 +47,8 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["setOfMaps"], note: "Quint's examples: N = 3, K = 2; tokenInv still holds there" },
   { id: "public-ewd426-3", file: "conformance/public/ewd426_3.qnt", main: "ewd426_3", invariant: "tokenInv", expect: "passed",
     ops: ["setOfMaps", "get"], note: "Quint's examples: the three-state ring, N = 5" },
+  { id: "public-ewd426-4", file: "conformance/public/ewd426_4.qnt", main: "ewd426_4", invariant: "tokenInv", expect: "passed",
+    ops: ["Rec", "field", "with", "setOfMaps", "setBy", "get"], note: "Quint's examples: the four-state ring, a record per node, N = 5" },
   // Quint's public secret_santa.qnt with its author's inv, which Quint's own route also finds broken.
   { id: "public-secret-santa", file: "conformance/public/games/secret-santa/secret_santa.qnt", main: "quint_team_secret_santa", invariant: "inv",
     expect: "violated", ops: ["put", "Map", "variant", "matchVariant"], note: "Quint's examples: imports spells/basicSpells.qnt; a self-assignment is reachable" },
@@ -83,6 +85,15 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["assign", "actionAll", "Set", "iadd", "ite"], note: "only assignments and nondet choices over constants" },
   { id: "init-unreached-read", file: "conformance/models/init_reads.qnt", main: "init_unreached_read", expect: "passed",
     ops: ["assign", "ite"], note: "a read in a branch init never takes, which Quint's evaluators skip too" },
+  // Per-worker state as a record in a map, updated with spread, as a model is written without the subset in mind.
+  { id: "workers-queue", file: "conformance/models/workers_queue.qnt", main: "workers_queue", expect: "passed",
+    ops: ["Rec", "field", "with", "mapBy", "get", "set", "filter", "map", "size"], note: "two workers, a job queue, a lock; a record per worker" },
+  { id: "workers-queue-bug", file: "conformance/models/workers_queue_bug.qnt", main: "workers_queue_bug", expect: "violated",
+    ops: ["Rec", "field", "with"], note: "planted fault: acquire doesn't check the lock" },
+  { id: "records-set", file: "conformance/models/records_set.qnt", main: "records_set", expect: "passed",
+    ops: ["Rec", "field", "fieldNames", "variant", "matchVariant", "union", "forall", "in"], note: "a set of records and a record payload" },
+  { id: "records-set-violated", file: "conformance/models/records_set.qnt", main: "records_set", invariant: "atMostOneFromA", expect: "violated",
+    ops: ["Rec", "field", "filter"], note: "a sends twice" },
   // Distinct Quint names that would become one TLA+ name, since `::` becomes `_`: refused at translation.
   { id: "collisions-instances", file: "conformance/models/collisions.qnt", main: "collisions_instances", expect: "unsupported",
     ops: ["assign", "actionAll"], note: "a::b_c and a_b::c" },

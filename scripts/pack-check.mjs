@@ -52,7 +52,7 @@ try {
   run(npm, ["install", "--no-audit", "--no-fund", tarball], project);
   for (const dev of ["typescript", "@types/bun"]) expect(!existsSync(join(project, "node_modules", dev)), `development dependency ${dev} is not installed`);
 
-  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_records", "unsupported", 21]];
+  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_tuple", "unsupported", 21]];
   for (const [name, status, code] of demos) {
     const ran = spawnSync(npx, ["--no-install", "quint-ts", "check", `node_modules/quint-ts/demo/${name}.qnt`, "--main", name, "--invariant", "inv"],
       { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
