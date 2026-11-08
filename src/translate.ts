@@ -43,6 +43,8 @@ const mangle = (name: string): string => {
 interface Ctx {
   readonly defs: Map<string, Def>;
   readonly vars: Set<string>;
+  /** The definitions that read a state variable, directly or through other definitions (`stateReaders`). */
+  readonly readers: ReadonlySet<string>;
   readonly mode: "init" | "action" | "state";
   readonly helpers: string[];
   readonly counter: { n: number };
@@ -102,13 +104,26 @@ function expr(ex: Ex, ctx: Ctx): string {
 }
 
 function name(n: string, ctx: Ctx): string {
-  if (ctx.locals.has(n) || ctx.vars.has(n)) return mangle(n);
+  if (ctx.locals.has(n)) return mangle(n);
+  if (ctx.vars.has(n)) return ctx.mode === "init" ? initRead(n) : mangle(n);
   const def = ctx.defs.get(n);
   if (def === undefined) throw new Unsupported(`unresolved name ${n}`);
-  if (def.qualifier === "action" && ctx.mode === "init") return `(${initBody(def, [], ctx)})`;
+  if (ctx.mode === "init" && inlinedInInit(n, def, ctx)) return `(${initBody(def, [], ctx)})`;
   if (def.qualifier === "action" && ctx.mode === "state") throw new Unsupported(`action ${n} used in a state expression`);
   return mangle(n);
 }
+
+/**
+ * A state variable read in init. Quint's evaluators reject the read (QNT502, "Variable x not set"),
+ * wherever it comes; TLC reads init's assignments as equations and solves them in order, so it
+ * passes `x = 0 /\ y = x + 1` and fails on the reverse. Where init evaluates the read, the check
+ * stops; a read in a branch init doesn't take is skipped, as Quint's evaluators skip it.
+ */
+const initRead = (n: string): string =>
+  `QTS__unsupported(${JSON.stringify(`init reads the state variable ${n}, which Quint's evaluators reject (QNT502) and its backends read differently`)})`;
+
+/** In init, an action is inlined, and so is a definition that reads a state variable, so the read is refused where init evaluates it. */
+const inlinedInInit = (n: string, def: Def, ctx: Ctx): boolean => def.qualifier === "action" || ctx.readers.has(n);
 
 /** Init reads assignments as equalities: the init action's body, inlined, its parameters bound by LET. */
 function initBody(def: Def, args: readonly string[], ctx: Ctx): string {
@@ -168,7 +183,7 @@ function app(ex: Ex, ctx: Ctx): string {
     default: {
       const def = ctx.defs.get(op);
       const args = a.map((x) => expr(x, ctx));
-      if (def.qualifier === "action" && ctx.mode === "init") return `(${initBody(def, args, ctx)})`;
+      if (ctx.mode === "init" && inlinedInInit(op, def, ctx)) return `(${initBody(def, args, ctx)})`;
       if (def.qualifier === "action" && ctx.mode === "state") throw new Unsupported(`action ${op} used in a state expression`);
       return `${mangle(op)}(${args.join(", ")})`;
     }
@@ -299,6 +314,29 @@ function firstUnsupported(ex: Ex, defs: Map<string, Def>): string | undefined {
   return undefined;
 }
 
+/** The definitions whose expression reads a state variable, directly or through other definitions. */
+function stateReaders(defs: Map<string, Def>, vars: ReadonlySet<string>): Set<string> {
+  const readers = new Set<string>();
+  const reads = (ex: Ex): boolean => {
+    if (ex === null || typeof ex !== "object") return false;
+    if (ex.kind === "name") return vars.has(ex.name) || readers.has(ex.name);
+    if (ex.kind === "lambda") return reads(ex.expr);
+    if (ex.kind === "let") return reads(ex.opdef.expr) || reads(ex.expr);
+    return (ex.kind === "app" && readers.has(ex.opcode)) || (ex.args ?? []).some(reads);
+  };
+  // Until nothing changes, so the result doesn't depend on the order of the definitions.
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const [n, d] of defs) {
+      if (!readers.has(n) && reads(d.expr)) {
+        readers.add(n);
+        grew = true;
+      }
+    }
+  }
+  return readers;
+}
+
 /** The variables an action assigns; every branch must assign the same ones, each once. */
 function assigned(ex: Ex, defs: Map<string, Def>, seen: ReadonlySet<string> = new Set()): Set<string> {
   if (ex.kind === "app" && ex.opcode === "assign") return new Set([ex.args[0].name]);
@@ -383,6 +421,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   const missing = [...vars].filter((v) => !step.has(v));
   if (missing.length > 0) throw new Unsupported(`a step that doesn't assign ${missing.join(", ")} in every branch`);
   const counter = { n: 0 };
+  const readers = stateReaders(defs, vars);
   const body: string[] = [];
   // Quint's frontend orders definitions so each follows what it uses, as TLA+ requires;
   // a definition's helpers go just before it, after what they use.
@@ -392,7 +431,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
     const mode = d.name === "q::init" ? "init" : d.qualifier === "action" ? "action" : "state";
     if (d.qualifier === "action" && d.name !== "q::init" && d.name !== "q::step" && onlyInInit(d.name, defs)) continue;
     const helpers: string[] = [];
-    const ctx: Ctx = { defs, vars, mode, helpers, counter, locals: new Set() };
+    const ctx: Ctx = { defs, vars, readers, mode, helpers, counter, locals: new Set() };
     const text = d.expr.kind === "lambda"
       ? `${mangle(d.name)}(${d.expr.params.map((p: Ex) => mangle(p.name)).join(", ")}) ==\n  ${expr(d.expr.expr, withLocals(ctx, d.expr.params.map((p: Ex) => p.name)))}`
       : `${mangle(d.name)} ==\n  ${mode === "init" ? initBody(d, [], ctx) : expr(d.expr, ctx)}`;
@@ -401,7 +440,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   // After every other definition: an invariant may use any of them.
   entries.forEach((entry, k) => {
     const helpers: string[] = [];
-    const ctx: Ctx = { defs, vars, mode: "state", helpers, counter, locals: new Set() };
+    const ctx: Ctx = { defs, vars, readers, mode: "state", helpers, counter, locals: new Set() };
     const text = `${invariantName(k)} ==\n  ${expr(entry, ctx)}`;
     body.push(...helpers, text);
   });

@@ -48,6 +48,22 @@ test("a reached operation Quint's sources disagree on is unsupported, never pass
   expect(result.guarantee.scope).not.toBe("complete");
 }, 60_000);
 
+test("an init that reads a state variable is unsupported, in either order and through definitions", async () => {
+  // Quint's evaluators reject each of these with QNT502; TLC would solve the first as an equation and pass it.
+  for (const main of ["init_reads_after", "init_reads_before", "init_reads_definition", "init_reads_nondet", "init_reads_any"]) {
+    const result = await check(model("init_reads"), { main, invariants: ["inv"] });
+    expect({ main, status: result.status }).toEqual({ main, status: "unsupported" });
+    if (result.status === "unsupported") expect(result.reason).toContain("init reads the state variable x");
+  }
+}, 120_000);
+
+test("an init that only assigns, or reads in a branch it never takes, still passes", async () => {
+  for (const main of ["init_assigns", "init_unreached_read"]) {
+    const result = await check(model("init_reads"), { main, invariants: ["inv"] });
+    expect({ main, status: result.status }).toEqual({ main, status: "passed" });
+  }
+}, 120_000);
+
 test("a search stopped by the time limit is inconclusive and partial", async () => {
   const result = await check("tests/fixtures/unbounded.qnt", { main: "unbounded", invariants: ["inv"], timeoutMs: 3_000 });
   expect(result.status).toBe("inconclusive");

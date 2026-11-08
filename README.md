@@ -144,7 +144,10 @@ lists, `Bool` and the other built-in sets, `then`, `powerset`, `ipow`,
 `chooseSome`, a non-sum `fold`, uninstantiated constants, and `/` or `%`
 on negative operands (Quint's sources disagree on their value,
 quint-co/quint#2070). `get`, `set` or `setBy` on a key the map lacks, which
-Quint leaves undefined, is `unsupported` where a state reaches it.
+Quint leaves undefined, is `unsupported` where a state reaches it. So is
+an init that reads a state variable, directly or through a definition, where
+init evaluates the read: Quint's evaluators reject it (QNT502), and TLC
+solves it as an equation.
 
 Of Quint's 77 public examples, 6 translate today, and 4 get a definitive
 verdict with their authors' own invariants (3 passed after a complete search, 1
