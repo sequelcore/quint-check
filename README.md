@@ -152,6 +152,9 @@ construct where tla-ts skips a read that Quint's evaluators would reach
 could still pass; none is known. The conformance harness also requires
 Quint's simulator to accept every model expected to pass or violate, which
 catches such a case in the models it covers, not in general.
+Two names that would become one TLA+ name are refused at translation:
+quint-ts writes `::` as `_`, so `a::b_c` and `a_b::c`, or an instance's
+`a::x` and a module's `a_x`, can't both be checked.
 
 Of Quint's 77 public examples, 6 translate today, and 4 get a definitive
 verdict with their authors' own invariants (3 passed after a complete search, 1

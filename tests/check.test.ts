@@ -63,6 +63,26 @@ test("an init that only assigns, or reads in a branch it never takes, still pass
     expect({ main, status: result.status }).toEqual({ main, status: "passed" });
   }
 }, 120_000);
+test("Quint names that would become one TLA+ name are unsupported at translation, naming both", async () => {
+  const cases = [
+    ["collisions_instances", "a::b_c", "a_b::c", "a_b_c"],
+    ["collisions_variable", "a::x", "a_x", "a_x"],
+    ["collisions_generated", "q_step", "q::step", "q_step"],
+    ["collisions_invariant", "q_inv_1", "invariant number 1", "q_inv_1"],
+  ] as const;
+  for (const [main, one, other, tla] of cases) {
+    const result = await check(model("collisions"), { main, invariants: ["inv"] });
+    expect({ main, status: result.status, where: "where" in result ? result.where : undefined })
+      .toEqual({ main, status: "unsupported", where: "translation" });
+    if (result.status !== "unsupported") continue;
+    for (const part of [one, other, `TLA+ name ${tla}`]) expect(result.reason).toContain(part);
+  }
+}, 120_000);
+
+test("a local beside a definition of the same flattened name is checked: the frontend renames locals", async () => {
+  const result = await check(model("collisions"), { main: "collisions_bound", invariants: ["inv"] });
+  expect(result.status).toBe("passed");
+}, 60_000);
 
 test("a search stopped by the time limit is inconclusive and partial", async () => {
   const result = await check("tests/fixtures/unbounded.qnt", { main: "unbounded", invariants: ["inv"], timeoutMs: 3_000 });
