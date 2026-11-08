@@ -8,7 +8,7 @@ section at a time.
 | --- | --- | --- |
 | [mutex.qnt](mutex.qnt) | The correct model, with a sum type for each process's phase (`Idle \| Waiting \| Critical`) | `passed`: all 20 reachable states explored, `inv` holds in each |
 | [mutex_bug.qnt](mutex_bug.qnt) | A deliberate bug: `enter` doesn't check that the lock is free | `violated`, with a counterexample in which two processes enter |
-| [mutex_tuple.qnt](mutex_tuple.qnt) | The correct model with the lock kept as a tuple | `unsupported`: tuples are outside quint-ts's subset, so it proves nothing rather than guess |
+| [mutex_list.qnt](mutex_list.qnt) | The correct model with the lock kept as a list of its holder | `unsupported`: lists are outside quint-ts's subset, so it proves nothing rather than guess |
 
 ## Run it
 
@@ -18,7 +18,7 @@ From this repository, with Node 24 and the package built (`bun run build`, or
 ```sh
 node dist/cli.js check demo/mutex.qnt --main mutex --invariant inv
 node dist/cli.js check demo/mutex_bug.qnt --main mutex_bug --invariant inv
-node dist/cli.js check demo/mutex_tuple.qnt --main mutex_tuple --invariant inv
+node dist/cli.js check demo/mutex_list.qnt --main mutex_list --invariant inv
 ```
 
 From an installed package, the same models ship in it:
@@ -55,6 +55,6 @@ installed package doesn't need Bun (`npm run pack:check` checks it).
   --backend=tlc` (Apalache and TLC, on Java). The demo and `quint-ts check`
   don't run that route.
 - **Not a replacement for Quint's tools.** It checks safety invariants on
-  finite models in a subset of Quint: no temporal properties, tuples or
-  lists yet, and no symbolic backend like Apalache's. For those, use
+  finite models in a subset of Quint: no temporal properties or lists
+  yet, and no symbolic backend like Apalache's. For those, use
   `quint verify`.

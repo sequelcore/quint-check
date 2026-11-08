@@ -94,6 +94,19 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["Rec", "field", "fieldNames", "variant", "matchVariant", "union", "forall", "in"], note: "a set of records and a record payload" },
   { id: "records-set-violated", file: "conformance/models/records_set.qnt", main: "records_set", invariant: "atMostOneFromA", expect: "violated",
     ops: ["Rec", "field", "filter"], note: "a sends twice" },
+  // Quint's public DiningPhilosophers5.qnt, with its authors' TypeOk and Safety: a set of (philosopher, fork) tuples.
+  { id: "public-dining-philosophers", file: "conformance/public/DiningPhilosophers5.qnt", main: "DiningPhilosophers5", invariants: ["TypeOk", "Safety"],
+    expect: "passed", ops: ["Tup", "item", "forall", "filter", "union", "exclude", "imod"], note: "Quint's examples: N = 5; tuples unpacked in its invariants" },
+  // Quint's public tuples.qnt, unchanged, with invariants added by an importing module (conformance/public/).
+  { id: "public-tuples-holds", file: "conformance/public/tuples_check.qnt", main: "tuples_holds", expect: "passed",
+    ops: ["Tup", "item", "tuples", "map", "mapBy", "get", "keys"], note: "Quint's examples: tuples.qnt; its definitions and both states" },
+  { id: "public-tuples-changes", file: "conformance/public/tuples_check.qnt", main: "tuples_changes", expect: "violated",
+    ops: ["Tup", "eq"], note: "Quint's examples: tuples.qnt; myTup changes after the first step" },
+  // Messages as (id, attempt) tuples, as a retry model is written without the subset in mind.
+  { id: "retry-idempotent", file: "conformance/models/retry_idempotent.qnt", main: "retry_idempotent", expect: "passed",
+    ops: ["Tup", "item", "tuples", "exists", "filter", "forall", "subseteq", "mapBy", "get", "set"], note: "two requests, two attempts each; the server dedups by request id" },
+  { id: "retry-idempotent-bug", file: "conformance/models/retry_idempotent_bug.qnt", main: "retry_idempotent_bug", expect: "violated",
+    ops: ["Tup", "item", "contains"], note: "planted fault: the server dedups by message, so a retry is applied again" },
   // Distinct Quint names that would become one TLA+ name, since `::` becomes `_`: refused at translation.
   { id: "collisions-instances", file: "conformance/models/collisions.qnt", main: "collisions_instances", expect: "unsupported",
     ops: ["assign", "actionAll"], note: "a::b_c and a_b::c" },

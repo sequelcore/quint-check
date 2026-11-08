@@ -34,6 +34,7 @@ const BUILTIN = "quint/src/builtin.qnt";
 const LANG_DIV = "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\")";
 const LESSON_DIV = "docs/content/docs/lessons/integers.md:242 (\"compute the integer part and the remainder\")";
 const RECORDS = "docs/content/docs/lang.md:1195 (Records)";
+const TUPLES = "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n)";
 const EVALUATORS_TRUNCATE = "Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)";
 
 export const OPERATOR_CASES: readonly OperatorCase[] = [
@@ -106,6 +107,27 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "record-string-name", ops: ["Rec", "field"], expr: "Rec(\"a b\", 1).field(\"a b\") == 1", semantics: "defined", source: `${BUILTIN}:973 (Rec takes a string for each field name)`,
     quintTs: "unsupported", quintTsWhy: "a field name that isn't an identifier can't be a field of a TLA+ record, and Quint's official route rejects it too",
     known: { official: { outcome: "error", why: "Apalache's translation writes the field a b, which TLA+'s parser rejects" } } },
+  // Tuples. Each case also holds the operator false where it should be, so a translation that reads the wrong item or reorders a tuple can't pass.
+  { id: "tuple-item", ops: ["Tup", "item"], expr: "(1, \"a\", true)._1 == 1 and (1, \"a\", true)._2 == \"a\" and (1, \"a\", true)._3 and Tup(4, 5).item(2) == 5 and (4, 5)._1 != 5 and (4, 5)._2 != 4 and not((true, false)._2)", semantics: "defined", source: `${TUPLES}; ${BUILTIN}:1037 (Tup), :1052 (item; the documentation's own examples)` },
+  { id: "tuple-eq", ops: ["Tup", "eq", "neq"], expr: "(1, 2) == (1, 2) and Tup(1, 2) == (1, 2) and (1, 2) != (2, 1) and not((1, 2) == (1, 3)) and (1, \"a\") != (1, \"b\")", semantics: "defined", source: `${TUPLES}: a tuple is its items, in order` },
+  { id: "tuple-wide", ops: ["Tup", "item"], expr: "(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)._11 == 11 and (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)._10 == 10 and (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)._1 != 11", semantics: "defined", source: `${TUPLES} (t._1 to t._50)` },
+  { id: "tuple-set", ops: ["Tup", "Set", "size", "in"], expr: "Set((1, 2), (1, 2), (2, 1)).size() == 2 and (2, 1).in(Set((1, 2), (2, 1))) and not((3, 3).in(Set((1, 2), (2, 1))))", semantics: "defined", source: `${TUPLES}: tuples are values, so sets hold them` },
+  { id: "tuples-product", ops: ["tuples", "Tup", "eq", "keys"], expr: "tuples(Set(1, 2), Set(3, 4)) == Set((1, 3), (1, 4), (2, 3), (2, 4)) and tuples(Set(1, 2), Set(3, 4)) != Set((3, 1), (4, 1), (3, 2), (4, 2)) and tuples(Set(1, 2).mapBy(k => k).keys(), Set(3)) == Set((1, 3), (2, 3))", semantics: "defined", source: `${BUILTIN}:1064 (tuples; the documentation's own example)` },
+  { id: "tuples-three", ops: ["tuples", "size", "in"], expr: "tuples(Set(1, 2), Set(\"a\"), Set(true, false)).size() == 4 and (2, \"a\", false).in(tuples(Set(1, 2), Set(\"a\"), Set(true, false))) and not((\"a\", 2, false).in(tuples(Set(\"a\"), Set(1), Set(true))))", semantics: "defined", source: `${TUPLES}` },
+  { id: "tuples-empty-factor", ops: ["tuples", "size", "exclude"], expr: "tuples(Set(1, 2), Set(1).exclude(Set(1))).size() == 0 and tuples(Set(1, 2), Set(3)).size() == 2", semantics: "defined", source: `${BUILTIN}:1054 (tuples: every (t0, ..., tn) with each ti in si, so none when one si is empty)` },
+  { id: "tuple-unpack", ops: ["map", "forall", "exists", "filter", "item"], expr: "Set((1, 2), (3, 4)).map(((a, b)) => a + b) == Set(3, 7) and Set((1, 2)).forall(((a, b)) => a < b) and not(Set((2, 1)).exists(((a, b)) => a < b)) and tuples(1.to(3), 1.to(3), 1.to(3)).filter(((a, b, c)) => a + b + c == 9) == Set((3, 3, 3))", semantics: "defined", source: "docs/content/docs/lang.md:729 (((x_1, ..., x_n)) => e is t => e with each x_i = t._i)" },
+  { id: "tuple-unpack-shadow", ops: ["forall", "item"], decls: "pure val a = 5", expr: "Set((1, 2)).forall(((a, b)) => a == 1 and b == 2) and a == 5", semantics: "defined", source: "docs/content/docs/lang.md:729 (an unpacked name is local to its lambda, so it hides a definition of the same name)" },
+  { id: "tuple-nested", ops: ["Tup", "item", "tuples"], expr: "((1, 2), 3)._1._2 == 2 and ((1, 2), 3) != ((2, 1), 3) and (1, (2, (3, 4)))._2._2._1 == 3 and tuples(Set((1, 2)), Set(3)) == Set(((1, 2), 3))", semantics: "defined", source: `${TUPLES}: an item may be a tuple` },
+  { id: "tuple-record", ops: ["Tup", "item", "Rec", "field"], expr: "{ p: (1, 2) }.p._2 == 2 and ({ a: 1 }, 2)._1.a == 1 and { p: (1, 2) } != { p: (2, 1) } and ({ a: 1, b: 2 }, 0) == ({ b: 2, a: 1 }, 0)", semantics: "defined", source: `${TUPLES}; ${RECORDS}: a record's field may be a tuple, and a tuple's item a record` },
+  { id: "tuple-map", ops: ["Tup", "mapBy", "get", "item"], expr: "Set((1, 2), (3, 4)).mapBy(t => t._1 + t._2).get((3, 4)) == 7 and Set(1, 2).mapBy(k => (k, k * 2)).get(2)._2 == 4 and Set(1, 2).mapBy(k => (k, k * 2)).get(1) != (2, 1)", semantics: "defined", source: `${TUPLES}; ${BUILTIN} mapBy, get (tuples as keys and as values)` },
+  { id: "tuple-variant", ops: ["variant", "matchVariant", "Tup", "item"], decls: "type T = A((int, str)) | B", expr: "(match A((1, \"x\")) { | A(p) => p._1 | B => 0 }) == 1 and A((1, \"x\")) != A((1, \"y\")) and A((1, \"x\")) == A((1, \"x\"))", semantics: "defined", source: `${TUPLES}; docs/content/docs/lang.md:1256 (Sum Types: a tuple as a constructor's payload)` },
+  { id: "tuple-unit", ops: ["Tup", "eq"], expr: "() == () and Tup() == ()", semantics: "defined", source: `${TUPLES} ("The empty tuple is also the canonical unit type", << >>)`,
+    quintTs: "unsupported", quintTsWhy: "Quint's documentation writes the empty tuple as << >>, its official route as [tag |-> \"UNIT\"], so a state that held one would print differently in each" },
+  { id: "tuple-single", ops: ["Tup", "item"], expr: "Tup(1)._1 == 1", semantics: "unspecified", source: "docs/content/docs/lang.md:79 (a tuple type has n >= 2 items, and (int) is int)" },
+  { id: "tuples-single", ops: ["tuples", "size"], expr: "tuples(Set(1, 2)).size() == 2", semantics: "unspecified", source: `${TUPLES}: S_1 \\X ... \\X S_n has no form with one set` },
+  { id: "tuples-none", ops: ["tuples"], expr: "tuples() == tuples()", semantics: "unspecified", source: `${TUPLES}: S_1 \\X ... \\X S_n has no form with no set` },
+  { id: "tuple-map-literal-key", ops: ["Map", "Tup", "get"], expr: "Map((1, 2) -> 3).get((1, 2)) == 3", semantics: "defined", source: "docs/content/docs/lang.md Maps; a tuple is a value, so it can be a key",
+    quintTs: "unsupported", quintTsWhy: "a Map literal's keys must be int, string or Boolean literals, so a repeated key is found at translation; a tuple isn't one" },
 ];
 
 /** Constructs outside the MVP: quint-ts must answer unsupported, at translation. */
@@ -113,7 +135,6 @@ export const UNSUPPORTED_CASES: readonly { id: string; module: string }[] = [
   { id: "temporal", module: "var x: int\naction init = x' = 0\naction step = x' = x\nval inv = true\ntemporal always0 = always(x == 0)" },
   { id: "then", module: "var x: int\naction init = x' = 0\naction inc = x' = x + 1\naction step = inc.then(inc)\nval inv = true" },
   { id: "choose-some", module: "var x: int\naction init = x' = Set(1, 2).chooseSome()\naction step = x' = x\nval inv = true" },
-  { id: "tuple", module: "var p: (int, int)\naction init = p' = (0, 1)\naction step = p' = (p._2, p._1)\nval inv = p._1 >= 0" },
   { id: "list", module: "var l: List[int]\naction init = l' = [1, 2]\naction step = l' = l\nval inv = l[0] == 1" },
   { id: "set-to-map", module: "var m: int -> int\naction init = m' = Set((1, 2)).setToMap()\naction step = m' = m\nval inv = true" },
   { id: "reps", module: "var x: int\naction init = x' = 0\naction step = 2.reps(_ => x' = x)\nval inv = true" },

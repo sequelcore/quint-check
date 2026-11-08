@@ -15,10 +15,10 @@ They test quint-ts on specifications it didn't write, in four groups
 
 | Group | Expected | Models |
 | --- | --- | --- |
-| Supported, with the authors' own invariants | The whole graph compared across routes, as for the other models | `play_rock_paper_scissors.qnt` (`winInv`, passed), `ewd426.qnt` (`tokenInv`, passed, in both of its modules), `ewd426_3.qnt` (`tokenInv`, passed), `ewd426_4.qnt` (`tokenInv`, passed), `games/secret-santa/secret_santa.qnt` (`inv`, violated, as in Quint's own route) |
-| Supported, with an invariant we added | The same | `booleans.qnt` (one invariant that holds, one that breaks), and `play_rock_paper_scissors.qnt` (a draw is reachable) |
+| Supported, with the authors' own invariants | The whole graph compared across routes, as for the other models | `play_rock_paper_scissors.qnt` (`winInv`, passed), `ewd426.qnt` (`tokenInv`, passed, in both of its modules), `ewd426_3.qnt` (`tokenInv`, passed), `ewd426_4.qnt` (`tokenInv`, passed), `games/secret-santa/secret_santa.qnt` (`inv`, violated, as in Quint's own route), `DiningPhilosophers5.qnt` (`TypeOk` and `Safety`, passed) |
+| Supported, with an invariant we added | The same | `booleans.qnt` and `tuples.qnt` (each with one invariant that holds, one that breaks), and `play_rock_paper_scissors.qnt` (a draw is reachable) |
 | Partially supported | Translated, but no complete verdict: `inconclusive`, never `passed` | `instances.qnt`, whose counters grow without bound |
-| Refused | `unsupported` at translation, naming the construct | `weakFairness.qnt` (`leadsTo`), `coin.qnt` (`ipow`), `ewd840.qnt` and `prisoners.qnt` (`Bool`), `two_phase_commit.qnt` (`then`), `tictactoe.qnt` (`Tup`), `BinSearch.qnt` (`List`), `generate.qnt` (`apalache::generate`), `counters.qnt` (`then`), `bakery.qnt` (`item`) |
+| Refused | `unsupported` at translation, naming the construct | `weakFairness.qnt` (`leadsTo`), `coin.qnt` (`ipow`), `ewd840.qnt` and `prisoners.qnt` (`Bool`), `two_phase_commit.qnt` (`then`), `tictactoe.qnt` (`eventually`), `BinSearch.qnt` (`List`), `generate.qnt` (`apalache::generate`), `counters.qnt` (`then`), `bakery.qnt` (`Nat`) |
 
 Every model here is accepted by Quint's frontend. A refusal is a limit of
 quint-ts's subset, not a defect in the model or in Quint.
@@ -29,15 +29,15 @@ All 77 `.qnt` files in Quint's `examples/` went through quint-ts's
 translation, with the last module of each file as the main module, then the
 translated ones were checked with their authors' invariants:
 
-| | Before variants | With variants | With map operations | With records (now) |
-| --- | ---: | ---: | ---: | ---: |
-| Translated | 2 | 3 | 6 | **9** |
-| … a definitive verdict with the authors' own invariant | 0 | 1 | 4 | **5**: 4 `passed` after a complete search, 1 `violated` with a counterexample |
-| … no invariant of the authors to check | 1 | 1 | 1 (`booleans.qnt`, checked with invariants we added) | 3 (`booleans.qnt`, `records.qnt`, `kettle.qnt`) |
-| … translated but `inconclusive` (unbounded) | 1 | 1 | 1 | 1 (`instances.qnt`) |
-| Refused by quint-ts | 49 | 48 | 44 | 41 |
-| Rejected by Quint's own frontend with the module chosen | 1 | 1 | 1 | 1 |
-| Without both `init` and `step` (libraries and tests) | 25 | 25 | 26 | 26 |
+| | Before variants | With variants | With map operations | With records | With tuples (now) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Translated | 2 | 3 | 6 | 9 | **12** |
+| … a definitive verdict with the authors' own invariant | 0 | 1 | 4 | 5 | **5**: 4 `passed` after a complete search, 1 `violated` with a counterexample |
+| … no invariant of the authors to check | 1 | 1 | 1 (`booleans.qnt`, checked with invariants we added) | 3 | 5 (`booleans.qnt`, `records.qnt`, `kettle.qnt`, `DiningPhilosophers5.qnt`, `tuples.qnt`) |
+| … translated but `inconclusive` | 1 | 1 | 1 | 1 | 2 (`instances.qnt`, unbounded; `teaching.qnt`, not finished in the survey's 30 s) |
+| Refused by quint-ts | 49 | 48 | 44 | 41 | 38 |
+| Rejected by Quint's own frontend with the module chosen | 1 | 1 | 1 | 1 | 1 |
+| Without both `init` and `step` (libraries and tests) | 25 | 25 | 26 | 26 | 26 |
 
 The "now" column comes from [SURVEY.md](SURVEY.md), which
 [survey.ts](../survey.ts) generates from a Quint checkout at the commit above,
@@ -64,6 +64,16 @@ refused models that use records also need another construct, now the
 first reason SURVEY.md gives for them. The map operations reached 3 of the 5
 models they were expected to unlock; `ewd840.qnt` and `prisoners.qnt` also
 need `Bool`, the set of Booleans.
+
+Tuples made `DiningPhilosophers5.qnt`, `tuples.qnt` and `teaching.qnt`
+translate, and brought no new definitive verdict to the survey: none of the
+three has an invariant named as the survey looks for one.
+`DiningPhilosophers5.qnt` has its authors' `TypeOk` and `Safety`, which
+[models.ts](../models.ts) checks: passed, 352 states, as in Quint's own
+route. `teaching.qnt`'s `IndInv` didn't finish within the survey's 30
+seconds. The other refused models that used tuples now stop at another
+construct: `bakery.qnt` at `Nat`, `tictactoe.qnt` at `eventually`,
+`mutex.qnt` at `Int`, and both ICS-20 models at `List`.
 
 Counting every construct each refused model uses, not only the first, the
 next additions with the most models fully inside the subset are `Bool`

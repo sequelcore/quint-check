@@ -1,18 +1,18 @@
-// The correct model with the lock kept as a tuple. Quint accepts it, but
-// tuples are outside quint-ts's subset, so quint-ts answers unsupported
-// instead of a verdict.
-module mutex_tuple {
+// The correct model with the lock kept as a list of its holder, empty when
+// free. Quint accepts it, but lists are outside quint-ts's subset, so
+// quint-ts answers unsupported instead of a verdict.
+module mutex_list {
   type Phase = Idle | Waiting | Critical
 
   pure val PROCS = Set("p1", "p2", "p3")
 
   var state: str -> Phase
-  // (free, owner)
-  var lock: (bool, str)
+  // [] when free, [owner] when held
+  var lock: List[str]
 
   action init = all {
     state' = PROCS.mapBy(_ => Idle),
-    lock' = (true, ""),
+    lock' = [],
   }
 
   action request(p: str): bool = all {
@@ -23,15 +23,15 @@ module mutex_tuple {
 
   action enter(p: str): bool = all {
     state.get(p) == Waiting,
-    lock._1,
+    lock.length() == 0,
     state' = state.set(p, Critical),
-    lock' = (false, p),
+    lock' = [p],
   }
 
   action leave(p: str): bool = all {
     state.get(p) == Critical,
     state' = state.set(p, Idle),
-    lock' = (true, ""),
+    lock' = [],
   }
 
   action step = {

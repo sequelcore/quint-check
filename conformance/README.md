@@ -65,11 +65,11 @@ running nothing.
 
 ## Limits
 
-- The corpus is small: 59 operator cases, 39 model cases compared as whole
-  graphs (9 of them on Quint's public examples), and 12 more models (11 of
+- The corpus is small: 77 operator cases, 44 model cases compared as whole
+  graphs (12 of them on Quint's public examples), and 12 more models (11 of
   them public, one the demo's) that quint-ts can't give a complete verdict
-  on. Tuples, lists and temporal properties aren't translated, so they
-  aren't compared.
+  on. Lists and temporal properties aren't translated, so they aren't
+  compared.
 - States are compared with each record's fields and each set's elements
   sorted (`canonValue` in [graph.ts](graph.ts)): TLC and tla-ts print a
   record's fields in an order of their own, not the model's, and it
