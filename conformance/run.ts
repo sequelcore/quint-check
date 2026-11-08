@@ -223,6 +223,8 @@ try {
     if (m.names !== undefined && sampled.broken?.[0] !== m.names) fail(`${m.id}: the simulator reports ${JSON.stringify(sampled.broken)} broken, expected ${m.names} first`);
     // The simulator samples, so its pass proves nothing; its violation contradicts a quint-ts pass.
     if (sampled.outcome === "violated" && result.status === "passed") fail(`${m.id}: the simulator finds a violation quint-ts doesn't`);
+    // A model quint-ts gives a verdict on must be one Quint's evaluator runs: one it rejects, such as an init that reads a variable (QNT502), has no verdict to agree with.
+    if (m.expect !== "unsupported" && sampled.outcome === "error") fail(`${m.id}: the simulator rejects the model: ${sampled.detail}`);
     const off = withOfficial ? official(target) : undefined;
     const g = graphs(target);
     const comparisons: Record<string, unknown> = {};

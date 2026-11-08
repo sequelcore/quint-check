@@ -44,7 +44,8 @@ translation.
 
 1. quint-ts's result must be the expected one.
 2. The simulator samples 300 behaviors of 6 steps; a violation it finds
-   that quint-ts doesn't is a failure.
+   that quint-ts doesn't is a failure, and so is an error, such as an init
+   it rejects, on a model quint-ts must pass or find violated.
 3. The full state graph is explored with `-continue` in `qts/tla-ts`,
    `qts/tlc` and `official/tlc`, and the routes are compared as sets: initial
    states, states, transitions (each successor of each state), and the states
