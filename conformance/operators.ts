@@ -38,6 +38,8 @@ const EVALUATORS_TRUNCATE = "Quint's evaluators truncate: quint/src/runtime/impl
 export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "eq-neq", ops: ["eq", "neq"], expr: "1 == 1 and 1 != 2 and \"a\" != \"b\"", semantics: "defined", source: `${BUILTIN} eq, neq` },
   { id: "boolean", ops: ["iff", "implies", "not", "and", "or"], expr: "(true iff true) and (false implies true) and not(false) and (true or false) and not(true implies false)", semantics: "defined", source: `${BUILTIN} iff, implies, not, and, or` },
+  // Each operator false where it should be: a case true only by an operator's true direction lets a translation to TRUE pass.
+  { id: "iff-false", ops: ["iff", "not"], expr: "not(true iff false) and not(false iff true) and (false iff false)", semantics: "defined", source: `${BUILTIN} iff` },
   { id: "int-arith", ops: ["iadd", "isub", "imul", "iuminus"], expr: "2 + 3 == 5 and 2 - 3 == -1 and 2 * -3 == -6 and -(2) == 0 - 2", semantics: "defined", source: `${BUILTIN} iadd, isub, imul, iuminus` },
   { id: "int-compare", ops: ["ilt", "igt", "ilte", "igte"], expr: "1 < 2 and 2 > 1 and 2 <= 2 and 2 >= 2 and not(2 < 2)", semantics: "defined", source: `${BUILTIN} ilt, igt, ilte, igte` },
   { id: "big-int", ops: ["imul", "eq"], expr: "4294967296 * 4294967296 == 18446744073709551616", semantics: "defined", source: `${BUILTIN} imul: int is unbounded`,
@@ -54,6 +56,7 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "div-by-zero", ops: ["idiv"], expr: "1 / 0 == 0", semantics: "unspecified", source: `${BUILTIN} idiv: no rule for a zero divisor; the evaluators raise QNT503` },
   { id: "set-literal", ops: ["Set", "eq"], expr: "Set(1, 2, 2) == Set(2, 1) and Set(1) != Set(2)", semantics: "defined", source: `${BUILTIN} Set` },
   { id: "set-membership", ops: ["in", "contains"], expr: "1.in(Set(1, 2)) and Set(1, 2).contains(2) and not(3.in(Set(1, 2)))", semantics: "defined", source: `${BUILTIN} in, contains` },
+  { id: "contains-false", ops: ["contains", "not"], expr: "not(Set(1, 2).contains(3)) and not(Set(1).exclude(Set(1)).contains(1))", semantics: "defined", source: `${BUILTIN} contains` },
   { id: "set-algebra", ops: ["union", "intersect", "exclude", "subseteq"], expr: "Set(1).union(Set(2)) == Set(1, 2) and Set(1, 2).intersect(Set(2, 3)) == Set(2) and Set(1, 2).exclude(Set(2)) == Set(1) and Set(1).subseteq(Set(1, 2)) and not(Set(3).subseteq(Set(1, 2)))", semantics: "defined", source: `${BUILTIN} union, intersect, exclude, subseteq` },
   { id: "set-size-range", ops: ["size", "to"], expr: "Set(1, 2, 3).size() == 3 and 1.to(3) == Set(1, 2, 3) and 3.to(1).size() == 0", semantics: "defined", source: `${BUILTIN} size, to` },
   { id: "quantifiers", ops: ["exists", "forall"], expr: "Set(1, 2).exists(x => x > 1) and Set(1, 2).forall(x => x > 0) and not(Set(1, 2).forall(x => x > 1)) and 3.to(1).forall(x => false)", semantics: "defined", source: `${BUILTIN} exists, forall` },
