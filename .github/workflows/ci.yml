@@ -1,13 +1,15 @@
 name: CI
 
-# Windows and Linux on every push to main and every pull request. macOS has its own workflow,
-# started by hand, since its minutes cost ten times Linux's on a private repository.
+# Windows and Linux on every pull request, every merge-queue group and every push to main.
+# Pull requests and queue groups run whatever they change: main requires these checks, so
+# a run skipped for a docs-only change would leave its pull request waiting forever. macOS
+# has its own workflow, started by hand for changes that can behave differently there.
 on:
   push:
     branches: [main]
     paths-ignore: ["**/*.md", "bench/results/**", "conformance/results/**"]
   pull_request:
-    paths-ignore: ["**/*.md", "bench/results/**", "conformance/results/**"]
+  merge_group:
 
 permissions:
   contents: read
