@@ -1,6 +1,7 @@
 name: macOS
 
-# Started by hand only: macOS minutes cost ten times Linux's on a private repository.
+# Started by hand only, once per pull request whose change can behave differently on macOS
+# (processes, signals, paths, the file system, packaging), on its final commit.
 on:
   workflow_dispatch:
     inputs:
