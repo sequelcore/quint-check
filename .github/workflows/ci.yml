@@ -46,6 +46,12 @@ jobs:
       - run: bun run check
       - name: Fetch Apalache
         run: node node_modules/@informalsystems/quint/dist/src/cli.js verify --backend=tlc --main=reserve3 --invariant=inv conformance/models/reserve.qnt
+      # Quint downloads its Rust evaluator through GitHub's API without a token, which a shared runner's rate limit can
+      # refuse; it skips the download when the evaluator is already in ~/.quint. The lockfile pins Quint's version.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.quint/rust-evaluator-*
+          key: quint-evaluator-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
       - run: bun run conformance
       # The package as npm would install it: packed, installed into a new project, run with Node only.
       - name: Package check
