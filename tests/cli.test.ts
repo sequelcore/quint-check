@@ -51,7 +51,7 @@ test("the largest timeout a timer can hold is accepted", () => {
 test("a valid check still prints its result and exits 0 when it passed", () => {
   const ran = cli("check", ...mutex, "--invariant", "inv");
   expect(ran.code).toBe(0);
-  expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed", states: 20, guarantee: { scope: "complete" } });
+  expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed", search: { distinctStates: 20 }, guarantee: { scope: "complete" } });
 }, 60_000);
 
 test("translate needs no invariant", () => {

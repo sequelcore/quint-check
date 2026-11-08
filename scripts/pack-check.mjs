@@ -80,7 +80,7 @@ const message = (p) => p.then(() => "resolved", (e) => e.name + ": " + e.message
 const aborted = await message(check(model, { main: "mutex", invariants: ["inv"], signal: AbortSignal.timeout(300) }));
 const badTimeout = await message(check(model, { main: "mutex", invariants: ["inv"], timeoutMs: Infinity }));
 const left = readdirSync(tmpdir()).filter((n) => n.startsWith("quint-ts-run-" + process.pid + "-")).length;
-console.log(JSON.stringify({ status: r.status, states: r.states, scope: r.guarantee.scope, aborted, badTimeout, left }));
+console.log(JSON.stringify({ status: r.status, states: r.search?.distinctStates, scope: r.guarantee.scope, aborted, badTimeout, left }));
 `);
   const api = JSON.parse(run(process.execPath, ["api.mjs"], project));
   expect(api.status === "passed" && api.states === 20 && api.scope === "complete", `API mutex: ${api.status}, ${api.states} states, scope ${api.scope}`);

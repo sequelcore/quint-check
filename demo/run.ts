@@ -20,7 +20,7 @@ for (const d of demos) {
   const result = await check(join(dir, d.file), { main: d.main, invariants: ["inv"] });
   console.log(`\n${d.file}: ${d.what}`);
   console.log(`  result: ${result.status} (expected ${d.expect}); search scope: ${result.guarantee.scope}; deadlock: ${result.guarantee.deadlock}`);
-  if (result.status === "passed") console.log(`  every one of ${result.states} reachable states satisfies inv`);
+  if (result.status === "passed") console.log(`  every one of ${result.search.distinctStates} reachable states satisfies inv`);
   if (result.status === "violated") {
     console.log("  counterexample:");
     for (const state of result.trace.states) {

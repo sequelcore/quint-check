@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { check, runChecker, verdict, type CheckResult } from "../src/check.ts";
+import { check, runChecker, tools, verdict, type CheckResult } from "../src/check.ts";
 import { parseCheckerResult, type CheckerResult } from "../src/checker-result.ts";
 import { isAlive } from "../src/process.ts";
 import type { Dump } from "../src/itf.ts";
@@ -47,8 +47,7 @@ test("aborting a real check rejects with the reason, ends the checker and leaves
 
 test("the time limit covers Quint's frontend: a limit it can't meet is inconclusive, with nothing explored", async () => {
   const result = await check("demo/mutex.qnt", { main: "mutex", invariants: ["inv"], timeoutMs: 1 });
-  expect(result.status).toBe("inconclusive");
-  expect(result.guarantee.scope).toBe("none");
+  expect(result).toMatchObject({ status: "inconclusive", reason: "timeout", guarantee: { scope: "none" } });
   expect(myRunDirs()).toEqual([]);
 }, 60_000);
 
@@ -184,16 +183,21 @@ const noNames: Translation = { tla: "", cfg: "", variables: new Map(), names: ne
 const success: CheckerResult = { kind: "checked", status: "success", distinctStates: 20, queuedStates: 0, initialStates: 1 };
 
 test("a success is passed only with an initial state, a distinct state and no state left queued", () => {
-  expect(verdict(success, noNames, "m.qnt")).toMatchObject({ status: "passed", states: 20, guarantee: { scope: "complete" } });
-  const notPassed: [Partial<CheckerResult>, CheckResult["status"]][] = [
-    [{ initialStates: 0 }, "inconclusive"],
-    [{ distinctStates: 0 }, "inconclusive"],
-    [{ initialStates: 0, distinctStates: 0 }, "inconclusive"],
-    [{ queuedStates: 3 }, "error"],
+  expect(verdict(success, noNames, "m.qnt")).toEqual({
+    status: "passed",
+    search: { initialStates: 1, distinctStates: 20, queuedStates: 0 },
+    guarantee: { method: "explicit-state", property: "safety-invariant", scope: "complete", deadlock: "not-checked",
+      frontend: { name: "quint", version: tools.quintVersion }, checker: { name: "tla-ts", version: tools.tlaTsVersion } },
+  });
+  const notPassed: [Partial<CheckerResult>, Partial<CheckResult>][] = [
+    [{ initialStates: 0 }, { status: "inconclusive", reason: "no-initial-state" }],
+    [{ distinctStates: 0 }, { status: "inconclusive", reason: "no-initial-state" }],
+    [{ initialStates: 0, distinctStates: 0 }, { status: "inconclusive", reason: "no-initial-state" }],
+    [{ queuedStates: 3 }, { status: "error" }],
   ];
-  for (const [counts, status] of notPassed) {
+  for (const [counts, expected] of notPassed) {
     const r = verdict({ ...success, ...counts } as CheckerResult, noNames, "m.qnt");
-    expect(r.status, JSON.stringify(counts)).toBe(status);
+    expect(r, JSON.stringify(counts)).toMatchObject(expected);
     expect(r.guarantee.scope, JSON.stringify(counts)).not.toBe("complete");
   }
 });
@@ -204,6 +208,9 @@ test("a violation names the invariant the user gave, from the checker's name for
   const translation: Translation = { ...noNames, variables: new Map([["x", { name: "m::x", type: { kind: "int" } }]]),
     invariants: new Map([["q_inv_1", "small"], ["q_inv_2", "x >= 0, x <= 5"]]) };
   expect(verdict(violated("q_inv_1"), translation, "m.qnt")).toMatchObject({ status: "violated", invariant: "small" });
+  // The counts are the checker's when it stopped at the violation, states still queued included.
+  expect(verdict({ ...violated("q_inv_1"), queuedStates: 4 } as CheckerResult, translation, "m.qnt")).toMatchObject({
+    status: "violated", search: { initialStates: 1, distinctStates: 20, queuedStates: 4 }, guarantee: { scope: "partial" } });
   // The text is the entry as the caller wrote it, commas included.
   expect(verdict(violated("q_inv_2"), translation, "m.qnt")).toMatchObject({ status: "violated", invariant: "x >= 0, x <= 5" });
   // A name the translation didn't define, such as a plain q_inv, is never read as a violation.

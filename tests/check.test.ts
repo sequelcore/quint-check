@@ -14,7 +14,7 @@ test("a `_` parameter, which Quint names without a letter, becomes a valid TLA+ 
   // mapBy(_ => 0) in a top-level module: Quint names the parameter _N, which TLA+ rejects as an identifier.
   const result = await check("demo/mutex.qnt", { main: "mutex", invariants: ["inv"] });
   expect(result.status).toBe("passed");
-  if (result.status === "passed") expect(result.states).toBe(20);
+  if (result.status === "passed") expect(result.search.distinctStates).toBe(20);
 }, 60_000);
 
 test("a model variable that shares a name with a generated parameter still translates", async () => {
@@ -27,7 +27,7 @@ test("a safe model passes after a complete search", async () => {
   const result = await check(model("reserve"), { main: "reserve3", invariants: ["inv"] });
   expect(result.status).toBe("passed");
   if (result.status !== "passed") return;
-  expect(result.states).toBe(20);
+  expect(result.search).toEqual({ initialStates: 1, distinctStates: 20, queuedStates: 0 });
   expect(result.guarantee.scope).toBe("complete");
   expect(result.guarantee.deadlock).toBe("not-checked");
 }, 60_000);
@@ -87,8 +87,7 @@ test("a local beside a definition of the same flattened name is checked: the fro
 
 test("a search stopped by the time limit is inconclusive and partial", async () => {
   const result = await check("tests/fixtures/unbounded.qnt", { main: "unbounded", invariants: ["inv"], timeoutMs: 3_000 });
-  expect(result.status).toBe("inconclusive");
-  expect(result.guarantee.scope).toBe("partial");
+  expect(result).toMatchObject({ status: "inconclusive", reason: "timeout", guarantee: { scope: "partial" } });
 }, 60_000);
 
 test("a check without an invariant is rejected, never passed", async () => {
@@ -133,7 +132,7 @@ test("a violation names the first invariant given that the first violating state
 
 test("several invariants that hold pass, and an entry with a comma is one invariant", async () => {
   const result = await invariantsModel(["nonNegative", "atMostFive", "x >= 0, x <= 5"]);
-  expect(result).toMatchObject({ status: "passed", states: 6 });
+  expect(result).toMatchObject({ status: "passed", search: { distinctStates: 6 } });
   // The entry's comma joins its pieces, as in `quint compile --invariant`; the entry is named whole.
   expect(await invariantsModel(["nonNegative", "x >= 0, x < 3"])).toMatchObject({ status: "violated", invariant: "x >= 0, x < 3" });
 }, 60_000);

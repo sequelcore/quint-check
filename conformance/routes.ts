@@ -48,7 +48,7 @@ export async function quintTs(t: Target, timeoutMs = 60_000): Promise<RouteRun> 
   const result = await check(t.file, { main: t.main, invariants: [t.invariant], timeoutMs });
   const detail = result.status === "unsupported" || result.status === "inconclusive" ? result.reason
     : result.status === "error" ? `${result.stage}: ${result.output.split("\n").find((l) => /Error|error/.test(l)) ?? ""}`
-      : `${result.states} states`;
+      : `${result.search.distinctStates} states`;
   return { outcome: result.status, detail };
 }
 

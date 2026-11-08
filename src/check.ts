@@ -25,24 +25,78 @@ export const tools: { version: string; quintCli: string; quintVersion: string; t
   tlaTsVersion: (require(tlaTsPackage) as { version: string }).version,
 };
 
-/** What a check covered, stated with every result so a partial check is never read as a complete one. */
-export interface Guarantee {
+type Scope = "complete" | "partial" | "none";
+
+/** What a check covered. Every result carries it, so a forwarded result keeps its caveats. */
+export interface Guarantee<S extends Scope = Scope> {
   readonly method: "explicit-state";
   readonly property: "safety-invariant";
-  /** Complete only when every reachable state was explored. */
-  readonly scope: "complete" | "partial" | "none";
-  /** quint verify --backend=tlc doesn't check deadlock; neither does quint-ts. */
+  /** `complete` only when every reachable state was explored. */
+  readonly scope: S;
+  /** Not checked, as `quint verify --backend=tlc` doesn't check it. */
   readonly deadlock: "not-checked";
-  readonly backend: string;
-  readonly frontend: string;
+  readonly frontend: { readonly name: "quint"; readonly version: string };
+  readonly checker: { readonly name: "tla-ts"; readonly version: string };
 }
 
-export type CheckResult =
-  | { readonly status: "passed"; readonly states: number; readonly guarantee: Guarantee }
-  | { readonly status: "violated"; readonly invariant: string; readonly states: number; readonly trace: ItfTrace; readonly guarantee: Guarantee }
-  | { readonly status: "unsupported"; readonly reason: string; readonly where: "translation" | "reached-state"; readonly guarantee: Guarantee }
-  | { readonly status: "inconclusive"; readonly reason: string; readonly guarantee: Guarantee }
-  | { readonly status: "error"; readonly stage: "frontend" | "translation" | "checker"; readonly output: string; readonly guarantee: Guarantee };
+/** The counts tla-ts reports when its search ends. */
+interface SearchStatistics {
+  /** Distinct initial states. */
+  readonly initialStates: number;
+  /** Distinct states found, initial ones included. */
+  readonly distinctStates: number;
+  /** States found but not yet explored when the search ended. */
+  readonly queuedStates: number;
+}
+
+/** Every reachable state was explored, and every invariant holds in each one. */
+interface Passed {
+  readonly status: "passed";
+  /** `queuedStates` is always 0. */
+  readonly search: SearchStatistics;
+  readonly guarantee: Guarantee<"complete">;
+}
+
+/** A reachable state breaks an invariant; `trace` leads to it. */
+interface Violated {
+  readonly status: "violated";
+  /** The entry of `options.invariants`, as given, that the last state of `trace` breaks; the first in the order given if it breaks several. */
+  readonly invariant: string;
+  /** A shortest path from an initial state to the first violating state the search found, as ITF in Quint's names. */
+  readonly trace: ItfTrace;
+  /** The counts when the search stopped at the violation. */
+  readonly search: SearchStatistics;
+  readonly guarantee: Guarantee<"partial">;
+}
+
+/** The model, or a state it reaches, needs something outside quint-ts's subset. Nothing was proved. */
+interface OutsideSubset {
+  readonly status: "unsupported";
+  /** The construct or operation, as quint-ts names it (for example `operator List`). */
+  readonly reason: string;
+  /** `translation`: found before the search (scope `none`). `reached-state`: a reachable state needed it (scope `partial`). */
+  readonly where: "translation" | "reached-state";
+  readonly guarantee: Guarantee<"none" | "partial">;
+}
+
+/** The check couldn't decide. */
+interface Inconclusive {
+  readonly status: "inconclusive";
+  /** `timeout`: `timeoutMs` ran out (scope `none` before the search, `partial` during it). `no-initial-state`: init has no satisfying state, so nothing was checked. */
+  readonly reason: "timeout" | "no-initial-state";
+  readonly guarantee: Guarantee<"none" | "partial">;
+}
+
+/** A stage failed. `translation` is a quint-ts defect; `frontend` is usually the model or the options. */
+interface CheckFailed {
+  readonly status: "error";
+  readonly stage: "frontend" | "translation" | "checker";
+  /** What the failing stage printed or why it couldn't run. */
+  readonly output: string;
+  readonly guarantee: Guarantee<"none" | "partial">;
+}
+
+export type CheckResult = Passed | Violated | OutsideSubset | Inconclusive | CheckFailed;
 
 /** What the frontend and the translation take; a translation may have no invariant. */
 export interface TranslateOptions {
@@ -173,9 +227,14 @@ const checkerScript = join(dirname(here), `checker${extname(here)}`);
 const MAX_RESULT_BYTES = 64 * 1024 * 1024;
 
 /** What a result covers, with `scope` saying how much of the state space. */
-function guarantee(scope: Guarantee["scope"]): Guarantee {
+function guarantee<S extends Scope>(scope: S): Guarantee<S> {
   return { method: "explicit-state", property: "safety-invariant", scope, deadlock: "not-checked",
-    backend: `tla-ts ${tools.tlaTsVersion}`, frontend: `quint ${tools.quintVersion}` };
+    frontend: { name: "quint", version: tools.quintVersion }, checker: { name: "tla-ts", version: tools.tlaTsVersion } };
+}
+
+/** The search counts of a checker run. */
+function search(r: SearchStatistics): SearchStatistics {
+  return { initialStates: r.initialStates, distinctStates: r.distinctStates, queuedStates: r.queuedStates };
 }
 
 /** Throw a TypeError or a RangeError when `options` can't be checked. */
@@ -238,15 +297,14 @@ export async function check(file: string, options: CheckOptions): Promise<CheckR
   try {
     const front = await runFrontend(file, options, dir, deadline);
     if (front === "time-limit") {
-      return { status: "inconclusive", reason: "the time limit was reached while Quint's frontend ran, before any state was explored",
-        guarantee: guarantee("none") };
+      return { status: "inconclusive", reason: "timeout", guarantee: guarantee("none") };
     }
     const t = translated(front, options);
     if (t.kind === "frontend-error") return { status: "error", stage: "frontend", output: t.output, guarantee: guarantee("none") };
     if (t.kind === "unsupported") return { status: "unsupported", reason: t.reason, where: "translation", guarantee: guarantee("none") };
     options.signal?.throwIfAborted();
     if (performance.now() >= deadline) {
-      return { status: "inconclusive", reason: "the time limit was reached before the search began", guarantee: guarantee("none") };
+      return { status: "inconclusive", reason: "timeout", guarantee: guarantee("none") };
     }
     const { translation } = t;
     const cacheDir = checkerCache(tools.tlaTsVersion);
@@ -268,7 +326,7 @@ export async function runChecker(script: string, dir: string, translation: Trans
   Promise<CheckResult> {
   const outcome = await runProcess(process.execPath, [script, dir], { stdout: "ignore", deadline, signal });
   if (outcome.kind === "time-limit") {
-    return { status: "inconclusive", reason: "the checker stopped at the time limit before exploring every state", guarantee: guarantee("partial") };
+    return { status: "inconclusive", reason: "timeout", guarantee: guarantee("partial") };
   }
   if (outcome.kind === "spawn-failed") {
     return { status: "error", stage: "checker", output: `the checker couldn't start: ${outcome.message}`, guarantee: guarantee("none") };
@@ -341,13 +399,13 @@ export function verdict(r: CheckerResult, translation: Translation, source: stri
   }
   if (r.status === "success") {
     if (r.initialStates === 0 || r.distinctStates === 0) {
-      return { status: "inconclusive", reason: "no initial state, so nothing was checked", guarantee: guarantee("none") };
+      return { status: "inconclusive", reason: "no-initial-state", guarantee: guarantee("none") };
     }
     if (r.queuedStates !== 0) {
       return { status: "error", stage: "checker", output: `the checker reported success with ${r.queuedStates} states still queued`,
         guarantee: guarantee("partial") };
     }
-    return { status: "passed", states: r.distinctStates, guarantee: guarantee("complete") };
+    return { status: "passed", search: search(r), guarantee: guarantee("complete") };
   }
   const invariant = r.status === "invariant-violation" ? translation.invariants.get(r.violation?.name ?? "") : undefined;
   if (r.status === "invariant-violation" && invariant !== undefined && r.violation !== undefined && r.violation.trace.length > 0) {
@@ -358,7 +416,7 @@ export function verdict(r: CheckerResult, translation: Translation, source: stri
       if (!(err instanceof EncodingError)) throw err;
       return { status: "error", stage: "checker", output: `quint-ts can't report the counterexample: ${err.message}`, guarantee: guarantee("partial") };
     }
-    const result: CheckResult = { status: "violated", invariant, states: r.distinctStates, trace, guarantee: guarantee("partial") };
+    const result: CheckResult = { status: "violated", invariant, trace, search: search(r), guarantee: guarantee("partial") };
     tlaStates.set(result, r.violation.trace.map((step) =>
       Object.fromEntries(Object.entries(step.state).map(([v, x]) => [translation.variables.get(v)?.name ?? v, x.replace(/\s+/g, " ")]))));
     return result;
