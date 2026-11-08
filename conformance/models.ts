@@ -78,7 +78,7 @@ export const MODEL_CASES: readonly ModelCase[] = [
   { id: "init-reads-nondet", file: "conformance/models/init_reads.qnt", main: "init_reads_nondet", expect: "unsupported",
     ops: ["assign", "actionAll", "Set"], note: "x is read in a nondet choice" },
   { id: "init-reads-any", file: "conformance/models/init_reads.qnt", main: "init_reads_any", expect: "unsupported",
-    ops: ["assign", "actionAny"], note: "x is read in a branch of any; Quint's evaluators disagree on it" },
+    ops: ["assign", "actionAny"], note: "x is read in a branch of any; both of Quint's evaluators reject it only when the simulator picks the reading branch, so the rejection depends on the seed" },
   { id: "init-assigns", file: "conformance/models/init_reads.qnt", main: "init_assigns", expect: "passed",
     ops: ["assign", "actionAll", "Set", "iadd", "ite"], note: "only assignments and nondet choices over constants" },
   { id: "init-unreached-read", file: "conformance/models/init_reads.qnt", main: "init_unreached_read", expect: "passed",
