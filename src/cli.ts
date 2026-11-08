@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>] [--timeout-ms <ms>]
+ * quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>] [--timeout-ms <ms>] [--out-itf <file>]
  * quint-ts translate <file.qnt> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>]
  * quint-ts cache path|clear
  * quint-ts --help | --version        quint-ts <command> --help
@@ -8,7 +8,8 @@
  * 23 error, 2 usage error, 1 crash, 130 SIGINT, 143 SIGTERM. `translate` prints the TLA+, or on failure
  * a message on stderr and exit 21 (unsupported) or 23 (error).
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { cacheRoot, clearCaches } from "./cache.js";
 import { check, invariantProblem, translateFile } from "./check.js";
@@ -48,7 +49,7 @@ const CHECK_HELP = `Check that each invariant holds in every reachable state of 
 Examples:
   quint-ts check spec.qnt --main spec --invariant inv
   quint-ts check spec.qnt --invariant inv --invariant "size(queue) <= 3"
-  quint-ts check spec.qnt --invariant inv --timeout-ms 300000
+  quint-ts check spec.qnt --invariant inv --out-itf counterexample.itf.json
 
 Usage: ${CHECK_USAGE}
 
@@ -58,9 +59,10 @@ Options:
   --init <action>        The initializer action (default: init)
   --step <action>        The step action (default: step)
   --timeout-ms <ms>      Time limit for the whole check, 1 to 2147483647 (default: 60000)
+  --out-itf <file>       On a violation, also write the counterexample to <file> as ITF; nothing otherwise
   -h, --help             Print this help
 
-The result is printed as JSON.
+The result is printed as JSON; a violation's trace is the counterexample as ITF.
 ${CHECK_EXIT_CODES}
 `;
 
@@ -150,6 +152,7 @@ try {
       // Each value goes to Quint whole: a comma inside it is Quint's own syntax, as in `quint compile --invariant`.
       invariant: { type: "string", multiple: true },
       "timeout-ms": { type: "string" },
+      "out-itf": { type: "string" },
     },
   });
 } catch (err) {
@@ -167,8 +170,10 @@ try {
   throw err;
 }
 const { values, positionals, tokens } = parsed;
-if (command === "translate" && values["timeout-ms"] !== undefined) fail("unknown option --timeout-ms; run quint-ts translate --help for the options");
-for (const name of ["main", "init", "step", "timeout-ms"]) {
+for (const name of ["timeout-ms", "out-itf"] as const) {
+  if (command === "translate" && values[name] !== undefined) fail(`unknown option --${name}; run quint-ts translate --help for the options`);
+}
+for (const name of ["main", "init", "step", "timeout-ms", "out-itf"]) {
   const times = tokens.filter((t) => t.kind === "option" && t.name === name).length;
   if (times > 1) fail(`--${name} given ${times === 2 ? "twice" : `${times} times`}; give it once`);
 }
@@ -214,6 +219,14 @@ if (timeout !== undefined && (!/^[1-9]\d*$/.test(timeout) || !Number.isSafeInteg
   const shown = timeout.length > 24 ? `${timeout.slice(0, 24)}… (${timeout.length} characters)` : JSON.stringify(timeout);
   fail(`--timeout-ms takes a whole number of milliseconds from 1 to ${MAX_TIMEOUT_MS}, not ${shown}`);
 }
+const outItf = values["out-itf"];
+if (outItf !== undefined) {
+  if (outItf === "" || outItf === "-") fail("--out-itf takes a file; the result itself is printed on stdout");
+  // Checked before the search, so a long check doesn't end with nowhere to write.
+  const folder = dirname(resolve(outItf));
+  if (statSync(folder, { throwIfNoEntry: false })?.isDirectory() !== true) fail(`--out-itf ${outItf}: the folder ${folder} doesn't exist`);
+  if (/\{(seq|test)\}/.test(outItf)) console.error(`quint-ts: warning: --out-itf ${outItf} is used as written; {seq} and {test} aren't replaced`);
+}
 // Ctrl-C and SIGTERM stop the check. On POSIX its children run in their own process group, so the signal
 // reaches only this process, and the check stops every child it started before the CLI exits.
 const SIGNAL_EXIT = { SIGINT: 130, SIGTERM: 143 } as const;
@@ -230,4 +243,20 @@ const result = await check(file, {
   throw err;
 });
 console.log(JSON.stringify(result, null, 2));
+if (outItf !== undefined) {
+  if (result.status !== "violated") {
+    console.error(`quint-ts: no counterexample; nothing written to ${outItf}`);
+  } else {
+    // Written whole or not at all: a partial file is renamed into place only once it is complete.
+    const partial = `${outItf}.${process.pid}.partial`;
+    try {
+      writeFileSync(partial, `${JSON.stringify(result.trace)}\n`);
+      renameSync(partial, outItf);
+    } catch (err) {
+      rmSync(partial, { force: true });
+      console.error(`quint-ts: error: the counterexample couldn't be written to ${outItf}: ${err instanceof Error ? err.message : String(err)}`);
+      process.exit(STATUS_EXIT.error);
+    }
+  }
+}
 process.exit(STATUS_EXIT[result.status]);

@@ -5,6 +5,8 @@
  * can't become a verdict.
  */
 
+import type { Dump } from "./itf.js";
+
 export const JOB_FILE = "job.json";
 export const RESULT_FILE = "result.json";
 
@@ -18,8 +20,10 @@ export interface CheckerJob {
 export interface CheckerTraceStep {
   /** tla-ts's `TraceStep.label`, as TLC prints it (`step line 65, col 24 to ...`); null for an initial state. */
   readonly label: string | null;
-  /** Each TLA+ variable's value, as tla-ts's `formatValue` prints it. */
+  /** Each TLA+ variable's value, as tla-ts's `formatValue` prints it; the conformance harness compares it with TLC's graphs. */
   readonly state: Readonly<Record<string, string>>;
+  /** Each TLA+ variable's value as a structure, which the parent encodes as ITF. */
+  readonly values: Readonly<Record<string, Dump>>;
 }
 
 export type CheckerResult =
@@ -41,9 +45,20 @@ export type CheckerResult =
 const isCount = (v: unknown): v is number => typeof v === "number" && Number.isSafeInteger(v) && v >= 0;
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
+function isDump(v: unknown): v is Dump {
+  if (typeof v === "boolean" || typeof v === "string") return true;
+  if (typeof v === "number") return Number.isSafeInteger(v);
+  if (!isObject(v)) return false;
+  const keys = Object.keys(v);
+  if (keys.length !== 1) return false;
+  if (keys[0] === "set") return Array.isArray(v["set"]) && v["set"].every(isDump);
+  return keys[0] === "fn" && Array.isArray(v["fn"])
+    && v["fn"].every((e: unknown) => Array.isArray(e) && e.length === 2 && isDump(e[0]) && isDump(e[1]));
+}
+
 function isStep(v: unknown): v is CheckerTraceStep {
-  return isObject(v) && (v["label"] === null || typeof v["label"] === "string") && isObject(v["state"])
-    && Object.values(v["state"]).every((x) => typeof x === "string");
+  return isObject(v) && (v["label"] === null || typeof v["label"] === "string") && isObject(v["state"]) && isObject(v["values"])
+    && Object.values(v["state"]).every((x) => typeof x === "string") && Object.values(v["values"]).every(isDump);
 }
 
 /** The result in `text`, or undefined unless it is complete and well formed. */

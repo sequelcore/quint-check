@@ -13,6 +13,10 @@ export interface ModelCase {
   /** The IR opcodes the model exercises; the harness checks they appear in its IR. */
   readonly ops: readonly string[];
   readonly note: string;
+  /** For a violated case: why `quint verify --out-itf` gives no counterexample to compare with quint-ts's. */
+  readonly apalacheItf?: string;
+  /** For a violated case: the negative controls of the ITF checks to run on its counterexample (see itf.ts). */
+  readonly itfControls?: "values" | "names";
 }
 
 export const MODEL_CASES: readonly ModelCase[] = [
@@ -107,6 +111,20 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["Tup", "item", "tuples", "exists", "filter", "forall", "subseteq", "mapBy", "get", "set"], note: "two requests, two attempts each; the server dedups by request id" },
   { id: "retry-idempotent-bug", file: "conformance/models/retry_idempotent_bug.qnt", main: "retry_idempotent_bug", expect: "violated",
     ops: ["Tup", "item", "contains"], note: "planted fault: the server dedups by message, so a retry is applied again" },
+  // Counterexamples whose values TLA+ prints alike, which their ITF must tell apart (conformance/itf.ts).
+  { id: "itf-maps", file: "conformance/models/itf.qnt", main: "itf_maps", expect: "violated",
+    ops: ["Map", "put", "mapBy", "to", "variant", "get"], note: "a one-key map beside a variant, a map on 1..3, the empty map, a unit variant" },
+  { id: "itf-sets", file: "conformance/models/itf.qnt", main: "itf_sets", expect: "violated",
+    ops: ["Set", "to", "setOfMaps", "tuples", "iadd"], note: "the empty set, a set of sets, and an interval, a set of maps and a product held in variables",
+    apalacheItf: "with a set of maps in the violating state, quint verify (Apalache 0.62.4) exits 0 and writes no counterexample" },
+  { id: "itf-ints", file: "conformance/models/itf.qnt", main: "itf_ints", expect: "violated",
+    ops: ["iadd", "isub", "variant", "ilt"], note: "the ends of the 32-bit range, a negative payload", itfControls: "values" },
+  { id: "itf-strings", file: "conformance/models/itf.qnt", main: "itf_strings", expect: "violated",
+    ops: ["Map", "eq"], note: "strings outside ASCII as values and as map keys" },
+  { id: "itf-structures", file: "conformance/models/itf.qnt", main: "itf_structures", expect: "violated",
+    ops: ["Rec", "with", "Tup", "variant", "set", "field"], note: "a record, a triple, a variant with a record payload in a map" },
+  { id: "itf-instances", file: "conformance/models/itf.qnt", main: "itf_instances", expect: "violated",
+    ops: ["iadd", "ilt", "and"], note: "two instances of one module, each with its own x", itfControls: "names" },
   // Distinct Quint names that would become one TLA+ name, since `::` becomes `_`: refused at translation.
   { id: "collisions-instances", file: "conformance/models/collisions.qnt", main: "collisions_instances", expect: "unsupported",
     ops: ["assign", "actionAll"], note: "a::b_c and a_b::c" },

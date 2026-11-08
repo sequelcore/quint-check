@@ -32,12 +32,13 @@ test("a safe model passes after a complete search", async () => {
   expect(result.guarantee.deadlock).toBe("not-checked");
 }, 60_000);
 
-test("a planted fault is violated, with a trace in Quint's names", async () => {
+test("a planted fault is violated, with its counterexample as ITF in Quint's names", async () => {
   const result = await check(model("reserve_overdraw"), { main: "reserve_overdraw3", invariants: ["inv"] });
   expect(result.status).toBe("violated");
   if (result.status !== "violated") return;
-  expect(result.trace[0]?.action).toBe("init");
-  expect(result.trace.at(-1)?.state["stock"]).toBe("-1");
+  expect(result.trace.vars).toEqual(["reserve_overdraw3::reserve_overdraw::stock", "reserve_overdraw3::reserve_overdraw::held"]);
+  expect(result.trace.states[0]?.["#meta"]).toEqual({ index: 0, action: "init" });
+  expect(result.trace.states.at(-1)?.["reserve_overdraw3::reserve_overdraw::stock"]).toEqual({ "#bigint": "-1" });
 }, 60_000);
 
 test("a reached operation Quint's sources disagree on is unsupported, never passed", async () => {

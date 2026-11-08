@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
 import { spawn, spawnSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { isAlive } from "../src/process.ts";
 
 const cli = (...args: string[]): { code: number | null; stdout: string; stderr: string } => {
@@ -110,7 +111,8 @@ test("--timeout is refused with a hint to --timeout-ms, and is not an alias", ()
 
 test("a single-value flag given twice is a usage error", () => {
   const base = ["check", "demo/mutex.qnt", "--invariant", "inv"];
-  for (const [flag, first, second] of [["--main", "mutex", "mutex"], ["--init", "init", "init"], ["--step", "step", "step"], ["--timeout-ms", "5000", "6000"]]) {
+  for (const [flag, first, second] of [["--main", "mutex", "mutex"], ["--init", "init", "init"], ["--step", "step", "step"], ["--timeout-ms", "5000", "6000"],
+    ["--out-itf", "a.itf.json", "b.itf.json"]]) {
     const ran = cli(...base, flag ?? "", first ?? "", flag ?? "", second ?? "");
     expect(ran.code, flag).toBe(2);
     expect(ran.stdout, flag).toBe("");
@@ -187,3 +189,61 @@ for (const [signal, code] of [["SIGINT", 130], ["SIGTERM", 143]] as const) {
     }
   }, 60_000);
 }
+
+const mutexBug = ["demo/mutex_bug.qnt", "--main", "mutex_bug", "--invariant", "inv"];
+
+test("--out-itf writes a violation's counterexample, the same ITF as the result's trace", () => {
+  const dir = mkdtempSync(join(tmpdir(), "quint-ts-out-itf-"));
+  try {
+    const out = join(dir, "cex.itf.json");
+    const ran = cli("check", ...mutexBug, "--out-itf", out);
+    expect(ran.code).toBe(20);
+    const written = JSON.parse(readFileSync(out, "utf8"));
+    expect(written).toEqual(JSON.parse(ran.stdout).trace);
+    expect(written["#meta"]).toMatchObject({ format: "ITF", status: "violation" });
+    expect(readdirSync(dir)).toEqual(["cex.itf.json"]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}, 60_000);
+
+test("--out-itf writes nothing, and keeps an existing file, when there is no violation", () => {
+  const dir = mkdtempSync(join(tmpdir(), "quint-ts-out-itf-"));
+  try {
+    const out = join(dir, "cex.itf.json");
+    writeFileSync(out, "earlier");
+    const ran = cli("check", ...mutex, "--invariant", "inv", "--out-itf", out);
+    expect(ran.code).toBe(0);
+    expect(JSON.parse(ran.stdout)).toMatchObject({ status: "passed" });
+    expect(ran.stderr.trimEnd()).toBe(`quint-ts: no counterexample; nothing written to ${out}`);
+    expect(readFileSync(out, "utf8")).toBe("earlier");
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}, 60_000);
+
+test("--out-itf in a missing folder, empty or - is a usage error before any check; translate doesn't take it", () => {
+  const missing = join(tmpdir(), "quint-ts-no-such-folder", "cex.itf.json");
+  for (const [args, says] of [
+    [["check", ...mutexBug, "--out-itf", missing], /the folder .*quint-ts-no-such-folder doesn't exist/],
+    [["check", ...mutexBug, "--out-itf", "-"], /--out-itf takes a file/],
+    [["check", ...mutexBug, "--out-itf="], /--out-itf takes a file/],
+    [["translate", ...mutex, "--out-itf", "x.json"], /unknown option --out-itf/],
+  ] as const) {
+    const ran = cli(...args);
+    expect(ran.code, args.join(" ")).toBe(2);
+    expect(ran.stdout, args.join(" ")).toBe("");
+    expect(ran.stderr.trimEnd().split("\n").at(-1), args.join(" ")).toMatch(says);
+  }
+  expect(existsSync(missing)).toBe(false);
+}, 60_000);
+
+test("a counterexample that can't be written exits 23, with the result still printed", () => {
+  const dir = mkdtempSync(join(tmpdir(), "quint-ts-out-itf-"));
+  try {
+    // A folder where the file should go: the rename onto it fails.
+    const out = join(dir, "taken");
+    mkdirSync(out);
+    const ran = cli("check", ...mutexBug, "--out-itf", out);
+    expect(ran.code).toBe(23);
+    expect(JSON.parse(ran.stdout)).toMatchObject({ status: "violated" });
+    expect(ran.stderr).toContain(`quint-ts: error: the counterexample couldn't be written to ${out}`);
+    expect(readdirSync(dir)).toEqual(["taken"]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}, 60_000);

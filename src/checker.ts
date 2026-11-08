@@ -12,6 +12,7 @@ import * as nodeModule from "node:module";
 import { join } from "node:path";
 import { isMainThread, Worker, workerData } from "node:worker_threads";
 import { JOB_FILE, RESULT_FILE, type CheckerJob, type CheckerResult } from "./checker-result.js";
+import { dump } from "./itf.js";
 
 /** The exit code when stdin ended before the check did. */
 const PARENT_GONE = 70;
@@ -42,6 +43,7 @@ async function runCheck(dir: string): Promise<void> {
           trace: r.violation.trace.map((step) => ({
             label: step.label ?? null,
             state: Object.fromEntries(Object.entries(step.state).map(([name, value]) => [name, tla.formatValue(value)])),
+            values: Object.fromEntries(Object.entries(step.state).map(([name, value]) => [name, dump(value)])),
           })),
         },
       },

@@ -36,10 +36,9 @@ installed package doesn't need Bun (`npm run pack:check` checks it).
   state; its `guarantee.scope` is `complete`.
 - **`violated`** prints the counterexample: the shortest path to a state that
   breaks `inv`. Its scope is `partial` because the search stops there.
-  Values are printed as TLC prints them: a Quint map shows as
-  `[p1 |-> ..., ...]`, `true` as `TRUE`, and a variant in the encoding both
-  quint-ts and Quint's TLC route use, so `Idle` shows as
-  `[Idle |-> [tag |-> "UNIT"]]` and `Busy(1)` as `[Busy |-> 1]`.
+  The counterexample is ITF, as `quint run --out-itf` writes it: the map of
+  phases is `{"#map": [["p1", {"tag": "Critical", "value": {"#tup": []}}], ...]}`.
+  `--out-itf cex.itf.json` writes it to a file.
 - **`unsupported`** says which construct is outside the subset. Nothing was
   checked, and the result never reads as a pass.
 - Deadlock isn't checked, as in `quint verify --backend=tlc`.

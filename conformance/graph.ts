@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseState, runQuint, tools, translateFile, type TraceStep } from "../src/check.ts";
+import { parseState, runQuint, tools, translateFile } from "../src/check.ts";
 import { checkerCache } from "../src/cache.ts";
 import type { Translation } from "../src/translate.ts";
 import { apalacheJar, javaAvailable, type Target } from "./routes.ts";
@@ -132,7 +132,8 @@ function explore(tla: string, moduleName: string, cfg: string, t: Translation, c
       "-dump", "dot,actionlabels", dot, "-config", `${moduleName}.cfg`, `${moduleName}.tla`];
     const ran = checker === "tla-ts"
       ? spawnSync(process.execPath, [tools.tlaTsCli, `-Djava.io.tmpdir=${checkerCache(tools.tlaTsVersion) ?? dir}`, ...args], { cwd: dir, encoding: "utf8", timeout: 300_000, maxBuffer: 1 << 28 })
-      : spawnSync("java", [`-Djava.io.tmpdir=${dir}`, "-cp", apalacheJar, ...args], { cwd: dir, encoding: "utf8", timeout: 300_000, maxBuffer: 1 << 28 });
+      // Java writes stdout in the console's code page unless told otherwise, and strings outside ASCII are read back from it.
+      : spawnSync("java", [`-Djava.io.tmpdir=${dir}`, "-Dstdout.encoding=UTF-8", "-cp", apalacheJar, ...args], { cwd: dir, encoding: "utf8", timeout: 300_000, maxBuffer: 1 << 28 });
     const output = `${ran.stdout ?? ""}${ran.stderr ?? ""}`;
     const finished = /Model checking completed|states left on queue/.test(output) && /\b0 states left on queue/.test(output);
     const evalError = /Error: The error occurred when TLC was evaluating|Assert evaluated to FALSE|Error: Parsing or semantic/.test(output);
@@ -194,9 +195,9 @@ export function compare(a: Graph, b: Graph): Comparison {
   return { equal: Object.keys(differences).length === 0, why: "", differences };
 }
 
-/** Whether a counterexample is a real path of `g`: from an initial state, along its edges, to its first violating state. */
-export function traceInGraph(trace: readonly TraceStep[], g: Graph): string {
-  const states = trace.map((s) => canon({ ...s.state }));
+/** Whether a counterexample, as TLC prints its states, is a real path of `g`: from an initial state, along its edges, to its first violating state. */
+export function traceInGraph(trace: readonly Readonly<Record<string, string>>[], g: Graph): string {
+  const states = trace.map((s) => canon({ ...s }));
   if (states.length === 0) return "no trace";
   if (!g.init.has(states[0] ?? "")) return "starts outside the initial states";
   for (let k = 1; k < states.length; k += 1) {

@@ -87,16 +87,21 @@ invariant or `true` checks nothing, so `check` refuses it, as it refuses an
 unknown or incomplete flag, or a single-value flag given twice: a usage error
 prints a message and exits 2.
 `--timeout-ms` is the time limit in milliseconds, from 1 to 2 147 483 647 (60 000
-by default).
+by default). `--out-itf <file>` writes a violation's counterexample to a file
+as ITF (see [Counterexamples](#counterexamples)); on any other result it writes
+nothing and leaves an existing file as it was. Its folder must exist, which
+`check` checks before the search; if the file can't be written after a
+violation, `check` still prints the result and exits 23.
 
 From TypeScript or JavaScript:
 
 ```ts
+import { writeFile } from "node:fs/promises";
 import { check } from "quint-ts";
 
 const result = await check("spec.qnt", { main: "spec", invariants: ["inv"] });
 if (result.status === "passed") console.log(`${result.states} states, scope ${result.guarantee.scope}`);
-if (result.status === "violated") console.log(result.trace);
+if (result.status === "violated") await writeFile("spec.itf.json", JSON.stringify(result.trace));
 ```
 
 `check` returns a promise. It rejects with a `TypeError`, and checks nothing,
@@ -112,7 +117,7 @@ The [demo](demo/README.md) shows the three kinds of answer on one model.
 | Status | Meaning |
 | --- | --- |
 | `passed` | Every reachable state was explored and the invariants hold in each. `guarantee.scope` is `complete`. |
-| `violated` | An invariant breaks. `invariant` is the one you passed, as you wrote it; `trace` is a shortest counterexample, in Quint's names. |
+| `violated` | An invariant breaks. `invariant` is the one you passed, as you wrote it; `trace` is a shortest counterexample, as ITF. |
 | `unsupported` | The model uses a construct outside the subset (`where: "translation"`), or a reachable state needs an operation whose result Quint leaves undefined or disputed, or an integer outside the checker's 32-bit range (`where: "reached-state"`). Nothing was proved. |
 | `inconclusive` | The search stopped before exploring every state (time limit), or there was no initial state. |
 | `error` | The Quint frontend rejected the model, or the checker failed. `stage: "translation"` is a quint-ts defect. |
@@ -128,6 +133,39 @@ Every result carries `guarantee`: the method (`explicit-state`), the property
 (`safety-invariant`), the scope (`complete`, `partial`, `none`), the backend
 and frontend versions, and that deadlock is not checked, as
 `quint verify --backend=tlc` doesn't check it.
+
+## Counterexamples
+
+A `violated` result's `trace` is the counterexample as an ITF document, the
+[Informal Trace Format](https://apalache-mc.org/docs/adr/015adr-trace.html)
+that `quint run --out-itf` writes and that Quint, the ITF Trace Viewer for VS
+Code and itf-rs read. `check --out-itf` writes the same document to a file.
+
+- `vars` lists the state variables by their full Quint names, as Quint's own
+  ITF names them: `x` in the main module, `a::x` and `b::x` for two
+  instances.
+- Each state holds every variable, and its `#meta` gives its `index` and the
+  `action` that reached it (`init` for the first state).
+- Values are encoded as Quint's writer encodes them: an integer as
+  `{"#bigint": "-1"}`, a set as `{"#set": [...]}`, a map as
+  `{"#map": [[key, value], ...]}`, a tuple as `{"#tup": [...]}`, a record as
+  an object, and a variant as `{"tag": "Busy", "value": ...}`, with
+  `{"#tup": []}` as the value of a constructor without one. The elements of a
+  set and the entries of a map are sorted, so one counterexample gives one
+  text.
+
+The encoding follows each variable's type in Quint's IR, so a map with one
+string key, a variant, a record and a map on `1..n`, which TLA+ prints alike,
+come out distinct. A variable whose type has no encoding here is refused at
+translation. A state that holds a set the checker keeps unexpanded (`1.to(n)`,
+`setOfMaps`, `tuples`) is enumerated, up to 100 000 elements per set; past
+that, or for any value quint-ts can't encode, the result is an `error`, never
+a counterexample with a value guessed, and quint-ts never writes
+`#unserializable`. The trace has no `varTypes` in its `#meta`, so Apalache
+can't read the file back. The conformance harness replays each
+counterexample through Quint's simulator, which must write the same ITF and
+reach each state with the model's own actions
+([conformance/itf.ts](conformance/itf.ts)).
 
 ## The supported subset
 
@@ -160,11 +198,6 @@ A record with no fields, which Quint's documentation doesn't define, and a
 field name that can't name a field of a TLA+ record (a string that isn't an
 identifier, such as `Rec("a b", 1)`, or a TLA+ reserved word, such as
 `DOMAIN`) are refused at translation; Quint's official route rejects both too.
-In a counterexample, a record is TLA+ text, `[a |-> 1, b |-> 2]`, with its
-fields in the order the checker keeps them, which need not be the model's.
-A tuple is TLA+ text too, `(1, "a")` as `<<1, "a">>`. TLA+ doesn't tell a
-tuple from a function on `1..n`, so a map whose keys are `1` to `n` prints
-as a tuple as well: `Set(1, 2).mapBy(_ => 0)` is `<<0, 0>>`.
 The empty tuple `()` outside a variant's payload, which Quint's documentation
 writes `<<>>` and its official route `[tag |-> "UNIT"]`, a tuple of one item,
 which the documentation doesn't define, and `tuples` of fewer than two sets,

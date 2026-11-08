@@ -11,9 +11,10 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { check, frontend, tools, translateFile } from "../src/check.ts";
+import { check, frontend, tlaStates, tools, translateFile } from "../src/check.ts";
 import { sourceChanged } from "./source-changed.ts";
 import { compare, graphs, traceInGraph } from "./graph.ts";
+import { controls, itfChecks, shortNamesControl } from "./itf.ts";
 import { MODEL_CASES } from "./models.ts";
 import { OPERATOR_CASES, UNSUPPORTED_CASES } from "./operators.ts";
 import { PUBLIC_PARTIAL, PUBLIC_REFUSED } from "./public.ts";
@@ -56,6 +57,15 @@ const environment = {
   commit: spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim() || "uncommitted",
   dirty: sourceChanged("."),
 };
+
+/** A model's ITF checks in a cell of the matrix. */
+function itfCell(itf: any): string {
+  if (itf === undefined) return "—";
+  const quint = ["replay", "violation", "transitions"].every((k) => itf[k] === "ok") ? "Quint accepts it" : "rejected: see JSON";
+  const apalache = itf.apalacheKnown !== undefined ? `Apalache: ${itf.apalacheKnown}` : itf.apalache === "ok" ? "Apalache: same shape" : `Apalache: ${itf.apalache}`;
+  const controls = Object.values(itf.controls ?? {}) as string[];
+  return `${quint}; ${apalache}${controls.length === 0 ? "" : `; ${controls.filter((c) => c.startsWith("caught")).length}/${controls.length} controls caught`}`.replaceAll("|", "\\|");
+}
 
 /** Write conformance/MATRIX.md: every platform's last run, and the tables of the run in `resultsFile`. */
 // The rows are read back from JSON, so they are typed loosely here; run.ts writes them above.
@@ -116,15 +126,18 @@ function writeMatrix(resultsFile: string, data: any): void {
     "",
     "Graphs are explored completely with `-continue`: initial states, states, transitions and the states that break the invariant are compared as sets.",
     "",
-    "| Model | Expected | quint-ts | Simulator (300 samples) | Official | qts/tla-ts vs qts/tlc | qts/tlc vs official/tlc | Counterexample |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "A counterexample's ITF is replayed through Quint's simulator, which must write the same ITF and break the invariant at the last state",
+    "only, and must reach each state with the model's own init and step; Apalache's counterexample must have the same variables and length.",
+    "",
+    "| Model | Expected | quint-ts | Simulator (300 samples) | Official | qts/tla-ts vs qts/tlc | qts/tlc vs official/tlc | Counterexample | ITF |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...modelRows.map((r) => {
       const eq = (k: string): string => {
         const c = r.comparisons[k] as { equal: boolean; why: string } | undefined;
         return c === undefined ? "not run" : c.equal ? "equal" : `differ (${c.why || "see JSON"})`;
       };
       const graph = r.graphs["qts/tla-ts"] as { states: number; edges: number } | undefined;
-      return `| \`${r.id}\` | ${r.expect} | ${r.quintTs}${graph === undefined ? "" : ` (${graph.states} states, ${graph.edges} transitions)`} | ${r.simulator.outcome} | ${r.official?.outcome ?? "not run"} | ${eq("qts/tla-ts vs qts/tlc")} | ${eq("qts/tlc vs official/tlc")} | ${r.trace === undefined ? "—" : Object.values(r.trace).every((v) => v === "valid") ? `valid in ${Object.keys(r.trace).length} graphs` : "invalid: see JSON"} |`;
+      return `| \`${r.id}\` | ${r.expect} | ${r.quintTs}${graph === undefined ? "" : ` (${graph.states} states, ${graph.edges} transitions)`} | ${r.simulator.outcome} | ${r.official?.outcome ?? "not run"} | ${eq("qts/tla-ts vs qts/tlc")} | ${eq("qts/tlc vs official/tlc")} | ${r.trace === undefined ? "—" : Object.values(r.trace).every((v) => v === "valid") ? `valid in ${Object.keys(r.trace).length} graphs` : "invalid: see JSON"} | ${itfCell(r.itf)} |`;
     }),
     "",
   ].join("\n");
@@ -246,12 +259,27 @@ try {
         if (m.expect !== "unsupported" && !cmp.equal) fail(`${m.id}: ${a} vs ${b} differ: ${cmp.why || JSON.stringify(cmp.differences)}`);
       }
       if (result.status === "violated") {
-        trace = Object.fromEntries(Object.entries(g.routes).map(([route, graph]) => [route, traceInGraph(result.trace, graph)]));
+        const states = tlaStates.get(result) ?? [];
+        trace = Object.fromEntries(Object.entries(g.routes).map(([route, graph]) => [route, traceInGraph(states, graph)]));
         for (const [route, verdict] of Object.entries(trace)) if (verdict !== "valid") fail(`${m.id}: quint-ts's counterexample against ${route}: ${verdict}`);
       }
     }
+    let itf: Record<string, unknown> | undefined;
+    if (result.status === "violated") {
+      const checks = itfChecks(target, result.trace, withOfficial);
+      for (const [check, verdict] of Object.entries(checks)) {
+        if (check === "apalache" && (verdict === "not run" || m.apalacheItf !== undefined)) continue;
+        if (verdict !== "ok") fail(`${m.id}: quint-ts's ITF, ${check}: ${verdict}`);
+      }
+      // A known reason that no longer holds is stale: the comparison it excused can be made again.
+      if (m.apalacheItf !== undefined && checks.apalache === "ok") fail(`${m.id}: quint verify now gives a counterexample; drop apalacheItf`);
+      const controlled = m.itfControls === "values" ? controls(target, result.trace)
+        : m.itfControls === "names" ? { "names by their last segment": shortNamesControl(target, result.trace) } : {};
+      for (const [what, verdict] of Object.entries(controlled)) if (verdict.startsWith("NOT")) fail(`${m.id}: control ${what} ${verdict}`);
+      itf = { ...checks, ...m.apalacheItf === undefined ? {} : { apalacheKnown: m.apalacheItf }, controls: controlled };
+    }
     return { ...m, quintTs: result.status, detail: "reason" in result ? result.reason : "states" in result ? `${result.states} states` : "",
-      simulator: sampled, official: off, graphs: summary, comparisons, trace };
+      simulator: sampled, official: off, graphs: summary, comparisons, trace, itf };
   });
 
   mkdirSync("conformance/results", { recursive: true });

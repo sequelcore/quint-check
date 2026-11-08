@@ -23,8 +23,8 @@ for (const d of demos) {
   if (result.status === "passed") console.log(`  every one of ${result.states} reachable states satisfies inv`);
   if (result.status === "violated") {
     console.log("  counterexample:");
-    for (const [k, step] of result.trace.entries()) {
-      console.log(`    ${k + 1}. ${step.action}: ${Object.entries(step.state).map(([v, x]) => `${v} = ${x}`).join(", ")}`);
+    for (const state of result.trace.states) {
+      console.log(`    ${state["#meta"].index + 1}. ${state["#meta"].action}: ${result.trace.vars.map((v) => `${v} = ${JSON.stringify(state[v])}`).join(", ")}`);
     }
   }
   if (result.status === "unsupported" || result.status === "inconclusive") console.log(`  why: ${result.reason}; nothing was proved`);

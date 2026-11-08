@@ -6,6 +6,8 @@
  * disagree, stops the check at the state that reaches it (`MARKER`).
  */
 
+import { type QuintType, typeProblem } from "./itf.js";
+
 /** A construct the translator can't translate faithfully. */
 export class Unsupported extends Error {}
 
@@ -437,7 +439,8 @@ function assigned(ex: Ex, defs: Map<string, Def>, seen: ReadonlySet<string> = ne
 export interface Translation {
   readonly tla: string;
   readonly cfg: string;
-  readonly variables: ReadonlyMap<string, string>;
+  /** Each state variable's TLA+ name to its full Quint name and type, in declaration order. */
+  readonly variables: ReadonlyMap<string, { readonly name: string; readonly type: QuintType }>;
   readonly names: ReadonlyMap<string, string>;
   /** Each invariant's TLA+ name, `q_inv_1` and so on, to the entry the caller gave. */
   readonly invariants: ReadonlyMap<string, string>;
@@ -464,10 +467,15 @@ const PRELUDE = [
 export function translate(ir: Ex, invariants: readonly string[]): Translation {
   const main = ir.modules.find((m: Ex) => m.name === ir.main) ?? ir.modules[0];
   const vars = new Set<string>();
+  const types = new Map<string, unknown>();
   const defs = new Map<string, Def>();
   for (const d of main.declarations) {
-    if (d.kind === "var") vars.add(d.name);
-    else if (d.kind === "const") throw new Unsupported(`the uninstantiated constant ${d.name}`);
+    if (d.kind === "var") {
+      vars.add(d.name);
+      const scheme = ir.types?.[d.id];
+      // A polymorphic type has no encoding: undefined, which typeProblem refuses.
+      types.set(d.name, scheme?.typeVariables?.length === 0 && scheme.rowVariables?.length === 0 ? scheme.type : undefined);
+    } else if (d.kind === "const") throw new Unsupported(`the uninstantiated constant ${d.name}`);
     else if (d.kind === "def") defs.set(d.name, d);
     else if (d.kind !== "typedef") throw new Unsupported(`declaration kind ${d.kind}`);
   }
@@ -483,6 +491,11 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   for (const d of defs.values()) {
     const op = firstUnsupported(d.expr, defs);
     if (op !== undefined) throw new Unsupported(`operator ${op}`);
+  }
+  // A counterexample reports every variable as ITF, by its type; one that couldn't be reported is refused here.
+  for (const [v, type] of types) {
+    const problem = typeProblem(type);
+    if (problem !== undefined) throw new Unsupported(`the state variable ${v}, whose type (${problem}) quint-ts can't report in a counterexample`);
   }
   const step = assigned(defs.get("q::step").expr, defs);
   const missing = [...vars].filter((v) => !step.has(v));
@@ -517,7 +530,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   return {
     tla,
     cfg: ["INIT q_init", "NEXT q_step", ...invariants.map((_, k) => `INVARIANT ${invariantName(k)}`)].join("\n"),
-    variables: new Map([...vars].map((v) => [mangle(v), short(v)])),
+    variables: new Map([...vars].map((v) => [mangle(v), { name: v, type: types.get(v) as QuintType }])),
     names: new Map([...defs.keys()].map((n) => [mangle(n), short(n)])),
     invariants: new Map(invariants.map((entry, k) => [invariantName(k), entry])),
   };
