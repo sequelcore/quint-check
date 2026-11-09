@@ -12,7 +12,7 @@ that passes, and `tests/coverage.test.ts` enforces that.
 
 | Kind | Constructs |
 | --- | --- |
-| Values | integers within the checker's 32-bit range, with `+`, `-`, `*`, `/`, `%` and comparisons; Booleans, with `and`, `or`, `not`, `implies`, `iff`; strings; `==` and `!=` |
+| Values | integers within the checker's 32-bit range, with `+`, `-`, `*`, `/`, `%` and comparisons; Booleans, with `and`, `or`, `not`, `implies`, `iff`, and `Bool`, the set of both; strings; `==` and `!=` |
 | Sets | literals, `in`, `contains`, `union`, `intersect`, `exclude`, `subseteq`, `size`, `to`, `exists`, `forall`, `filter`, `map` |
 | Maps | literals with literal keys, `get`, `set`, `put`, `setBy`, `keys`, `mapBy`, `setOfMaps` |
 | Records | `{ a: 1 }`, `r.a`, `r.with("a", v)`, `{ ...r, a: v }`, `fieldNames`, nested, and in sets, maps and variants |
@@ -28,7 +28,7 @@ any state is explored.
 | Construct | Why |
 | --- | --- |
 | Temporal properties | Only safety invariants are checked. |
-| Lists, `Bool` and the other built-in sets, `then`, `powerset`, `ipow`, `chooseSome` | Not in the subset yet. |
+| Lists, `Int` and `Nat`, `then`, `powerset`, `ipow`, `chooseSome` | Not in the subset yet. |
 | A `fold` whose step isn't `acc + f(x)` | Quint leaves a fold undefined unless its operator is associative and commutative; a sum is both. |
 | Uninstantiated constants | Instances with constants are checked; give the constants values in an instance. |
 | A record with no fields | Quint's documentation doesn't define it, and Quint's official route rejects it. |

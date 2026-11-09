@@ -24,10 +24,14 @@ const withOfficial = !process.argv.includes("--no-official") && javaAvailable();
 const failures: string[] = [];
 const fail = (what: string): void => { failures.push(what); console.log(`  FAIL ${what}`); };
 
+/** Quint's built-in sets, which the IR holds as names, not applications; a case lists them as it lists opcodes. */
+const BUILTIN_SETS = new Set(["Bool", "Int", "Nat"]);
+
 function opcodes(ex: unknown, out: Set<string>): Set<string> {
   if (ex === null || typeof ex !== "object") return out;
   const node = ex as Record<string, unknown>;
   if (typeof node["opcode"] === "string") out.add(node["opcode"]);
+  if (node["kind"] === "name" && typeof node["name"] === "string" && BUILTIN_SETS.has(node["name"])) out.add(node["name"]);
   for (const value of Object.values(node)) opcodes(value, out);
   return out;
 }

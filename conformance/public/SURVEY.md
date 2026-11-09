@@ -6,12 +6,12 @@ Each file's last module is the main module, and each value of that file named as
 | Outcome | Files |
 | --- | ---: |
 | All | 77 |
-| Translated | 12 |
-| … a definitive verdict with the authors' invariant | 5 |
+| Translated | 14 |
+| … a definitive verdict with the authors' invariant | 7 |
 | … no invariant of the authors to check | 5 |
 | … inconclusive | 2 |
 | … checked with an error | 0 |
-| Refused by quint-check | 38 |
+| Refused by quint-check | 36 |
 | Rejected by Quint's frontend with the last module as main | 1 |
 | Without `init` or `step` | 26 |
 
@@ -35,7 +35,7 @@ Each file's last module is the main module, and each value of that file named as
 | `classic/distributed/ewd426/ewd426.qnt` | `broken_ewd426` | definitive | tokenInv: passed, 16 states |
 | `classic/distributed/ewd426/ewd426_3.qnt` | `ewd426_3` | definitive | tokenInv: passed, 729 states |
 | `classic/distributed/ewd426/ewd426_4.qnt` | `ewd426_4` | definitive | tokenInv: passed, 1024 states |
-| `classic/distributed/ewd840/ewd840.qnt` | `ewd840_3` | refused | unresolved name Bool |
+| `classic/distributed/ewd840/ewd840.qnt` | `ewd840_3` | definitive | IndInv: passed, 302 states; Inv: passed, 302 states |
 | `classic/sequential/BinSearch/BinSearch.qnt` | `BinSearch10` | refused | operator List |
 | `cosmos/bank/bank.qnt` | `bank` | no-init-step | no init |
 | `cosmos/bank/bankTest.qnt` | `bankTest` | refused | operator expect |
@@ -76,7 +76,7 @@ Each file's last module is the main module, and each value of that file named as
 | `language-features/strongFairness.qnt` | `strongFairness` | refused | operator weakFair |
 | `language-features/tuples.qnt` | `tuples` | no-invariant | translated; no invariant of the authors to check |
 | `language-features/weakFairness.qnt` | `weakFairness` | refused | operator leadsTo |
-| `puzzles/prisoners/prisoners.qnt` | `prisoners3` | refused | unresolved name Bool |
+| `puzzles/prisoners/prisoners.qnt` | `prisoners3` | definitive | countInv: passed, 70 states; safetyInv: passed, 70 states |
 | `puzzles/river/river.qnt` | `river` | refused | operator powerset |
 | `solidity/ERC20/erc20.qnt` | `erc20Tests` | refused | operator ipow |
 | `solidity/GradualPonzi/gradualPonzi.qnt` | `gradualPonziTest` | refused | operator ipow |

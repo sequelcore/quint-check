@@ -14,8 +14,6 @@ export const PUBLIC_PARTIAL: readonly { id: string; file: string; main: string; 
 export const PUBLIC_REFUSED: readonly { id: string; file: string; main: string; reason: string }[] = [
   { id: "weakFairness", file: "conformance/public/weakFairness.qnt", main: "weakFairness", reason: "operator leadsTo" },
   { id: "coin", file: "conformance/public/coin.qnt", main: "coin", reason: "operator ipow" },
-  { id: "ewd840", file: "conformance/public/ewd840.qnt", main: "ewd840_3", reason: "unresolved name Bool" },
-  { id: "prisoners", file: "conformance/public/prisoners.qnt", main: "prisoners3", reason: "unresolved name Bool" },
   { id: "two_phase_commit", file: "conformance/public/two_phase_commit.qnt", main: "two_phase_commit_3", reason: "operator then" },
   { id: "tictactoe", file: "conformance/public/tictactoe.qnt", main: "tictactoe", reason: "operator eventually" },
   { id: "BinSearch", file: "conformance/public/BinSearch.qnt", main: "BinSearch10", reason: "operator List" },

@@ -111,9 +111,13 @@ function parseDot(dot: string, t: Translation): { init: Set<string>; states: Set
   return { init, states: new Set(byId.values()), edges };
 }
 
-/** The last state of every counterexample a `-continue` run printed. */
-function violatingStates(output: string, t: Translation): Set<string> {
+/** The last state of every counterexample a `-continue` run printed, initial states that break an invariant included. */
+export function violatingStates(output: string, t: Translation): Set<string> {
   const found = new Set<string>();
+  // An initial state that breaks an invariant is printed on its own, with no `State <n>:` header.
+  for (const m of output.matchAll(/^Error: Invariant \S+ is violated by the initial state:\n([\s\S]*?)(?:\n\n|(?![\s\S]))/gm)) {
+    found.add(canon(parseState(m[1] ?? "", t)));
+  }
   for (const block of output.split(/^Error: Invariant \S+ is violated\.?$/m).slice(1)) {
     const states = block.split(/\r?\n(?=State \d+:)/).slice(1).map((b) => b.split(/\r?\n\r?\n/)[0] ?? "");
     const last = states.at(-1);
