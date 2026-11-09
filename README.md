@@ -1,5 +1,8 @@
 # quint-check
 
+[![version](https://img.shields.io/npm/v/@sequelcore/quint-check?style=flat&colorA=000000&colorB=000000)](https://www.npmjs.com/package/@sequelcore/quint-check)
+[![downloads](https://img.shields.io/npm/dt/@sequelcore/quint-check.svg?style=flat&colorA=000000&colorB=000000)](https://www.npmjs.com/package/@sequelcore/quint-check)
+
 Check the safety invariants of [Quint](https://github.com/quint-co/quint)
 models from Node.js, without Java.
 
