@@ -16,6 +16,10 @@ release may change the API, the command line or the result format.
   `indices`, as TLA+ sequences. `head` and `tail` of an empty list, and `nth`
   outside the list, answer `unsupported`, since Quint leaves them undefined.
   A counterexample shows a list as `[1, 2]`, and ITF writes it as a JSON array.
+- `replaceAt`, `slice`, `range`, `select` and `foldl`, which takes any
+  operator since a list has an order. Where Quint leaves them undefined, they
+  answer `unsupported` when reached; for `slice`, that includes an empty
+  slice at the end of a list, as Quint's documentation says.
 
 ### Changed
 
