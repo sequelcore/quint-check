@@ -18,7 +18,7 @@ import { controls, itfChecks, shortNamesControl } from "./itf.ts";
 import { MODEL_CASES } from "./models.ts";
 import { OPERATOR_CASES, UNSUPPORTED_CASES } from "./operators.ts";
 import { PUBLIC_PARTIAL, PUBLIC_REFUSED } from "./public.ts";
-import { APALACHE_VERSION, apalacheJar, evaluator, javaAvailable, official, quintTs, startApalache, stopApalache, type RouteRun } from "./routes.ts";
+import { APALACHE_VERSION, apalacheJar, evaluator, javaAvailable, official, quintCheck, startApalache, stopApalache, type RouteRun } from "./routes.ts";
 
 const withOfficial = !process.argv.includes("--no-official") && javaAvailable();
 const failures: string[] = [];
@@ -37,7 +37,7 @@ function irOpcodes(file: string, main: string, invariant = "inv"): Set<string> {
   return front.ok ? opcodes(front.ir, new Set()) : new Set();
 }
 
-const scratch = mkdtempSync(join(tmpdir(), "quint-ts-conformance-"));
+const scratch = mkdtempSync(join(tmpdir(), "quint-check-conformance-"));
 function caseFile(id: string, body: string): string {
   const file = join(scratch, `${id.replaceAll("-", "_")}.qnt`);
   writeFileSync(file, `module ${id.replaceAll("-", "_")} {\n${body}\n}\n`);
@@ -102,15 +102,15 @@ function writeMatrix(resultsFile: string, data: any): void {
     "",
     "## Operators",
     "",
-    "A defined case must pass everywhere; any other must be `unsupported` in quint-ts, and the other routes are recorded.",
+    "A defined case must pass everywhere; any other must be `unsupported` in quint-check, and the other routes are recorded.",
     "",
-    "| Case | Semantics | quint-ts | evaluator-ts | evaluator-rust | official (Apalache + TLC) | Source |",
+    "| Case | Semantics | quint-check | evaluator-ts | evaluator-rust | official (Apalache + TLC) | Source |",
     "| --- | --- | --- | --- | --- | --- | --- |",
-    ...operatorRows.map((r) => `| \`${r.id}\` | ${r.semantics} | ${cell(r.routes["quint-ts"])} | ${cell(r.routes["evaluator-ts"])} | ${cell(r.routes["evaluator-rust"])} | ${cell(r.routes["official"])} | ${r.source.replaceAll("|", "\\|")} |`),
+    ...operatorRows.map((r) => `| \`${r.id}\` | ${r.semantics} | ${cell(r.routes["quint-check"])} | ${cell(r.routes["evaluator-ts"])} | ${cell(r.routes["evaluator-rust"])} | ${cell(r.routes["official"])} | ${r.source.replaceAll("|", "\\|")} |`),
     "",
     "## Constructs outside the MVP",
     "",
-    "| Case | quint-ts | Reason |",
+    "| Case | quint-check | Reason |",
     "| --- | --- | --- |",
     ...unsupportedRows.map((r) => `| \`${r.id}\` | ${r.status} | ${r.reason.replaceAll("|", "\\|").replaceAll("\n", " ")} |`),
     "",
@@ -118,7 +118,7 @@ function writeMatrix(resultsFile: string, data: any): void {
     "",
     "From Quint's examples ([public/](public/)), and the demo's model with variants. The supported ones are in the models table below.",
     "",
-    "| Model | Group | Expected | quint-ts | Reason |",
+    "| Model | Group | Expected | quint-check | Reason |",
     "| --- | --- | --- | --- | --- |",
     ...publicRows.map((r) => `| \`${r.id}\` | ${r.group} | ${r.expected} | ${r.status} | ${r.reason.replaceAll("|", "\\|").replaceAll("\n", " ")} |`),
     "",
@@ -129,15 +129,15 @@ function writeMatrix(resultsFile: string, data: any): void {
     "A counterexample's ITF is replayed through Quint's simulator, which must write the same ITF and break the invariant at the last state",
     "only, and must reach each state with the model's own init and step; Apalache's counterexample must have the same variables and length.",
     "",
-    "| Model | Expected | quint-ts | Simulator (300 samples) | Official | qts/tla-ts vs qts/tlc | qts/tlc vs official/tlc | Counterexample | ITF |",
+    "| Model | Expected | quint-check | Simulator (300 samples) | Official | qc/tla-ts vs qc/tlc | qc/tlc vs official/tlc | Counterexample | ITF |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...modelRows.map((r) => {
       const eq = (k: string): string => {
         const c = r.comparisons[k] as { equal: boolean; why: string } | undefined;
         return c === undefined ? "not run" : c.equal ? "equal" : `differ (${c.why || "see JSON"})`;
       };
-      const graph = r.graphs["qts/tla-ts"] as { states: number; edges: number } | undefined;
-      return `| \`${r.id}\` | ${r.expect} | ${r.quintTs}${graph === undefined ? "" : ` (${graph.states} states, ${graph.edges} transitions)`} | ${r.simulator.outcome} | ${r.official?.outcome ?? "not run"} | ${eq("qts/tla-ts vs qts/tlc")} | ${eq("qts/tlc vs official/tlc")} | ${r.trace === undefined ? "—" : Object.values(r.trace).every((v) => v === "valid") ? `valid in ${Object.keys(r.trace).length} graphs` : "invalid: see JSON"} | ${itfCell(r.itf)} |`;
+      const graph = r.graphs["qc/tla-ts"] as { states: number; edges: number } | undefined;
+      return `| \`${r.id}\` | ${r.expect} | ${r.quintCheck}${graph === undefined ? "" : ` (${graph.states} states, ${graph.edges} transitions)`} | ${r.simulator.outcome} | ${r.official?.outcome ?? "not run"} | ${eq("qc/tla-ts vs qc/tlc")} | ${eq("qc/tlc vs official/tlc")} | ${r.trace === undefined ? "—" : Object.values(r.trace).every((v) => v === "valid") ? `valid in ${Object.keys(r.trace).length} graphs` : "invalid: see JSON"} | ${itfCell(r.itf)} |`;
     }),
     "",
   ].join("\n");
@@ -170,16 +170,16 @@ try {
     const used = irOpcodes(file, target.main);
     for (const op of c.ops) if (!used.has(op)) fail(`${c.id}: declares ${op}, which its IR doesn't use`);
     const routes: Record<string, RouteRun> = {
-      "quint-ts": await quintTs(target),
+      "quint-check": await quintCheck(target),
       "evaluator-ts": evaluator(target, "typescript"),
       "evaluator-rust": evaluator(target, "rust"),
       ...withOfficial ? { official: official(target) } : {},
     };
-    const expected = c.quintTs ?? (c.semantics === "defined" ? "passed" : "unsupported");
-    if (routes["quint-ts"]?.outcome !== expected) fail(`${c.id}: quint-ts ${routes["quint-ts"]?.outcome} (${routes["quint-ts"]?.detail}), expected ${expected}`);
+    const expected = c.quintCheck ?? (c.semantics === "defined" ? "passed" : "unsupported");
+    if (routes["quint-check"]?.outcome !== expected) fail(`${c.id}: quint-check ${routes["quint-check"]?.outcome} (${routes["quint-check"]?.detail}), expected ${expected}`);
     const verdicts: Record<string, string> = {};
     for (const [route, run] of Object.entries(routes)) {
-      if (route === "quint-ts") continue;
+      if (route === "quint-check") continue;
       const known = c.known?.[route];
       if (c.semantics !== "defined") verdicts[route] = "recorded";
       else if (run.outcome === "passed") verdicts[route] = "agrees";
@@ -195,7 +195,7 @@ try {
     const file = caseFile(`u-${c.id}`, c.module);
     const result = await check(file, { main: `u_${c.id.replaceAll("-", "_")}`, invariants: ["inv"] });
     const ok = result.status === "unsupported" && result.where === "translation";
-    if (!ok) fail(`unsupported ${c.id}: quint-ts ${result.status}${"reason" in result ? ` (${result.reason})` : ""}${"output" in result ? ` (${result.output.slice(0, 200)})` : ""}`);
+    if (!ok) fail(`unsupported ${c.id}: quint-check ${result.status}${"reason" in result ? ` (${result.reason})` : ""}${"output" in result ? ` (${result.output.slice(0, 200)})` : ""}`);
     return { id: c.id, status: result.status, reason: "reason" in result ? result.reason : "output" in result ? result.output.slice(0, 300) : "" };
   });
 
@@ -204,7 +204,7 @@ try {
     ...await mapInOrder(PUBLIC_PARTIAL, async (c) => {
       console.log(`- ${c.id}`);
       const result = await check(c.file, { main: c.main, invariants: ["inv"], timeoutMs: c.timeoutMs });
-      if (result.status !== "inconclusive") fail(`public ${c.id}: quint-ts ${result.status}, expected inconclusive (${c.why})`);
+      if (result.status !== "inconclusive") fail(`public ${c.id}: quint-check ${result.status}, expected inconclusive (${c.why})`);
       return { id: c.id, group: "partially supported", expected: "inconclusive", status: result.status, reason: "reason" in result ? result.reason : c.why };
     }),
     ...PUBLIC_REFUSED.map((c) => {
@@ -213,7 +213,7 @@ try {
       const t = translateFile(c.file, { main: c.main, invariants: [] });
       const status = t.kind;
       const reason = t.kind === "unsupported" ? t.reason : t.kind === "frontend-error" ? t.output.slice(0, 200) : "";
-      if (t.kind !== "unsupported" || reason !== c.reason) fail(`public ${c.id}: quint-ts ${status} (${reason}), expected unsupported at translation (${c.reason})`);
+      if (t.kind !== "unsupported" || reason !== c.reason) fail(`public ${c.id}: quint-check ${status} (${reason}), expected unsupported at translation (${c.reason})`);
       return { id: c.id, group: "refused", expected: `unsupported: ${c.reason}`, status, reason };
     }),
   ];
@@ -227,16 +227,16 @@ try {
     for (const op of m.ops) if (!used.has(op)) fail(`${m.id}: declares ${op}, which its IR doesn't use`);
     const target = { file: m.file, main: m.main, invariant, ...m.invariants === undefined ? {} : { invariants: m.invariants } };
     const result = await check(m.file, { main: m.main, invariants });
-    if (result.status !== m.expect) fail(`${m.id}: quint-ts ${result.status}, expected ${m.expect}`);
+    if (result.status !== m.expect) fail(`${m.id}: quint-check ${result.status}, expected ${m.expect}`);
     if (result.status === "violated" && result.invariant !== (m.names ?? (m.invariants === undefined ? invariant : undefined))) {
-      fail(`${m.id}: quint-ts names ${result.invariant}, expected ${m.names ?? invariant}`);
+      fail(`${m.id}: quint-check names ${result.invariant}, expected ${m.names ?? invariant}`);
     }
     const sampled = evaluator(target, "typescript", 6, 300);
-    // Quint lists every invariant the violating state breaks, in the order given; the one quint-ts names is the first of them.
+    // Quint lists every invariant the violating state breaks, in the order given; the one quint-check names is the first of them.
     if (m.names !== undefined && sampled.broken?.[0] !== m.names) fail(`${m.id}: the simulator reports ${JSON.stringify(sampled.broken)} broken, expected ${m.names} first`);
-    // The simulator samples, so its pass proves nothing; its violation contradicts a quint-ts pass.
-    if (sampled.outcome === "violated" && result.status === "passed") fail(`${m.id}: the simulator finds a violation quint-ts doesn't`);
-    // A model quint-ts gives a verdict on must be one Quint's evaluator runs: one it rejects, such as an init that reads a variable (QNT502), has no verdict to agree with.
+    // The simulator samples, so its pass proves nothing; its violation contradicts a quint-check pass.
+    if (sampled.outcome === "violated" && result.status === "passed") fail(`${m.id}: the simulator finds a violation quint-check doesn't`);
+    // A model quint-check gives a verdict on must be one Quint's evaluator runs: one it rejects, such as an init that reads a variable (QNT502), has no verdict to agree with.
     if (m.expect !== "unsupported" && sampled.outcome === "error") fail(`${m.id}: the simulator rejects the model: ${sampled.detail}`);
     const off = withOfficial ? official(target) : undefined;
     const g = graphs(target);
@@ -249,7 +249,7 @@ try {
       for (const [route, graph] of Object.entries(g.routes)) {
         summary[route] = { complete: graph.complete, why: graph.why, init: graph.init.size, states: graph.states.size, edges: graph.edges.size, violating: graph.violating.size };
       }
-      const pairs: [string, string][] = [["qts/tla-ts", "qts/tlc"], ["qts/tlc", "official/tlc"]];
+      const pairs: [string, string][] = [["qc/tla-ts", "qc/tlc"], ["qc/tlc", "official/tlc"]];
       for (const [a, b] of pairs) {
         const ga = g.routes[a];
         const gb = g.routes[b];
@@ -261,7 +261,7 @@ try {
       if (result.status === "violated") {
         const states = tlaStates.get(result) ?? [];
         trace = Object.fromEntries(Object.entries(g.routes).map(([route, graph]) => [route, traceInGraph(states, graph)]));
-        for (const [route, verdict] of Object.entries(trace)) if (verdict !== "valid") fail(`${m.id}: quint-ts's counterexample against ${route}: ${verdict}`);
+        for (const [route, verdict] of Object.entries(trace)) if (verdict !== "valid") fail(`${m.id}: quint-check's counterexample against ${route}: ${verdict}`);
       }
     }
     let itf: Record<string, unknown> | undefined;
@@ -269,7 +269,7 @@ try {
       const checks = itfChecks(target, result.trace, withOfficial);
       for (const [check, verdict] of Object.entries(checks)) {
         if (check === "apalache" && (verdict === "not run" || m.apalacheItf !== undefined)) continue;
-        if (verdict !== "ok") fail(`${m.id}: quint-ts's ITF, ${check}: ${verdict}`);
+        if (verdict !== "ok") fail(`${m.id}: quint-check's ITF, ${check}: ${verdict}`);
       }
       // A known reason that no longer holds is stale: the comparison it excused can be made again.
       if (m.apalacheItf !== undefined && checks.apalache === "ok") fail(`${m.id}: quint verify now gives a counterexample; drop apalacheItf`);
@@ -278,7 +278,7 @@ try {
       for (const [what, verdict] of Object.entries(controlled)) if (verdict.startsWith("NOT")) fail(`${m.id}: control ${what} ${verdict}`);
       itf = { ...checks, ...m.apalacheItf === undefined ? {} : { apalacheKnown: m.apalacheItf }, controls: controlled };
     }
-    return { ...m, quintTs: result.status, detail: "reason" in result ? result.reason : "search" in result ? `${result.search.distinctStates} states` : "",
+    return { ...m, quintCheck: result.status, detail: "reason" in result ? result.reason : "search" in result ? `${result.search.distinctStates} states` : "",
       simulator: sampled, official: off, graphs: summary, comparisons, trace, itf };
   });
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // node scripts/pack-check.mjs
 //
-// Packs quint-ts with npm, installs the tarball into a new project outside
+// Packs quint-check with npm, installs the tarball into a new project outside
 // this repository, and checks the three demo models through the installed
 // CLI and API, with Node only: the check fails if Bun or Java is on PATH,
 // and if a development dependency got installed. Exits non-zero on any
@@ -13,7 +13,7 @@ import { delimiter, dirname, join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const packageVersion = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
-const work = mkdtempSync(join(tmpdir(), "quint-ts-pack-"));
+const work = mkdtempSync(join(tmpdir(), "quint-check-pack-"));
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 // On Windows, PATH holds only Node's folder and System32, so neither Bun nor Java can be found. Elsewhere the
@@ -54,7 +54,7 @@ try {
 
   const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_list", "unsupported", 21]];
   for (const [name, status, code] of demos) {
-    const args = ["--no-install", "quint-ts", "check", `node_modules/quint-ts/demo/${name}.qnt`, "--main", name, "--invariant", "inv"];
+    const args = ["--no-install", "quint-check", "check", `node_modules/@sequelcore/quint-check/demo/${name}.qnt`, "--main", name, "--invariant", "inv"];
     const ran = spawnSync(npx, args, { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
     const verdict = ran.stdout.trimEnd().split("\n").at(-1) ?? "";
     expect(verdict.startsWith(`${status}: `) && ran.status === code, `CLI ${name}: "${verdict}", exit ${ran.status} (expected ${status}, exit ${code})`);
@@ -63,26 +63,26 @@ try {
     expect(result.status === status && json.status === code, `CLI ${name} --json: ${result.status}, exit ${json.status} (expected ${status}, exit ${code})`);
   }
   // The old name of the time limit is refused with a hint, never accepted.
-  const oldName = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invariant", "inv", "--timeout", "5000"],
+  const oldName = spawnSync(npx, ["--no-install", "quint-check", "check", "node_modules/@sequelcore/quint-check/demo/mutex.qnt", "--main", "mutex", "--invariant", "inv", "--timeout", "5000"],
     { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
   expect(oldName.status === 2 && oldName.stdout === "" && oldName.stderr.includes("--timeout-ms"), `CLI --timeout: exit ${oldName.status} (expected a usage error naming --timeout-ms, exit 2)`);
-  const help = spawnSync(npx, ["--no-install", "quint-ts", "check", "--help"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+  const help = spawnSync(npx, ["--no-install", "quint-check", "check", "--help"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
   expect(help.status === 0 && help.stderr === "" && help.stdout.includes("--timeout-ms <ms>"), `CLI check --help: exit ${help.status}`);
-  const version = spawnSync(npx, ["--no-install", "quint-ts", "--version"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+  const version = spawnSync(npx, ["--no-install", "quint-check", "--version"], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
   expect(version.status === 0 && version.stdout.trim() === packageVersion, `CLI --version: ${version.stdout.trim()}, exit ${version.status} (expected ${packageVersion})`);
   // A misspelled flag is a usage error under Node too, never a check without an invariant.
-  const typo = spawnSync(npx, ["--no-install", "quint-ts", "check", "node_modules/quint-ts/demo/mutex.qnt", "--main", "mutex", "--invarient", "inv"],
+  const typo = spawnSync(npx, ["--no-install", "quint-check", "check", "node_modules/@sequelcore/quint-check/demo/mutex.qnt", "--main", "mutex", "--invarient", "inv"],
     { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
   expect(typo.status === 2 && typo.stdout === "" && typo.stderr.includes("--invarient"), `CLI --invarient: exit ${typo.status} (expected a usage error, exit 2)`);
   writeFileSync(join(project, "api.mjs"), `import { readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { check } from "quint-ts";
-const model = "node_modules/quint-ts/demo/mutex.qnt";
+import { check } from "@sequelcore/quint-check";
+const model = "node_modules/@sequelcore/quint-check/demo/mutex.qnt";
 const r = await check(model, { main: "mutex", invariants: ["inv"] });
 const message = (p) => p.then(() => "resolved", (e) => e.name + ": " + e.message);
 const aborted = await message(check(model, { main: "mutex", invariants: ["inv"], signal: AbortSignal.timeout(300) }));
 const badTimeout = await message(check(model, { main: "mutex", invariants: ["inv"], timeoutMs: Infinity }));
-const left = readdirSync(tmpdir()).filter((n) => n.startsWith("quint-ts-run-" + process.pid + "-")).length;
+const left = readdirSync(tmpdir()).filter((n) => n.startsWith("quint-check-run-" + process.pid + "-")).length;
 console.log(JSON.stringify({ status: r.status, states: r.search?.distinctStates, scope: r.guarantee.scope, aborted, badTimeout, left }));
 `);
   const api = JSON.parse(run(process.execPath, ["api.mjs"], project));

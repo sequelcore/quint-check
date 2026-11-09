@@ -7,7 +7,7 @@
  *   SIGKILL too, for any descendant still running.
  * - Windows: the child is ended with TerminateProcess. Processes a Node child starts without `detached`
  *   end with it, through the job object libuv puts every Node process in; processes started with
- *   `detached` leave that job and don't. quint-ts's own children start none.
+ *   `detached` leave that job and don't. quint-check's own children start none.
  *
  * A stop sends SIGTERM, then SIGKILL after GRACE_MS. After the child exits, its pipes get DRAIN_MS to
  * close before they're destroyed, so a descendant holding them can't keep the run from settling.
@@ -24,7 +24,7 @@ const STDERR_KEPT = 64 * 1024;
 export type ProcessOutcome =
   /** The child exited on its own with this code. */
   | { readonly kind: "exited"; readonly code: number; readonly stderr: string }
-  /** A signal quint-ts didn't send ended the child (POSIX only; Windows reports an exit code). */
+  /** A signal quint-check didn't send ended the child (POSIX only; Windows reports an exit code). */
   | { readonly kind: "signaled"; readonly signal: string; readonly stderr: string }
   /** The deadline passed; the child, if it had started, was stopped and is gone. */
   | { readonly kind: "time-limit" }
@@ -45,7 +45,7 @@ const posix = process.platform !== "win32";
 /**
  * Run `command` with `args`. Resolves with how the child ended; rejects with `signal.reason` when the
  * caller aborts before the child exits on its own. Settles only after the child has exited, or never
- * started. The child's stdin is a pipe quint-ts never writes to and keeps open while it runs.
+ * started. The child's stdin is a pipe quint-check never writes to and keeps open while it runs.
  */
 export function runProcess(command: string, args: readonly string[], options: ProcessOptions): Promise<ProcessOutcome> {
   const { signal } = options;

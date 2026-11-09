@@ -69,10 +69,10 @@ interface Violated {
   readonly guarantee: Guarantee<"partial">;
 }
 
-/** The model, or a state it reaches, needs something outside quint-ts's subset. Nothing was proved. */
+/** The model, or a state it reaches, needs something outside quint-check's subset. Nothing was proved. */
 interface OutsideSubset {
   readonly status: "unsupported";
-  /** The construct or operation, as quint-ts names it (for example `operator List`). */
+  /** The construct or operation, as quint-check names it (for example `operator List`). */
   readonly reason: string;
   /** `translation`: found before the search (scope `none`). `reached-state`: a reachable state needed it (scope `partial`). */
   readonly where: "translation" | "reached-state";
@@ -87,7 +87,7 @@ interface Inconclusive {
   readonly guarantee: Guarantee<"none" | "partial">;
 }
 
-/** A stage failed. `translation` is a quint-ts defect; `frontend` is usually the model or the options. */
+/** A stage failed. `translation` is a quint-check defect; `frontend` is usually the model or the options. */
 interface CheckFailed {
   readonly status: "error";
   readonly stage: "frontend" | "translation" | "checker";
@@ -179,7 +179,7 @@ function translated(front: FrontendOutput, options: TranslateOptions): Translate
  */
 export function runQuint(args: readonly string[], options: { cwd?: string; timeoutMs?: number } = {}):
   { status: number | null; stdout: string; stderr: string } {
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-out-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-out-"));
   const path = join(dir, "stdout");
   const fd = openSync(path, "w");
   try {
@@ -283,7 +283,7 @@ async function readResult(dir: string): Promise<CheckerResult | undefined> {
 
 /**
  * Check `file` with `options`: the official Quint frontend, the translation, then tla-ts, in a child
- * process quint-ts owns. `timeoutMs` bounds the whole check. Rejects with a TypeError or a RangeError
+ * process quint-check owns. `timeoutMs` bounds the whole check. Rejects with a TypeError or a RangeError
  * when the options can't be checked (see `invariantProblem`), and with `signal.reason` when
  * `options.signal` aborts. Every process the check started is gone by the time it settles.
  */
@@ -308,7 +308,7 @@ export async function check(file: string, options: CheckOptions): Promise<CheckR
     }
     const { translation } = t;
     const cacheDir = checkerCache(tools.tlaTsVersion);
-    // quint verify --backend=tlc doesn't check deadlock, and neither does quint-ts.
+    // quint verify --backend=tlc doesn't check deadlock, and neither does quint-check.
     const job: CheckerJob = { source: translation.tla, config: `${translation.cfg}\nCHECK_DEADLOCK FALSE`, ...cacheDir === undefined ? {} : { cacheDir } };
     await writeFile(join(dir, JOB_FILE), JSON.stringify(job));
     return await runChecker(checkerScript, dir, translation, file, deadline, options.signal);
@@ -341,7 +341,7 @@ export async function runChecker(script: string, dir: string, translation: Trans
   return verdict(result, translation, source);
 }
 
-/** Why a failure the checker reported is quint-ts's `unsupported`, not an error: a marker the translation planted, or 32-bit integers. */
+/** Why a failure the checker reported is quint-check's `unsupported`, not an error: a marker the translation planted, or 32-bit integers. */
 function unsupportedFailure(message: string): string | undefined {
   const marker = new RegExp(`"${MARKER} ([^"]*)"`).exec(message);
   if (marker !== null) return marker[1] ?? "";
@@ -374,7 +374,7 @@ function itfTrace(steps: readonly CheckerTraceStep[], translation: Translation, 
   });
   return {
     "#meta": { format: "ITF", "format-description": "https://apalache-mc.org/docs/adr/015adr-trace.html", source, status: "violation",
-      description: `Created by quint-ts ${tools.version}` },
+      description: `Created by quint-check ${tools.version}` },
     vars: vars.map((v) => v.name),
     states,
   };
@@ -383,7 +383,7 @@ function itfTrace(steps: readonly CheckerTraceStep[], translation: Translation, 
 /**
  * What a complete checker run establishes. A `passed` needs a finished search from at least one initial
  * state: tla-ts's success, at least one initial and one distinct state, and no state left queued. A
- * counterexample quint-ts can't encode as ITF is an error: the translation admits only types it encodes.
+ * counterexample quint-check can't encode as ITF is an error: the translation admits only types it encodes.
  */
 export function verdict(r: CheckerResult, translation: Translation, source: string): CheckResult {
   // tla-ts reports some failures by throwing (a literal past 32 bits) and others in its result (a computation past them).
@@ -391,7 +391,7 @@ export function verdict(r: CheckerResult, translation: Translation, source: stri
   const unsupported = failure === undefined ? undefined : unsupportedFailure(failure);
   if (unsupported !== undefined) return { status: "unsupported", reason: unsupported, where: "reached-state", guarantee: guarantee("partial") };
   if (r.kind === "threw") {
-    // A translation tla-ts can't parse is quint-ts's defect, not the model's.
+    // A translation tla-ts can't parse is quint-check's defect, not the model's.
     return { status: "error", stage: r.error === "other" ? "checker" : "translation", output: r.message, guarantee: guarantee("partial") };
   }
   if (r.status === "error") {
@@ -414,12 +414,12 @@ export function verdict(r: CheckerResult, translation: Translation, source: stri
       trace = itfTrace(r.violation.trace, translation, source);
     } catch (err) {
       if (!(err instanceof EncodingError)) throw err;
-      return { status: "error", stage: "checker", output: `quint-ts can't report the counterexample: ${err.message}`, guarantee: guarantee("partial") };
+      return { status: "error", stage: "checker", output: `quint-check can't report the counterexample: ${err.message}`, guarantee: guarantee("partial") };
     }
     const result: CheckResult = { status: "violated", invariant, trace, search: search(r), guarantee: guarantee("partial") };
     tlaStates.set(result, r.violation.trace.map((step) =>
       Object.fromEntries(Object.entries(step.state).map(([v, x]) => [translation.variables.get(v)?.name ?? v, x.replace(/\s+/g, " ")]))));
     return result;
   }
-  return { status: "error", stage: "checker", output: `the checker returned ${r.status} without a result quint-ts can read`, guarantee: guarantee("partial") };
+  return { status: "error", stage: "checker", output: `the checker returned ${r.status} without a result quint-check can read`, guarantee: guarantee("partial") };
 }

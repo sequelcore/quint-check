@@ -12,4 +12,4 @@
 The simulators keep the last pair; both verifiers keep the first. Quint's
 documentation gives no rule for a repeated key, so it's unclear whether this
 is a defect or unspecified behavior. At most it's a documentation question
-for quint-co/quint. quint-ts refuses a Map literal with a repeated key.
+for quint-co/quint. quint-check refuses a Map literal with a repeated key.

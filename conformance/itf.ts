@@ -1,10 +1,10 @@
 /**
- * quint-ts's counterexamples as ITF, checked by Quint itself. Each check uses only Quint's frontend,
- * its simulator and its own ITF writer, with the variables' types from Quint's IR, never quint-ts's
+ * quint-check's counterexamples as ITF, checked by Quint itself. Each check uses only Quint's frontend,
+ * its simulator and its own ITF writer, with the variables' types from Quint's IR, never quint-check's
  * converter:
  *
  * - replay (C1): the states, as Quint literals, are replayed through `quint run --init/--step`, and the
- *   ITF Quint writes for the replay must equal quint-ts's, with sets and maps sorted and `#meta` set
+ *   ITF Quint writes for the replay must equal quint-check's, with sets and maps sorted and `#meta` set
  *   aside. Proves each value is a well-typed value of its variable, encoded as Quint encodes it; not
  *   that the values are the right ones.
  * - violation (C2): the replay reports the violation at the last state and no earlier.
@@ -87,13 +87,13 @@ function names(t: Target, trace: ItfTrace, qualified: boolean): Map<string, stri
   }));
 }
 
-/** Check `trace`, quint-ts's counterexample for `t`, against Quint. `apalache` runs the comparison with `quint verify`. */
+/** Check `trace`, quint-check's counterexample for `t`, against Quint. `apalache` runs the comparison with `quint verify`. */
 export function itfChecks(t: Target, trace: ItfTrace, apalache: boolean): ItfChecks {
   const types = variableTypes(t);
   if (JSON.stringify([...types.keys()].sort()) !== JSON.stringify([...trace.vars].sort())) {
     return { replay: `variables ${JSON.stringify(trace.vars)}, the model's ${JSON.stringify([...types.keys()])}`, violation: "not run", transitions: "not run", apalache: "not run" };
   }
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-itf-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-itf-"));
   try {
     let replay = "";
     let violation = "";
@@ -126,7 +126,7 @@ export function itfChecks(t: Target, trace: ItfTrace, apalache: boolean): ItfChe
         const why = `${ran.stdout}${ran.stderr}`.split(/\r?\n/).find((l) => /error|Error/.test(l)) ?? `exit ${ran.status}`;
         return { replay: `Quint wrote no replay: ${why}`, violation: "not run", transitions: "not run", apalache: "not run" };
       }
-      // Quint names the replay's variables by their full names, as quint-ts must.
+      // Quint names the replay's variables by their full names, as quint-check must.
       const sameVars = JSON.stringify([...q.vars].sort()) === JSON.stringify([...trace.vars].sort());
       replay = !sameVars ? `variables ${JSON.stringify(trace.vars)}, Quint's ${JSON.stringify(q.vars)}`
         : JSON.stringify(canonical(q.states)) === JSON.stringify(canonical(states.slice(0, q.states.length))) ? "ok" : "a state differs from Quint's encoding";
@@ -160,7 +160,7 @@ function againstApalache(t: Target, trace: ItfTrace, dir: string): string {
     return `quint verify wrote no counterexample (exit ${ran.status})`;
   }
   if (JSON.stringify([...a.vars].sort()) !== JSON.stringify([...trace.vars].sort())) return `Apalache's variables are ${JSON.stringify(a.vars)}`;
-  return a.states.length === trace.states.length ? "ok" : `Apalache's counterexample has ${a.states.length} states, quint-ts's ${trace.states.length}`;
+  return a.states.length === trace.states.length ? "ok" : `Apalache's counterexample has ${a.states.length} states, quint-check's ${trace.states.length}`;
 }
 
 /** A copy of `trace` with `f` applied to every value, for the negative controls. */
@@ -203,7 +203,7 @@ export function controls(t: Target, trace: ItfTrace): Record<string, string> {
   }));
 }
 
-/** C6 for names: a trace with each variable by its last name segment, as quint-ts reported them before, must fail the replay. */
+/** C6 for names: a trace with each variable by its last name segment, as quint-check reported them before, must fail the replay. */
 export function shortNamesControl(t: Target, trace: ItfTrace): string {
   const short = (v: string): string => v.split("::").at(-1) ?? v;
   const renamed: ItfTrace = { ...trace, vars: trace.vars.map(short),

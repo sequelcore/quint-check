@@ -1,7 +1,7 @@
 /**
  * bun run bench [--runs N] [--routes id,id] [--models id,id] [--out-dir results/ci] [--report-only]
  *
- * Times quint-ts against TLC and Quint's own TLC route under the same
+ * Times quint-check against TLC and Quint's own TLC route under the same
  * guarantee: explicit-state search of every reachable state, safety
  * invariants only, deadlock not checked, one worker. Before any time is
  * kept, every route must reach the same verdict and, for a pass, the same
@@ -10,7 +10,7 @@
  *
  * Each repetition runs the routes in a rotated order, after one warm-up
  * run each. Writes bench/results/<platform>-<arch>-<machine>.json, where the
- * machine is QUINT_TS_MACHINE or the CPU model, and regenerates
+ * machine is QUINT_CHECK_MACHINE or the CPU model, and regenerates
  * bench/BASELINE.md from every results file. --report-only skips the
  * measurements and only regenerates BASELINE.md.
  */
@@ -48,7 +48,7 @@ interface Measured { readonly ms: number; readonly peakBytes: number | null; rea
 
 /** Wall time, exit code and peak memory of the whole process tree. */
 function measure(command: readonly string[], cwd: string, env: Readonly<Record<string, string>> = {}): Measured {
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-bench-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-bench-"));
   try {
     const out = join(dir, "out.txt");
     if (process.platform === "win32") {
@@ -76,13 +76,13 @@ function measure(command: readonly string[], cwd: string, env: Readonly<Record<s
   }
 }
 
-/** Distinct states, from quint-ts's JSON or TLC's text. */
+/** Distinct states, from quint-check's JSON or TLC's text. */
 function statesOf(output: string): number {
   const json = /"states": (\d+)/.exec(output)?.[1];
   return json !== undefined ? Number(json) : distinctStates(output);
 }
 
-/** The counterexample's length in states, from quint-ts's JSON trace or TLC's "State n:" lines; 0 when none. */
+/** The counterexample's length in states, from quint-check's JSON trace or TLC's "State n:" lines; 0 when none. */
 function traceLength(output: string): number {
   const actions = output.match(/"action": /g)?.length ?? 0;
   if (actions > 0) return actions;
@@ -104,24 +104,24 @@ interface Route {
 function routesFor(m: BenchModel, work: string, cacheDir: string): Route[] {
   const translated = translateFile(join(root, m.file), { main: m.main, invariants: ["inv"] });
   if (translated.kind !== "translated") throw new Error(`${m.id}: ${translated.kind}`);
-  const qts = join(work, "qts");
-  mkdirSync(qts, { recursive: true });
-  writeFileSync(join(qts, "Q.tla"), translated.translation.tla);
-  writeFileSync(join(qts, "Q.cfg"), translated.translation.cfg);
+  const qc = join(work, "qc");
+  mkdirSync(qc, { recursive: true });
+  writeFileSync(join(qc, "Q.tla"), translated.translation.tla);
+  writeFileSync(join(qc, "Q.cfg"), translated.translation.cfg);
   const tlcArgs = (dir: string, module: string): string[] => ["tlc2.TLC", "-workers", "1", "-deadlock", "-metadir", join(dir, "states"),
     "-config", `${module}.cfg`, `${module}.tla`];
   const check = [process.execPath, join(root, "src", "cli.ts"), "check", join(root, m.file), "--main", m.main, "--invariant", "inv", "--timeout-ms", "1800000"];
   const routes: Route[] = [
-    { id: "quint-ts", what: "quint-ts end to end, tla-ts's compile cache warm", checkerOnly: false, cwd: root, command: check,
-      env: { QUINT_TS_CACHE_DIR: cacheDir } },
-    { id: "quint-ts-nocache", what: "quint-ts end to end, cache off (QUINT_TS_CACHE=off): tla-ts compiles itself on every check", checkerOnly: false,
-      cwd: root, command: check, env: { QUINT_TS_CACHE: "off" } },
-    { id: "tla-ts", what: "tla-ts on quint-ts's TLA+", checkerOnly: true, cwd: qts,
-      command: [process.execPath, tools.tlaTsCli, `-Djava.io.tmpdir=${qts}`, ...tlcArgs(qts, "Q")] },
+    { id: "quint-check", what: "quint-check end to end, tla-ts's compile cache warm", checkerOnly: false, cwd: root, command: check,
+      env: { QUINT_CHECK_CACHE_DIR: cacheDir } },
+    { id: "quint-check-nocache", what: "quint-check end to end, cache off (QUINT_CHECK_CACHE=off): tla-ts compiles itself on every check", checkerOnly: false,
+      cwd: root, command: check, env: { QUINT_CHECK_CACHE: "off" } },
+    { id: "tla-ts", what: "tla-ts on quint-check's TLA+", checkerOnly: true, cwd: qc,
+      command: [process.execPath, tools.tlaTsCli, `-Djava.io.tmpdir=${qc}`, ...tlcArgs(qc, "Q")] },
   ];
   if (!javaAvailable() || !existsSync(apalacheJar)) return routes;
-  routes.push({ id: "tlc-qts", what: "TLC (Apalache's jar) on quint-ts's TLA+", checkerOnly: true, cwd: qts,
-    command: ["java", "-cp", apalacheJar, ...tlcArgs(qts, "Q")] });
+  routes.push({ id: "tlc-qc", what: "TLC (Apalache's jar) on quint-check's TLA+", checkerOnly: true, cwd: qc,
+    command: ["java", "-cp", apalacheJar, ...tlcArgs(qc, "Q")] });
   const official = join(work, "official");
   mkdirSync(official, { recursive: true });
   const compiled = runQuint(["compile", "--target", "tlaplus", `--main=${m.main}`, "--invariant=inv", join(root, m.file)], { cwd: official });
@@ -146,7 +146,7 @@ const median = (xs: readonly number[]): number => {
 };
 
 /** Results are kept per operating system and hardware: timings from one machine say nothing about another. */
-const machine = (process.env["QUINT_TS_MACHINE"] ?? cpus()[0]?.model ?? "unknown").toLowerCase().replace(/\(r\)|\(tm\)/g, "")
+const machine = (process.env["QUINT_CHECK_MACHINE"] ?? cpus()[0]?.model ?? "unknown").toLowerCase().replace(/\(r\)|\(tm\)/g, "")
   .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
 const environment = {
@@ -171,11 +171,11 @@ const environment = {
 function measureAll() {
   return MODELS.filter((m) => onlyModels === undefined || onlyModels.includes(m.id)).map((m) => {
   console.log(`- ${m.id}`);
-  const work = mkdtempSync(join(tmpdir(), `quint-ts-bench-${m.id}-`));
+  const work = mkdtempSync(join(tmpdir(), `quint-check-bench-${m.id}-`));
   try {
     const routes = routesFor(m, work, join(work, "cache")).filter((r) => onlyRoutes === undefined || onlyRoutes.includes(r.id));
     const samples = new Map<string, Measured[]>(routes.map((r) => [r.id, []]));
-    // The warm-up runs also fill quint-ts's cache, so the timed runs of "quint-ts" find it warm.
+    // The warm-up runs also fill quint-check's cache, so the timed runs of "quint-check" find it warm.
     for (const r of routes) measure(r.command, r.cwd, r.env);
     for (let k = 0; k < RUNS; k += 1) {
       for (let j = 0; j < routes.length; j += 1) {
@@ -203,9 +203,9 @@ function measureAll() {
       if (row.verdicts.length !== 1 || row.verdicts[0] !== m.expect) problems.push(`${row.id}: verdicts ${row.verdicts.join(", ")}`);
     }
     if (m.expect === "passed") {
-      const counts = new Set(rows.filter((r) => !r.id.startsWith("quint-ts")).flatMap((r) => r.states));
-      const qts = rows.filter((r) => r.id.startsWith("quint-ts")).flatMap((r) => r.states);
-      if (counts.size !== 1 || qts.some((s) => !counts.has(s))) problems.push(`distinct states differ: ${rows.map((r) => `${r.id} ${r.states.join("/")}`).join("; ")}`);
+      const counts = new Set(rows.filter((r) => !r.id.startsWith("quint-check")).flatMap((r) => r.states));
+      const qc = rows.filter((r) => r.id.startsWith("quint-check")).flatMap((r) => r.states);
+      if (counts.size !== 1 || qc.some((s) => !counts.has(s))) problems.push(`distinct states differ: ${rows.map((r) => `${r.id} ${r.states.join("/")}`).join("; ")}`);
     }
     if (m.expect === "violated") {
       // Breadth-first search with one worker finds a shortest counterexample, so every route's has the same length.
@@ -236,8 +236,8 @@ if (outDir !== "results" && results !== undefined) {
     lines.push("| Route | Median ms | Min–max ms | CV | Peak MiB |", "| --- | --- | --- | --- | --- |",
       ...r.rows.map((x) => `| ${x.id} | ${x.msMedian.toFixed(0)} | ${x.msMin.toFixed(0)}–${x.msMax.toFixed(0)} | ${(x.msCv * 100).toFixed(1)} % | ` +
         `${x.peakMiBMedian === null ? "not measured" : x.peakMiBMedian.toFixed(0)} |`), "");
-    const warm = r.rows.find((x) => x.id === "quint-ts");
-    const off = r.rows.find((x) => x.id === "quint-ts-nocache");
+    const warm = r.rows.find((x) => x.id === "quint-check");
+    const off = r.rows.find((x) => x.id === "quint-check-nocache");
     if (warm !== undefined && off !== undefined) lines.push(`Cache warm against cache off: ${(off.msMedian - warm.msMedian).toFixed(0)} ms less at the median.`, "");
   }
   writeFileSync(resolve(root, "bench", outDir, `${environment.platform}-${machine}.md`), lines.join("\n"));

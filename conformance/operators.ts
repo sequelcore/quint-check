@@ -8,7 +8,7 @@
  * - undefined: the documentation says the behavior is undefined;
  * - contested: Quint's own sources disagree on the value;
  * - unspecified: the documentation doesn't say.
- * Only a defined case may pass in quint-ts; every other must be unsupported.
+ * Only a defined case may pass in quint-check; every other must be unsupported.
  */
 
 export type Semantics = "defined" | "undefined" | "contested" | "unspecified";
@@ -23,9 +23,9 @@ export interface OperatorCase {
   readonly semantics: Semantics;
   /** Where the documentation says it, from the Quint repository at the pinned version. */
   readonly source: string;
-  /** quint-ts's expected outcome when a defined case is outside what its backend can check; with why. */
-  readonly quintTs?: "unsupported";
-  readonly quintTsWhy?: string;
+  /** quint-check's expected outcome when a defined case is outside what its backend can check; with why. */
+  readonly quintCheck?: "unsupported";
+  readonly quintCheckWhy?: string;
   /** Other routes' outcomes already explained, by route; any other difference fails the run. */
   readonly known?: Readonly<Record<string, { outcome: string; why: string }>>;
 }
@@ -45,10 +45,10 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "int-arith", ops: ["iadd", "isub", "imul", "iuminus"], expr: "2 + 3 == 5 and 2 - 3 == -1 and 2 * -3 == -6 and -(2) == 0 - 2", semantics: "defined", source: `${BUILTIN} iadd, isub, imul, iuminus` },
   { id: "int-compare", ops: ["ilt", "igt", "ilte", "igte"], expr: "1 < 2 and 2 > 1 and 2 <= 2 and 2 >= 2 and not(2 < 2)", semantics: "defined", source: `${BUILTIN} ilt, igt, ilte, igte` },
   { id: "big-int", ops: ["imul", "eq"], expr: "4294967296 * 4294967296 == 18446744073709551616", semantics: "defined", source: `${BUILTIN} imul: int is unbounded`,
-    quintTs: "unsupported", quintTsWhy: "TLC's and tla-ts's integers are 32-bit",
+    quintCheck: "unsupported", quintCheckWhy: "TLC's and tla-ts's integers are 32-bit",
     known: { "evaluator-rust": { outcome: "error", why: "the Rust evaluator's integers are i64 (QNT600)" }, official: { outcome: "error", why: "TLC's integers are 32-bit" } } },
   { id: "int-overflow", ops: ["imul", "igt"], expr: "1073741824 * 4 > 0", semantics: "defined", source: `${BUILTIN} imul: int is unbounded`,
-    quintTs: "unsupported", quintTsWhy: "the product leaves TLC's 32-bit range; TLC and tla-ts stop rather than wrap",
+    quintCheck: "unsupported", quintCheckWhy: "the product leaves TLC's 32-bit range; TLC and tla-ts stop rather than wrap",
     known: { official: { outcome: "error", why: "TLC reports the overflow" } } },
   { id: "div-nonneg", ops: ["idiv", "imod"], expr: "7 / 2 == 3 and 7 % 2 == 1 and 0 / 5 == 0 and 99 / 2 == 49 and 98 % 2 == 0", semantics: "defined", source: `${LESSON_DIV} examples; truncation and floor agree for a non-negative dividend and positive divisor` },
   { id: "div-neg-dividend", ops: ["idiv"], expr: "(-7) / 2 == -4", semantics: "contested", source: `${LANG_DIV}; ${EVALUATORS_TRUNCATE}` },
@@ -99,13 +99,13 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "record-set", ops: ["Rec", "Set", "size", "filter", "field"], expr: "Set({ a: 1 }, { a: 1 }, { a: 2 }).size() == 2 and { a: 2 }.in(Set({ a: 1 }, { a: 2 })) and not({ a: 3 }.in(Set({ a: 1 }, { a: 2 }))) and Set({ a: 1, b: 0 }, { a: 2, b: 0 }).filter(r => r.a > 1) == Set({ a: 2, b: 0 })", semantics: "defined", source: `${RECORDS}; ${BUILTIN}:973 (records are values, so sets hold them)` },
   { id: "record-map", ops: ["Rec", "mapBy", "get", "set", "field"], expr: "Set({ a: 1 }, { a: 2 }).mapBy(r => r.a).get({ a: 2 }) == 2 and Set(1, 2).mapBy(k => { n: k, on: false }).set(1, { n: 1, on: true }).get(1).on and not(Set(1, 2).mapBy(k => { n: k, on: false }).get(2).on)", semantics: "defined", source: `${RECORDS}; ${BUILTIN} mapBy, get, set (records as keys and as values)` },
   { id: "record-variant", ops: ["variant", "matchVariant", "Rec", "field"], decls: "type T = A({ x: int, y: bool }) | B", expr: "(match A({ x: 1, y: true }) { | A(r) => r.x | B => 0 }) == 1 and A({ x: 1, y: true }) != A({ x: 1, y: false }) and A({ x: 1, y: true }) == A({ y: true, x: 1 })", semantics: "defined", source: `${RECORDS}; docs/content/docs/lang.md:1256 (Sum Types: a record as a constructor's payload)` },
-  { id: "record-odd-names", ops: ["Rec", "field", "with"], expr: "{ Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.Cardinality == 2 and { Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.with(\"Nat\", 5).Nat == 5 and { _a: 3, QTS__x: 4 }.QTS__x == 4", semantics: "defined", source: `${RECORDS}: field names are identifiers, so a TLA+ operator's name or quint-ts's prefix is a field name too` },
+  { id: "record-odd-names", ops: ["Rec", "field", "with"], expr: "{ Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.Cardinality == 2 and { Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.with(\"Nat\", 5).Nat == 5 and { _a: 3, QTS__x: 4 }.QTS__x == 4", semantics: "defined", source: `${RECORDS}: field names are identifiers, so a TLA+ operator's name or quint-check's prefix is a field name too` },
   { id: "record-empty", ops: ["Rec"], expr: "Rec() == Rec()", semantics: "unspecified", source: `${RECORDS} ("Warning: n >= 1"): no record without fields` },
   { id: "record-reserved-name", ops: ["Rec", "field"], expr: "{ DOMAIN: 1, IF: 2 }.DOMAIN == 1", semantics: "defined", source: `${RECORDS}: field names are identifiers`,
-    quintTs: "unsupported", quintTsWhy: "a TLA+ reserved word can't be a field of a TLA+ record, and Quint's official route rejects it too",
+    quintCheck: "unsupported", quintCheckWhy: "a TLA+ reserved word can't be a field of a TLA+ record, and Quint's official route rejects it too",
     known: { official: { outcome: "error", why: "Apalache's translation names the field DOMAIN, which TLA+'s parser rejects" } } },
   { id: "record-string-name", ops: ["Rec", "field"], expr: "Rec(\"a b\", 1).field(\"a b\") == 1", semantics: "defined", source: `${BUILTIN}:973 (Rec takes a string for each field name)`,
-    quintTs: "unsupported", quintTsWhy: "a field name that isn't an identifier can't be a field of a TLA+ record, and Quint's official route rejects it too",
+    quintCheck: "unsupported", quintCheckWhy: "a field name that isn't an identifier can't be a field of a TLA+ record, and Quint's official route rejects it too",
     known: { official: { outcome: "error", why: "Apalache's translation writes the field a b, which TLA+'s parser rejects" } } },
   // Tuples. Each case also holds the operator false where it should be, so a translation that reads the wrong item or reorders a tuple can't pass.
   { id: "tuple-item", ops: ["Tup", "item"], expr: "(1, \"a\", true)._1 == 1 and (1, \"a\", true)._2 == \"a\" and (1, \"a\", true)._3 and Tup(4, 5).item(2) == 5 and (4, 5)._1 != 5 and (4, 5)._2 != 4 and not((true, false)._2)", semantics: "defined", source: `${TUPLES}; ${BUILTIN}:1037 (Tup), :1052 (item; the documentation's own examples)` },
@@ -122,15 +122,15 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "tuple-map", ops: ["Tup", "mapBy", "get", "item"], expr: "Set((1, 2), (3, 4)).mapBy(t => t._1 + t._2).get((3, 4)) == 7 and Set(1, 2).mapBy(k => (k, k * 2)).get(2)._2 == 4 and Set(1, 2).mapBy(k => (k, k * 2)).get(1) != (2, 1)", semantics: "defined", source: `${TUPLES}; ${BUILTIN} mapBy, get (tuples as keys and as values)` },
   { id: "tuple-variant", ops: ["variant", "matchVariant", "Tup", "item"], decls: "type T = A((int, str)) | B", expr: "(match A((1, \"x\")) { | A(p) => p._1 | B => 0 }) == 1 and A((1, \"x\")) != A((1, \"y\")) and A((1, \"x\")) == A((1, \"x\"))", semantics: "defined", source: `${TUPLES}; docs/content/docs/lang.md:1256 (Sum Types: a tuple as a constructor's payload)` },
   { id: "tuple-unit", ops: ["Tup", "eq"], expr: "() == () and Tup() == ()", semantics: "defined", source: `${TUPLES} ("The empty tuple is also the canonical unit type", << >>)`,
-    quintTs: "unsupported", quintTsWhy: "Quint's documentation writes the empty tuple as << >>, its official route as [tag |-> \"UNIT\"], so a state that held one would print differently in each" },
+    quintCheck: "unsupported", quintCheckWhy: "Quint's documentation writes the empty tuple as << >>, its official route as [tag |-> \"UNIT\"], so a state that held one would print differently in each" },
   { id: "tuple-single", ops: ["Tup", "item"], expr: "Tup(1)._1 == 1", semantics: "unspecified", source: "docs/content/docs/lang.md:79 (a tuple type has n >= 2 items, and (int) is int)" },
   { id: "tuples-single", ops: ["tuples", "size"], expr: "tuples(Set(1, 2)).size() == 2", semantics: "unspecified", source: `${TUPLES}: S_1 \\X ... \\X S_n has no form with one set` },
   { id: "tuples-none", ops: ["tuples"], expr: "tuples() == tuples()", semantics: "unspecified", source: `${TUPLES}: S_1 \\X ... \\X S_n has no form with no set` },
   { id: "tuple-map-literal-key", ops: ["Map", "Tup", "get"], expr: "Map((1, 2) -> 3).get((1, 2)) == 3", semantics: "defined", source: "docs/content/docs/lang.md Maps; a tuple is a value, so it can be a key",
-    quintTs: "unsupported", quintTsWhy: "a Map literal's keys must be int, string or Boolean literals, so a repeated key is found at translation; a tuple isn't one" },
+    quintCheck: "unsupported", quintCheckWhy: "a Map literal's keys must be int, string or Boolean literals, so a repeated key is found at translation; a tuple isn't one" },
 ];
 
-/** Constructs outside the MVP: quint-ts must answer unsupported, at translation. */
+/** Constructs outside the MVP: quint-check must answer unsupported, at translation. */
 export const UNSUPPORTED_CASES: readonly { id: string; module: string }[] = [
   { id: "temporal", module: "var x: int\naction init = x' = 0\naction step = x' = x\nval inv = true\ntemporal always0 = always(x == 0)" },
   { id: "then", module: "var x: int\naction init = x' = 0\naction inc = x' = x + 1\naction step = inc.then(inc)\nval inv = true" },

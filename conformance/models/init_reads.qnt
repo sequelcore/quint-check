@@ -1,7 +1,7 @@
 // An init that reads a state variable. Quint's evaluators reject the read
 // (QNT502, "Variable x not set") whichever order the assignments come in,
 // while TLC reads `x = 0 /\ y = x + 1` as equations and solves it, so the
-// routes disagree. quint-ts refuses a read init evaluates, never passes it.
+// routes disagree. quint-check refuses a read init evaluates, never passes it.
 module init_reads_after {
   var x: int
   var y: int

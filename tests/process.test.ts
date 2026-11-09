@@ -1,5 +1,5 @@
 // The runner's fault scenarios, each through a stand-in child (tests/fixtures/fake-child.mjs). Written
-// with node:test so the same file runs under Bun (`bun test`) and under Node, which runs quint-ts once
+// with node:test so the same file runs under Bun (`bun test`) and under Node, which runs quint-check once
 // installed (`node --test tests/process.test.ts`).
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
@@ -22,7 +22,7 @@ const recorded = (file: string): Recorded | undefined => (existsSync(file) ? JSO
 
 /** Run the stand-in in `mode`; return how it ended, or why it was rejected, and the pids it recorded. */
 async function run(mode: string, options: { timeoutMs?: number; signal?: AbortSignal; command?: string; args?: string[]; onPidFile?: (file: string) => void } = {}): Promise<Run> {
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-process-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-process-test-"));
   const pidFile = join(dir, "pids.json");
   options.onPidFile?.(pidFile);
   const start = performance.now();
@@ -93,7 +93,7 @@ test("4. an already aborted signal rejects without starting the child", async ()
 
 test("5. an abort right after the child starts still stops it", async () => {
   const ac = new AbortController();
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-process-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-process-test-"));
   try {
     const pending = runProcess(process.execPath, [fake, "hang", join(dir, "pids.json")],
       { stdout: "ignore", deadline: performance.now() + 30_000, signal: ac.signal });
@@ -133,7 +133,7 @@ test("9. arguments spawn can't take resolve spawn-failed instead of throwing", a
   assert.equal(r.outcome?.kind, "spawn-failed");
 });
 
-test("10. a child ended by a signal quint-ts didn't send is told apart from a normal exit", async () => {
+test("10. a child ended by a signal quint-check didn't send is told apart from a normal exit", async () => {
   const r = await run("selfkill");
   // Windows has no signals: TerminateProcess shows as exit code 1.
   if (posix) assert.equal(r.outcome?.kind === "signaled" && r.outcome.signal, "SIGKILL");

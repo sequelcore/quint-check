@@ -32,7 +32,7 @@ module collisions_variable {
   val inv = a::x == a_x
 }
 
-// The model's q_step and the step quint-ts generates from it, q::step.
+// The model's q_step and the step quint-check generates from it, q::step.
 module collisions_generated {
   var x: int
   action q_step = x' = x
@@ -41,7 +41,7 @@ module collisions_generated {
   val inv = x < 2
 }
 
-// The model's q_inv_1 and the name quint-ts gives the first invariant.
+// The model's q_inv_1 and the name quint-check gives the first invariant.
 module collisions_invariant {
   var x: int
   val q_inv_1 = x >= 0

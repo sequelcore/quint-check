@@ -1,6 +1,6 @@
 name: Windows benchmark
 
-# Started by hand only. Times quint-ts with tla-ts's compile cache warm against the cache off, on one
+# Started by hand only. Times quint-check with tla-ts's compile cache warm against the cache off, on one
 # hosted runner, with tla-ts alone as a control for the runner's own noise. Hosted runners vary between
 # runs, so these timings are compared within a run only, never with a local machine's baseline.
 on:
@@ -34,11 +34,11 @@ jobs:
         with:
           node-version: 24.22.1
       - run: bun install --frozen-lockfile
-      # No Java: these routes are quint-ts's own, with tla-ts alone as the control.
+      # No Java: these routes are quint-check's own, with tla-ts alone as the control.
       - name: Benchmark
-        run: bun bench/run.ts --runs ${{ inputs.runs }} --routes quint-ts,quint-ts-nocache,tla-ts --out-dir results/ci
+        run: bun bench/run.ts --runs ${{ inputs.runs }} --routes quint-check,quint-check-nocache,tla-ts --out-dir results/ci
         env:
-          QUINT_TS_MACHINE: github-windows-2025-${{ runner.arch }}
+          QUINT_CHECK_MACHINE: github-windows-2025-${{ runner.arch }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

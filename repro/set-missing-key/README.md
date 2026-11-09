@@ -24,5 +24,5 @@ on this passes verification while its simulation fails.
 
 That every backend reject an operation outside its domain, as the
 simulators do. It's a design proposal for quint-co/quint, not a defect
-report, and the same question applies to `get` and `setBy`. quint-ts already
+report, and the same question applies to `get` and `setBy`. quint-check already
 does this: it reports `unsupported` at the state that reaches the operation.

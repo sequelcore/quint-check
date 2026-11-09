@@ -1,6 +1,6 @@
 # Benchmarks
 
-`bun run bench [--runs N]` times quint-ts against TLC and Quint's own TLC
+`bun run bench [--runs N]` times quint-check against TLC and Quint's own TLC
 route, and writes `bench/BASELINE.md` from the results of every
 platform and machine in `results/`. Correctness comes first: a model's timings are kept
 only when every route reaches the expected verdict in every run, with the
@@ -17,10 +17,10 @@ guarantee, bounded and symbolic, so it isn't compared.
 
 | Route | What it times |
 | --- | --- |
-| `quint-ts` | `quint-ts check`: Quint's frontend (Node), the translation, tla-ts, with tla-ts's compile cache warm |
-| `quint-ts-nocache` | The same with `QUINT_TS_CACHE=off`: tla-ts compiles itself on every check, as quint-ts did before the cache |
-| `tla-ts` | tla-ts alone on quint-ts's TLA+ |
-| `tlc-qts` | TLC from Apalache's jar on the same TLA+, so the checkers compare on one input |
+| `quint-check` | `quint-check check`: Quint's frontend (Node), the translation, tla-ts, with tla-ts's compile cache warm |
+| `quint-check-nocache` | The same with `QUINT_CHECK_CACHE=off`: tla-ts compiles itself on every check, as quint-check did before the cache |
+| `tla-ts` | tla-ts alone on quint-check's TLA+ |
+| `tlc-qc` | TLC from Apalache's jar on the same TLA+, so the checkers compare on one input |
 | `tlc-apalache` | That TLC on Apalache's translation, the TLA+ that `quint verify --backend=tlc` checks |
 | `quint-verify-tlc` | `quint verify --backend=tlc` end to end, starting its Apalache server |
 
@@ -52,7 +52,7 @@ the conformance corpus.
 
 ## Limits
 
-- One file per operating system and machine (`<platform>-<arch>-<machine>.json`, the machine from `QUINT_TS_MACHINE` or the CPU model); numbers don't transfer between machines. A GitHub-hosted runner's hardware can change between runs.
+- One file per operating system and machine (`<platform>-<arch>-<machine>.json`, the machine from `QUINT_CHECK_MACHINE` or the CPU model); numbers don't transfer between machines. A GitHub-hosted runner's hardware can change between runs.
 - Run nothing else heavy during a benchmark: the routes share the machine.
 - The JVM's default heap applies to the TLC routes, and Quint's
   `quint verify` uses its own default (`-Xmx8G`); memory follows those

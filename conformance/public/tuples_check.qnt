@@ -1,5 +1,5 @@
 // Invariants for Quint's public tuples.qnt, which declares none. Not part of Quint's examples:
-// written for quint-ts's conformance, importing tuples.qnt unchanged.
+// written for quint-check's conformance, importing tuples.qnt unchanged.
 
 // The step keeps myTup's first item and takes the second from (1, "world"), and the
 // definitions unpack tuples, so this holds in both reachable states.

@@ -15,7 +15,7 @@ tla-ts accepts operator parameters, but not one passed on in a recursive
 call, where TLC accepts it. A compatibility gap with TLC, for
 aidenybai/tla-ts. Its effect here: tla-ts can't load Apalache's
 `Apalache.tla`, so it can't run Apalache's translation of a Quint `fold`.
-quint-ts doesn't depend on it (it emits a recursive operator per fold, with
+quint-check doesn't depend on it (it emits a recursive operator per fold, with
 no operator parameter). Reported as [aidenybai/tla-ts#363](https://github.com/aidenybai/tla-ts/issues/363) on 2026-11-07.
 
 Fixed in tla-ts 0.0.9: `Recursive.tla` checks with no error, as in TLC.
