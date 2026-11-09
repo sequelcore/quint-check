@@ -1,15 +1,15 @@
 {
   "environment": {
-    "date": "2026-11-07T09:41:02.290Z",
+    "date": "2026-11-09T04:38:27.454Z",
     "platform": "darwin arm64",
     "bun": "1.4.4",
     "node": "v24.22.1",
     "quint": "0.33.1",
-    "tlaTs": "0.0.8-dev.8067c48",
+    "tlaTs": "0.0.9",
     "java": "openjdk version \"25.0.5\" 2026-10-20 LTS",
     "apalache": "0.62.4",
     "apalacheJarSha256": "e5223915507b65cc5f1638bd037ede60f8a4fc1644aff46355779f9b05df9262",
-    "commit": "fb35f1b3205abf1d9c9e591668c266cb81944350",
+    "commit": "aff396e043666f276fde724da05a1996aa7b16a1",
     "dirty": false
   },
   "failures": [],
@@ -24,21 +24,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt eq, neq",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (570ms at 2 traces/second)."
+          "detail": "[ok] No violation found (10ms at 100 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (358ms)."
+          "detail": "[ok] No violation found (569ms)."
         }
       },
       "verdicts": {
@@ -60,7 +60,7 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt iff, implies, not, and, or",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
@@ -70,11 +70,44 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (370ms)."
+          "detail": "[ok] No violation found (413ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "iff-false",
+      "ops": [
+        "iff",
+        "not"
+      ],
+      "expr": "not(true iff false) and not(false iff true) and (false iff false)",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt iff",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (394ms)."
         }
       },
       "verdicts": {
@@ -95,21 +128,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt iadd, isub, imul, iuminus",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (11ms at 91 traces/second)."
+          "detail": "[ok] No violation found (12ms at 83 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (351ms)."
+          "detail": "[ok] No violation found (405ms)."
         }
       },
       "verdicts": {
@@ -130,21 +163,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt ilt, igt, ilte, igte",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (31ms at 32 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (380ms)."
+          "detail": "[ok] No violation found (435ms)."
         }
       },
       "verdicts": {
@@ -162,8 +195,8 @@
       "expr": "4294967296 * 4294967296 == 18446744073709551616",
       "semantics": "defined",
       "source": "quint/src/builtin.qnt imul: int is unbounded",
-      "quintTs": "unsupported",
-      "quintTsWhy": "TLC's and tla-ts's integers are 32-bit",
+      "quintCheck": "unsupported",
+      "quintCheckWhy": "TLC's and tla-ts's integers are 32-bit",
       "known": {
         "evaluator-rust": {
           "outcome": "error",
@@ -175,7 +208,7 @@
         }
       },
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "an integer outside the checker's 32-bit range (TLC can't handle a number this big: 4294967296 at line 26, column 12); Quint's integers are unbounded"
         },
@@ -207,8 +240,8 @@
       "expr": "1073741824 * 4 > 0",
       "semantics": "defined",
       "source": "quint/src/builtin.qnt imul: int is unbounded",
-      "quintTs": "unsupported",
-      "quintTsWhy": "the product leaves TLC's 32-bit range; TLC and tla-ts stop rather than wrap",
+      "quintCheck": "unsupported",
+      "quintCheckWhy": "the product leaves TLC's 32-bit range; TLC and tla-ts stop rather than wrap",
       "known": {
         "official": {
           "outcome": "error",
@@ -216,17 +249,17 @@
         }
       },
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "an integer outside the checker's 32-bit range (Overflow when computing 1073741824*4); Quint's integers are unbounded"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (11ms at 91 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -249,7 +282,7 @@
       "semantics": "defined",
       "source": "docs/content/docs/lessons/integers.md:242 (\"compute the integer part and the remainder\") examples; truncation and floor agree for a non-negative dividend and positive divisor",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
@@ -259,11 +292,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (11ms at 91 traces/second)."
+          "detail": "[ok] No violation found (10ms at 100 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (382ms)."
+          "detail": "[ok] No violation found (332ms)."
         }
       },
       "verdicts": {
@@ -281,21 +314,23 @@
       "semantics": "contested",
       "source": "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\"); Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "/ with a negative operand or a zero divisor"
         },
         "evaluator-ts": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (3ms at 333 traces/second)."
+          "detail": "[violation] Found an issue (6ms at 167 traces/second).",
+          "broken": []
         },
         "evaluator-rust": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (8ms at 125 traces/second)."
+          "detail": "[violation] Found an issue (22ms at 45 traces/second).",
+          "broken": []
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (312ms)."
+          "detail": "[ok] No violation found (421ms)."
         }
       },
       "verdicts": {
@@ -313,21 +348,23 @@
       "semantics": "contested",
       "source": "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\"); Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "/ with a negative operand or a zero divisor"
         },
         "evaluator-ts": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (3ms at 333 traces/second)."
+          "detail": "[violation] Found an issue (4ms at 250 traces/second).",
+          "broken": []
         },
         "evaluator-rust": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (9ms at 111 traces/second)."
+          "detail": "[violation] Found an issue (12ms at 83 traces/second).",
+          "broken": []
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (301ms)."
+          "detail": "[ok] No violation found (447ms)."
         }
       },
       "verdicts": {
@@ -345,21 +382,23 @@
       "semantics": "contested",
       "source": "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\"); Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "% with a negative operand or a zero divisor"
         },
         "evaluator-ts": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (4ms at 250 traces/second)."
+          "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+          "broken": []
         },
         "evaluator-rust": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (9ms at 111 traces/second)."
+          "detail": "[violation] Found an issue (13ms at 77 traces/second).",
+          "broken": []
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (340ms)."
+          "detail": "[ok] No violation found (418ms)."
         }
       },
       "verdicts": {
@@ -377,17 +416,17 @@
       "semantics": "contested",
       "source": "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\"); Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "% with a negative operand or a zero divisor"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (4ms at 250 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (11ms at 91 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -409,7 +448,7 @@
       "semantics": "unspecified",
       "source": "quint/src/builtin.qnt idiv: no rule for a zero divisor; the evaluators raise QNT503",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "/ with a negative operand or a zero divisor"
         },
@@ -442,21 +481,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt Set",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (319ms)."
+          "detail": "[ok] No violation found (467ms)."
         }
       },
       "verdicts": {
@@ -475,7 +514,7 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt in, contains",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
@@ -485,11 +524,44 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (17ms at 59 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (331ms)."
+          "detail": "[ok] No violation found (509ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "contains-false",
+      "ops": [
+        "contains",
+        "not"
+      ],
+      "expr": "not(Set(1, 2).contains(3)) and not(Set(1).exclude(Set(1)).contains(1))",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt contains",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (11ms at 91 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (539ms)."
         }
       },
       "verdicts": {
@@ -510,21 +582,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt union, intersect, exclude, subseteq",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (8ms at 125 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (16ms at 63 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (309ms)."
+          "detail": "[ok] No violation found (547ms)."
         }
       },
       "verdicts": {
@@ -543,21 +615,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt size, to",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (15ms at 67 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (321ms)."
+          "detail": "[ok] No violation found (609ms)."
         }
       },
       "verdicts": {
@@ -576,21 +648,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt exists, forall",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (341ms)."
+          "detail": "[ok] No violation found (604ms)."
         }
       },
       "verdicts": {
@@ -609,21 +681,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt filter, map",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (8ms at 125 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (289ms)."
+          "detail": "[ok] No violation found (598ms)."
         }
       },
       "verdicts": {
@@ -641,21 +713,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt fold: a sum is associative and commutative",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (297ms)."
+          "detail": "[ok] No violation found (519ms)."
         }
       },
       "verdicts": {
@@ -673,21 +745,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt fold: no element, so the initial value",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (4ms at 250 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (14ms at 71 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (319ms)."
+          "detail": "[ok] No violation found (574ms)."
         }
       },
       "verdicts": {
@@ -705,21 +777,22 @@
       "semantics": "undefined",
       "source": "quint/src/builtin.qnt:182 (\"must be associative and commutative or else it has undefined behavior\")",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "a fold whose operator isn't `acc + f(x)`: Quint leaves other folds undefined unless associative and commutative"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (9ms at 111 traces/second)."
+          "detail": "[violation] Found an issue (15ms at 67 traces/second).",
+          "broken": []
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (305ms)."
+          "detail": "[ok] No violation found (491ms)."
         }
       },
       "verdicts": {
@@ -738,21 +811,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt Map, get",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (354ms)."
+          "detail": "[ok] No violation found (596ms)."
         }
       },
       "verdicts": {
@@ -772,21 +845,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt mapBy, keys",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (17ms at 59 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (375ms)."
+          "detail": "[ok] No violation found (530ms)."
         }
       },
       "verdicts": {
@@ -805,21 +878,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt set (key in the map)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (8ms at 125 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (21ms at 48 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (320ms)."
+          "detail": "[ok] No violation found (674ms)."
         }
       },
       "verdicts": {
@@ -837,7 +910,7 @@
       "semantics": "undefined",
       "source": "quint/src/builtin.qnt:290 (\"If `k` is not in `m` then the behavior is undefined\")",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "get with a key the map lacks"
         },
@@ -869,7 +942,7 @@
       "semantics": "undefined",
       "source": "quint/src/builtin.qnt:348 (\"If `k` is not a key in `m`, this operator has undefined behavior\")",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "set with a key the map lacks"
         },
@@ -883,7 +956,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (322ms)."
+          "detail": "[ok] No violation found (569ms)."
         }
       },
       "verdicts": {
@@ -901,7 +974,7 @@
       "semantics": "unspecified",
       "source": "quint/src/builtin.qnt Map: no rule for a repeated key",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "a Map literal with a repeated key"
         },
@@ -911,7 +984,7 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "violated",
@@ -936,21 +1009,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md:1256 (Sum Types: constructors, and match choosing the case of the variant's label)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (295ms)."
+          "detail": "[ok] No violation found (599ms)."
         }
       },
       "verdicts": {
@@ -970,21 +1043,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md:1256 (Sum Types: constructors, and match choosing the case of the variant's label)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (11ms at 91 traces/second)."
+          "detail": "[ok] No violation found (22ms at 45 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (302ms)."
+          "detail": "[ok] No violation found (552ms)."
         }
       },
       "verdicts": {
@@ -1003,21 +1076,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md:1256 (Sum Types: constructors, and match choosing the case of the variant's label); the default case `_` appears in Quint's examples, such as classic/distributed/Bakery/bakery.qnt",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (8ms at 125 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (318ms)."
+          "detail": "[ok] No violation found (506ms)."
         }
       },
       "verdicts": {
@@ -1038,21 +1111,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md:1256 (Sum Types: constructors, and match choosing the case of the variant's label); lang.md's own example is a set of variants",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (10ms at 100 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (286ms)."
+          "detail": "[ok] No violation found (586ms)."
         }
       },
       "verdicts": {
@@ -1073,21 +1146,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md:1256 (Sum Types: constructors, and match choosing the case of the variant's label)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (317ms)."
+          "detail": "[ok] No violation found (490ms)."
         }
       },
       "verdicts": {
@@ -1107,21 +1180,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md:1256 (Sum Types: constructors, and match choosing the case of the variant's label)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+          "detail": "[ok] No violation found (27ms at 37 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (359ms)."
+          "detail": "[ok] No violation found (573ms)."
         }
       },
       "verdicts": {
@@ -1139,21 +1212,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:374 (put; the documentation's own example)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (15ms at 67 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (302ms)."
+          "detail": "[ok] No violation found (505ms)."
         }
       },
       "verdicts": {
@@ -1171,21 +1244,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:374 (put; the documentation's own example)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (333ms)."
+          "detail": "[ok] No violation found (588ms)."
         }
       },
       "verdicts": {
@@ -1205,21 +1278,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:374 (put: the map m but with k mapped to v)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (12ms at 83 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (323ms)."
+          "detail": "[ok] No violation found (529ms)."
         }
       },
       "verdicts": {
@@ -1237,21 +1310,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:360 (setBy; the documentation's own example)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (12ms at 83 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (325ms)."
+          "detail": "[ok] No violation found (534ms)."
         }
       },
       "verdicts": {
@@ -1270,21 +1343,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:360 (setBy: k set to f(m.get(k)), the other keys unchanged)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (3ms at 333 traces/second)."
+          "detail": "[ok] No violation found (9ms at 111 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (12ms at 83 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (333ms)."
+          "detail": "[ok] No violation found (498ms)."
         }
       },
       "verdicts": {
@@ -1302,7 +1375,7 @@
       "semantics": "undefined",
       "source": "quint/src/builtin.qnt:362 (\"If `k` is not present in `m`, this operator has undefined behavior\")",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "unsupported",
           "detail": "setBy with a key the map lacks"
         },
@@ -1316,7 +1389,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (306ms)."
+          "detail": "[ok] No violation found (508ms)."
         }
       },
       "verdicts": {
@@ -1334,21 +1407,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:331 (setOfMaps; the documentation's own example)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (333ms)."
+          "detail": "[ok] No violation found (584ms)."
         }
       },
       "verdicts": {
@@ -1367,21 +1440,21 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:331 (setOfMaps: the set of all maps from keys to values)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+          "detail": "[ok] No violation found (12ms at 83 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (15ms at 67 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (363ms)."
+          "detail": "[ok] No violation found (539ms)."
         }
       },
       "verdicts": {
@@ -1400,7 +1473,7 @@
       "semantics": "defined",
       "source": "quint/src/builtin.qnt:331 (setOfMaps: all maps from no keys is the one empty map; to no values, none)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
@@ -1410,11 +1483,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (11ms at 91 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (311ms)."
+          "detail": "[ok] No violation found (477ms)."
         }
       },
       "verdicts": {
@@ -1433,21 +1506,21 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md Maps (Map() is the map with no keys)",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (308ms)."
+          "detail": "[ok] No violation found (497ms)."
         }
       },
       "verdicts": {
@@ -1465,7 +1538,7 @@
       "semantics": "defined",
       "source": "docs/content/docs/lang.md if-then-else",
       "routes": {
-        "quint-ts": {
+        "quint-check": {
           "outcome": "passed",
           "detail": "1 states"
         },
@@ -1475,11 +1548,1085 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+          "detail": "[ok] No violation found (12ms at 83 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (328ms)."
+          "detail": "[ok] No violation found (568ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-field",
+      "ops": [
+        "Rec",
+        "field"
+      ],
+      "expr": "{ a: 1, b: true }.a == 1 and { a: 1, b: true }.b and { a: 1, b: 2 }.field(\"b\") == 2 and { a: 1, b: 2 }.a != 2 and not({ a: 1, b: false }.b)",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records); quint/src/builtin.qnt:973 (Rec), :987 (field)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (16ms at 63 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (475ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-eq",
+      "ops": [
+        "Rec",
+        "eq",
+        "neq"
+      ],
+      "expr": "{ a: 1, b: 2 } == { b: 2, a: 1 } and { a: 1, b: 2 } != { a: 1, b: 3 } and not({ a: 1 } == { a: 2 }) and Rec(\"a\", 1) == { a: 1 }",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records); quint/src/builtin.qnt:973 (Rec: a record is its fields and their values)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (552ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-with",
+      "ops": [
+        "with",
+        "Rec",
+        "field"
+      ],
+      "expr": "{ a: 1, b: 2 }.with(\"a\", 3) == { a: 3, b: 2 } and { a: 1, b: 2 }.with(\"a\", 3).b == 2 and { a: 1, b: 2 }.with(\"a\", 3) != { a: 1, b: 2 } and { a: 1, b: 2 }.with(\"a\", 1) == { a: 1, b: 2 }",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:1012 (with; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (446ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-spread",
+      "ops": [
+        "with",
+        "Rec"
+      ],
+      "expr": "{ ...{ a: 1, b: 2, c: 3 }, a: 5, c: 6 } == { a: 5, b: 2, c: 6 } and { ...{ a: 1, b: 2 }, b: 7 }.a == 1 and { ...{ a: 1, b: 2 }, b: 7 } != { a: 1, b: 2 }",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records) ({ f1: e1, fN: eN, ...r } is [r EXCEPT !.f1 = e1, !.fN = eN])",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (16ms at 63 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (534ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-field-names",
+      "ops": [
+        "fieldNames",
+        "Rec"
+      ],
+      "expr": "{ a: 1, b: true }.fieldNames() == Set(\"a\", \"b\") and not({ a: 1, b: true }.fieldNames().contains(\"c\")) and { a: 1 }.with(\"a\", 2).fieldNames() == Set(\"a\")",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:1002 (fieldNames; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (23ms at 43 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (699ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-nested",
+      "ops": [
+        "Rec",
+        "field",
+        "with"
+      ],
+      "expr": "{ a: { b: 1, c: 2 }, d: 3 }.a.c == 2 and { ...{ a: { b: 1, c: 2 }, d: 3 }, a: { ...{ b: 1, c: 2 }, b: 5 } } == { a: { b: 5, c: 2 }, d: 3 } and { a: { b: 1 } } != { a: { b: 2 } }",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records): a field's value may be a record",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (14ms at 71 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (26ms at 38 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (760ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-set",
+      "ops": [
+        "Rec",
+        "Set",
+        "size",
+        "filter",
+        "field"
+      ],
+      "expr": "Set({ a: 1 }, { a: 1 }, { a: 2 }).size() == 2 and { a: 2 }.in(Set({ a: 1 }, { a: 2 })) and not({ a: 3 }.in(Set({ a: 1 }, { a: 2 }))) and Set({ a: 1, b: 0 }, { a: 2, b: 0 }).filter(r => r.a > 1) == Set({ a: 2, b: 0 })",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records); quint/src/builtin.qnt:973 (records are values, so sets hold them)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (22ms at 45 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (736ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-map",
+      "ops": [
+        "Rec",
+        "mapBy",
+        "get",
+        "set",
+        "field"
+      ],
+      "expr": "Set({ a: 1 }, { a: 2 }).mapBy(r => r.a).get({ a: 2 }) == 2 and Set(1, 2).mapBy(k => { n: k, on: false }).set(1, { n: 1, on: true }).get(1).on and not(Set(1, 2).mapBy(k => { n: k, on: false }).get(2).on)",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records); quint/src/builtin.qnt mapBy, get, set (records as keys and as values)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (10ms at 100 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (855ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-variant",
+      "ops": [
+        "variant",
+        "matchVariant",
+        "Rec",
+        "field"
+      ],
+      "decls": "type T = A({ x: int, y: bool }) | B",
+      "expr": "(match A({ x: 1, y: true }) { | A(r) => r.x | B => 0 }) == 1 and A({ x: 1, y: true }) != A({ x: 1, y: false }) and A({ x: 1, y: true }) == A({ y: true, x: 1 })",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records); docs/content/docs/lang.md:1256 (Sum Types: a record as a constructor's payload)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (24ms at 42 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (634ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-odd-names",
+      "ops": [
+        "Rec",
+        "field",
+        "with"
+      ],
+      "expr": "{ Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.Cardinality == 2 and { Nat: 1, Cardinality: 2, _a: 3, QTS__x: 4 }.with(\"Nat\", 5).Nat == 5 and { _a: 3, QTS__x: 4 }.QTS__x == 4",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records): field names are identifiers, so a TLA+ operator's name or quint-check's prefix is a field name too",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (27ms at 37 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (601ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "record-empty",
+      "ops": [
+        "Rec"
+      ],
+      "expr": "Rec() == Rec()",
+      "semantics": "unspecified",
+      "source": "docs/content/docs/lang.md:1195 (Records) (\"Warning: n >= 1\"): no record without fields",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "a record with no fields, which Quint's documentation doesn't define"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (4ms at 250 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (16ms at 63 traces/second)."
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Parsing or semantic analysis failed."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "record-reserved-name",
+      "ops": [
+        "Rec",
+        "field"
+      ],
+      "expr": "{ DOMAIN: 1, IF: 2 }.DOMAIN == 1",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1195 (Records): field names are identifiers",
+      "quintCheck": "unsupported",
+      "quintCheckWhy": "a TLA+ reserved word can't be a field of a TLA+ record, and Quint's official route rejects it too",
+      "known": {
+        "official": {
+          "outcome": "error",
+          "why": "Apalache's translation names the field DOMAIN, which TLA+'s parser rejects"
+        }
+      },
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "the record field \"DOMAIN\", which can't name a field of a TLA+ record"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (16ms at 63 traces/second)."
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Parsing or semantic analysis failed."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "known: Apalache's translation names the field DOMAIN, which TLA+'s parser rejects"
+      }
+    },
+    {
+      "id": "record-string-name",
+      "ops": [
+        "Rec",
+        "field"
+      ],
+      "expr": "Rec(\"a b\", 1).field(\"a b\") == 1",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:973 (Rec takes a string for each field name)",
+      "quintCheck": "unsupported",
+      "quintCheckWhy": "a field name that isn't an identifier can't be a field of a TLA+ record, and Quint's official route rejects it too",
+      "known": {
+        "official": {
+          "outcome": "error",
+          "why": "Apalache's translation writes the field a b, which TLA+'s parser rejects"
+        }
+      },
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "the record field \"a b\", which can't name a field of a TLA+ record"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (15ms at 67 traces/second)."
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Parsing or semantic analysis failed."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "known: Apalache's translation writes the field a b, which TLA+'s parser rejects"
+      }
+    },
+    {
+      "id": "tuple-item",
+      "ops": [
+        "Tup",
+        "item"
+      ],
+      "expr": "(1, \"a\", true)._1 == 1 and (1, \"a\", true)._2 == \"a\" and (1, \"a\", true)._3 and Tup(4, 5).item(2) == 5 and (4, 5)._1 != 5 and (4, 5)._2 != 4 and not((true, false)._2)",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n); quint/src/builtin.qnt:1037 (Tup), :1052 (item; the documentation's own examples)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (28ms at 36 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (582ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-eq",
+      "ops": [
+        "Tup",
+        "eq",
+        "neq"
+      ],
+      "expr": "(1, 2) == (1, 2) and Tup(1, 2) == (1, 2) and (1, 2) != (2, 1) and not((1, 2) == (1, 3)) and (1, \"a\") != (1, \"b\")",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n): a tuple is its items, in order",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (22ms at 45 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (673ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-wide",
+      "ops": [
+        "Tup",
+        "item"
+      ],
+      "expr": "(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)._11 == 11 and (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)._10 == 10 and (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)._1 != 11",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n) (t._1 to t._50)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (24ms at 42 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (660ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-set",
+      "ops": [
+        "Tup",
+        "Set",
+        "size",
+        "in"
+      ],
+      "expr": "Set((1, 2), (1, 2), (2, 1)).size() == 2 and (2, 1).in(Set((1, 2), (2, 1))) and not((3, 3).in(Set((1, 2), (2, 1))))",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n): tuples are values, so sets hold them",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (595ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuples-product",
+      "ops": [
+        "tuples",
+        "Tup",
+        "eq",
+        "keys"
+      ],
+      "expr": "tuples(Set(1, 2), Set(3, 4)) == Set((1, 3), (1, 4), (2, 3), (2, 4)) and tuples(Set(1, 2), Set(3, 4)) != Set((3, 1), (4, 1), (3, 2), (4, 2)) and tuples(Set(1, 2).mapBy(k => k).keys(), Set(3)) == Set((1, 3), (2, 3))",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:1064 (tuples; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (17ms at 59 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (25ms at 40 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (602ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuples-three",
+      "ops": [
+        "tuples",
+        "size",
+        "in"
+      ],
+      "expr": "tuples(Set(1, 2), Set(\"a\"), Set(true, false)).size() == 4 and (2, \"a\", false).in(tuples(Set(1, 2), Set(\"a\"), Set(true, false))) and not((\"a\", 2, false).in(tuples(Set(\"a\"), Set(1), Set(true))))",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (22ms at 45 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (706ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuples-empty-factor",
+      "ops": [
+        "tuples",
+        "size",
+        "exclude"
+      ],
+      "expr": "tuples(Set(1, 2), Set(1).exclude(Set(1))).size() == 0 and tuples(Set(1, 2), Set(3)).size() == 2",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:1054 (tuples: every (t0, ..., tn) with each ti in si, so none when one si is empty)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (8ms at 125 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (673ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-unpack",
+      "ops": [
+        "map",
+        "forall",
+        "exists",
+        "filter",
+        "item"
+      ],
+      "expr": "Set((1, 2), (3, 4)).map(((a, b)) => a + b) == Set(3, 7) and Set((1, 2)).forall(((a, b)) => a < b) and not(Set((2, 1)).exists(((a, b)) => a < b)) and tuples(1.to(3), 1.to(3), 1.to(3)).filter(((a, b, c)) => a + b + c == 9) == Set((3, 3, 3))",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:729 (((x_1, ..., x_n)) => e is t => e with each x_i = t._i)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (11ms at 91 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (13ms at 77 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (614ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-unpack-shadow",
+      "ops": [
+        "forall",
+        "item"
+      ],
+      "decls": "pure val a = 5",
+      "expr": "Set((1, 2)).forall(((a, b)) => a == 1 and b == 2) and a == 5",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:729 (an unpacked name is local to its lambda, so it hides a definition of the same name)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (21ms at 48 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (626ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-nested",
+      "ops": [
+        "Tup",
+        "item",
+        "tuples"
+      ],
+      "expr": "((1, 2), 3)._1._2 == 2 and ((1, 2), 3) != ((2, 1), 3) and (1, (2, (3, 4)))._2._2._1 == 3 and tuples(Set((1, 2)), Set(3)) == Set(((1, 2), 3))",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n): an item may be a tuple",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (17ms at 59 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (641ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-record",
+      "ops": [
+        "Tup",
+        "item",
+        "Rec",
+        "field"
+      ],
+      "expr": "{ p: (1, 2) }.p._2 == 2 and ({ a: 1 }, 2)._1.a == 1 and { p: (1, 2) } != { p: (2, 1) } and ({ a: 1, b: 2 }, 0) == ({ b: 2, a: 1 }, 0)",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n); docs/content/docs/lang.md:1195 (Records): a record's field may be a tuple, and a tuple's item a record",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (11ms at 91 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (719ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-map",
+      "ops": [
+        "Tup",
+        "mapBy",
+        "get",
+        "item"
+      ],
+      "expr": "Set((1, 2), (3, 4)).mapBy(t => t._1 + t._2).get((3, 4)) == 7 and Set(1, 2).mapBy(k => (k, k * 2)).get(2)._2 == 4 and Set(1, 2).mapBy(k => (k, k * 2)).get(1) != (2, 1)",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n); quint/src/builtin.qnt mapBy, get (tuples as keys and as values)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (599ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-variant",
+      "ops": [
+        "variant",
+        "matchVariant",
+        "Tup",
+        "item"
+      ],
+      "decls": "type T = A((int, str)) | B",
+      "expr": "(match A((1, \"x\")) { | A(p) => p._1 | B => 0 }) == 1 and A((1, \"x\")) != A((1, \"y\")) and A((1, \"x\")) == A((1, \"x\"))",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n); docs/content/docs/lang.md:1256 (Sum Types: a tuple as a constructor's payload)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (17ms at 59 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (796ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-unit",
+      "ops": [
+        "Tup",
+        "eq"
+      ],
+      "expr": "() == () and Tup() == ()",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n) (\"The empty tuple is also the canonical unit type\", << >>)",
+      "quintCheck": "unsupported",
+      "quintCheckWhy": "Quint's documentation writes the empty tuple as << >>, its official route as [tag |-> \"UNIT\"], so a state that held one would print differently in each",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "the empty tuple, which Quint's documentation writes << >> and its official route [tag |-> \"UNIT\"]"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (23ms at 43 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (600ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "tuple-single",
+      "ops": [
+        "Tup",
+        "item"
+      ],
+      "expr": "Tup(1)._1 == 1",
+      "semantics": "unspecified",
+      "source": "docs/content/docs/lang.md:79 (a tuple type has n >= 2 items, and (int) is int)",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "a tuple of one item, which Quint's documentation doesn't define (a tuple type has at least two)"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (606ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "tuples-single",
+      "ops": [
+        "tuples",
+        "size"
+      ],
+      "expr": "tuples(Set(1, 2)).size() == 2",
+      "semantics": "unspecified",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n): S_1 \\X ... \\X S_n has no form with one set",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "tuples of 1 set(s): Quint's documentation defines it as S_1 \\X ... \\X S_n, and its official route rejects fewer than two"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (15ms at 67 traces/second)."
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "error: error"
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "tuples-none",
+      "ops": [
+        "tuples"
+      ],
+      "expr": "tuples() == tuples()",
+      "semantics": "unspecified",
+      "source": "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n): S_1 \\X ... \\X S_n has no form with no set",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "tuples of 0 set(s): Quint's documentation defines it as S_1 \\X ... \\X S_n, and its official route rejects fewer than two"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (9ms at 111 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "error: error"
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "tuple-map-literal-key",
+      "ops": [
+        "Map",
+        "Tup",
+        "get"
+      ],
+      "expr": "Map((1, 2) -> 3).get((1, 2)) == 3",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md Maps; a tuple is a value, so it can be a key",
+      "quintCheck": "unsupported",
+      "quintCheckWhy": "a Map literal's keys must be int, string or Boolean literals, so a repeated key is found at translation; a tuple isn't one",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "a Map literal with a key that isn't a literal"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (616ms)."
         }
       },
       "verdicts": {
@@ -1506,24 +2653,9 @@
       "reason": "operator chooseSome"
     },
     {
-      "id": "record",
-      "status": "unsupported",
-      "reason": "operator with"
-    },
-    {
-      "id": "tuple",
-      "status": "unsupported",
-      "reason": "operator Tup"
-    },
-    {
       "id": "list",
       "status": "unsupported",
       "reason": "operator nth"
-    },
-    {
-      "id": "variant-record-payload",
-      "status": "unsupported",
-      "reason": "operator Rec"
     },
     {
       "id": "set-to-map",
@@ -1557,7 +2689,7 @@
       "group": "partially supported",
       "expected": "inconclusive",
       "status": "inconclusive",
-      "reason": "the checker stopped at the time limit before exploring every state"
+      "reason": "timeout"
     },
     {
       "id": "weakFairness",
@@ -1597,9 +2729,9 @@
     {
       "id": "tictactoe",
       "group": "refused",
-      "expected": "unsupported: operator Tup",
+      "expected": "unsupported: operator eventually",
       "status": "unsupported",
-      "reason": "operator Tup"
+      "reason": "operator eventually"
     },
     {
       "id": "BinSearch",
@@ -1625,16 +2757,16 @@
     {
       "id": "bakery",
       "group": "refused",
-      "expected": "unsupported: operator item",
+      "expected": "unsupported: unresolved name Nat",
       "status": "unsupported",
-      "reason": "operator item"
+      "reason": "unresolved name Nat"
     },
     {
-      "id": "demo-mutex-records",
+      "id": "demo-mutex-list",
       "group": "refused",
-      "expected": "unsupported: operator Rec",
+      "expected": "unsupported: operator List",
       "status": "unsupported",
-      "reason": "operator Rec"
+      "reason": "operator List"
     }
   ],
   "modelRows": [
@@ -1656,18 +2788,18 @@
         "igte"
       ],
       "note": "nondet client, two actions, instance with a constant",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "20 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (56ms at 5357 traces/second)."
+        "detail": "[ok] No violation found (181ms at 1657 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (340ms)."
+        "detail": "[ok] No violation found (529ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1675,7 +2807,7 @@
           "edges": 60,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1693,12 +2825,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -1716,18 +2848,19 @@
         "actionAny"
       ],
       "note": "planted fault: the stock check allows -1",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "21 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (12ms at 83 traces/second)."
+        "detail": "[violation] Found an issue (27ms at 37 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1735,7 +2868,7 @@
           "edges": 210,
           "violating": 36
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1753,21 +2886,28 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
       }
     },
     {
@@ -1796,18 +2936,18 @@
         "Map"
       ],
       "note": "two nondet choices, the second depending on the first; parameterized action",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "107 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (178ms at 1685 traces/second)."
+        "detail": "[ok] No violation found (472ms at 636 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (325ms)."
+        "detail": "[ok] No violation found (1470ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1815,7 +2955,7 @@
           "edges": 401,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1833,12 +2973,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -1856,18 +2996,19 @@
         "set"
       ],
       "note": "planted fault: one transfer moves two tokens",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (14ms at 71 traces/second)."
+        "detail": "[violation] Found an issue (20ms at 50 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1875,7 +3016,7 @@
           "edges": 401,
           "violating": 29
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -1893,21 +3034,28 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
       }
     },
     {
@@ -1919,18 +3067,18 @@
         "idiv"
       ],
       "note": "reaches (-7) / 2, whose value Quint's sources disagree on",
-      "quintTs": "unsupported",
+      "quintCheck": "unsupported",
       "detail": "/ with a negative operand or a zero divisor",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (16ms at 18750 traces/second)."
+        "detail": "[ok] No violation found (21ms at 14286 traces/second)."
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": false,
           "why": "Error: The first argument of Assert evaluated to FALSE; the second argument was:",
           "init": 1,
@@ -1938,7 +3086,7 @@
           "edges": 0,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": false,
           "why": "Error: The first argument of Assert evaluated to FALSE; the second argument was:",
           "init": 1,
@@ -1956,12 +3104,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": false,
           "why": "incomplete: Error: The first argument of Assert evaluated to FALSE; the second argument was:; Error: The first argument of Assert evaluated to FALSE; the second argument was:",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": false,
           "why": "incomplete: Error: The first argument of Assert evaluated to FALSE; the second argument was:",
           "differences": {}
@@ -1983,18 +3131,18 @@
         "eq"
       ],
       "note": "three processes, one lock",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "20 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (52ms at 5769 traces/second)."
+        "detail": "[ok] No violation found (99ms at 3030 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (302ms)."
+        "detail": "[ok] No violation found (635ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2002,7 +3150,7 @@
           "edges": 48,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2020,12 +3168,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2043,18 +3191,19 @@
         "set"
       ],
       "note": "planted fault: enter doesn't check the lock",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "18 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (11ms at 91 traces/second)."
+        "detail": "[violation] Found an issue (32ms at 31 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2062,7 +3211,7 @@
           "edges": 135,
           "violating": 13
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2080,21 +3229,28 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
       }
     },
     {
@@ -2112,18 +3268,18 @@
         "eq"
       ],
       "note": "variants without payload, compared and stored in a map",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "20 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (51ms at 5882 traces/second)."
+        "detail": "[ok] No violation found (135ms at 2222 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (291ms)."
+        "detail": "[ok] No violation found (846ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2131,7 +3287,7 @@
           "edges": 48,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2149,12 +3305,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2171,18 +3327,19 @@
         "set"
       ],
       "note": "planted fault: enter doesn't check the lock",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "18 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (11ms at 91 traces/second)."
+        "detail": "[violation] Found an issue (31ms at 32 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2190,7 +3347,7 @@
           "edges": 135,
           "violating": 13
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2208,21 +3365,28 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
       }
     },
     {
@@ -2238,18 +3402,18 @@
         "implies"
       ],
       "note": "Quint's examples: variants with and without payload, compared with ==; its own invariant",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "19 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (35ms at 8571 traces/second)."
+        "detail": "[ok] No violation found (62ms at 4839 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (296ms)."
+        "detail": "[ok] No violation found (501ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2257,7 +3421,7 @@
           "edges": 27,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2275,12 +3439,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2300,18 +3464,18 @@
         "ite"
       ],
       "note": "Quint's examples: N = 5, K = 7; 117,649 states",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "117649 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (72ms at 4167 traces/second)."
+        "detail": "[ok] No violation found (206ms at 1456 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (915ms)."
+        "detail": "[ok] No violation found (3969ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 117649,
@@ -2319,7 +3483,7 @@
           "edges": 521017,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 117649,
@@ -2337,12 +3501,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2359,18 +3523,18 @@
         "setOfMaps"
       ],
       "note": "Quint's examples: N = 3, K = 2; tokenInv still holds there",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "16 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (62ms at 4839 traces/second)."
+        "detail": "[ok] No violation found (130ms at 2308 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (293ms)."
+        "detail": "[ok] No violation found (709ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 16,
@@ -2378,7 +3542,7 @@
           "edges": 32,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 16,
@@ -2396,12 +3560,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2419,18 +3583,18 @@
         "get"
       ],
       "note": "Quint's examples: the three-state ring, N = 5",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "729 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (89ms at 3371 traces/second)."
+        "detail": "[ok] No violation found (180ms at 1667 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (352ms)."
+        "detail": "[ok] No violation found (746ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 729,
@@ -2438,7 +3602,7 @@
           "edges": 2025,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 729,
@@ -2456,12 +3620,76 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "public-ewd426-4",
+      "file": "conformance/public/ewd426_4.qnt",
+      "main": "ewd426_4",
+      "invariant": "tokenInv",
+      "expect": "passed",
+      "ops": [
+        "Rec",
+        "field",
+        "with",
+        "setOfMaps",
+        "setBy",
+        "get"
+      ],
+      "note": "Quint's examples: the four-state ring, a record per node, N = 5",
+      "quintCheck": "passed",
+      "detail": "1024 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (178ms at 1685 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (617ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1024,
+          "states": 1024,
+          "edges": 3136,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1024,
+          "states": 1024,
+          "edges": 3136,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1024,
+          "states": 1024,
+          "edges": 3136,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2481,18 +3709,19 @@
         "matchVariant"
       ],
       "note": "Quint's examples: imports spells/basicSpells.qnt; a self-assignment is reachable",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "28 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (13ms at 77 traces/second)."
+        "detail": "[violation] Found an issue (18ms at 56 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2500,7 +3729,7 @@
           "edges": 7969,
           "violating": 735
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2518,21 +3747,28 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
       }
     },
     {
@@ -2545,18 +3781,19 @@
         "neq"
       ],
       "note": "Quint's examples: a draw is reachable",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "11 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (4ms at 250 traces/second)."
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2564,7 +3801,7 @@
           "edges": 27,
           "violating": 3
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2582,21 +3819,28 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
       }
     },
     {
@@ -2616,18 +3860,18 @@
         "actionAll"
       ],
       "note": "Quint's examples: booleans.qnt; b or not(b) holds",
-      "quintTs": "passed",
+      "quintCheck": "passed",
       "detail": "2 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (18ms at 16667 traces/second)."
+        "detail": "[ok] No violation found (24ms at 12500 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (286ms)."
+        "detail": "[ok] No violation found (550ms)."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2635,7 +3879,7 @@
           "edges": 2,
           "violating": 0
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2653,12 +3897,12 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
@@ -2676,18 +3920,19 @@
         "actionAll"
       ],
       "note": "Quint's examples: booleans.qnt; b breaks after the first step",
-      "quintTs": "violated",
+      "quintCheck": "violated",
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (3ms at 333 traces/second)."
+        "detail": "[violation] Found an issue (4ms at 250 traces/second).",
+        "broken": []
       },
       "official": {
         "outcome": "violated",
         "detail": "Error: Invariant q_inv is violated."
       },
       "graphs": {
-        "qts/tla-ts": {
+        "qc/tla-ts": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2695,7 +3940,7 @@
           "edges": 2,
           "violating": 1
         },
-        "qts/tlc": {
+        "qc/tlc": {
           "complete": true,
           "why": "",
           "init": 1,
@@ -2713,21 +3958,2059 @@
         }
       },
       "comparisons": {
-        "qts/tla-ts vs qts/tlc": {
+        "qc/tla-ts vs qc/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         },
-        "qts/tlc vs official/tlc": {
+        "qc/tlc vs official/tlc": {
           "equal": true,
           "why": "",
           "differences": {}
         }
       },
       "trace": {
-        "qts/tla-ts": "valid",
-        "qts/tlc": "valid",
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
         "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "invariants-same-state",
+      "file": "conformance/models/invariants.qnt",
+      "main": "invariants",
+      "invariants": [
+        "below2",
+        "doubleBelow4"
+      ],
+      "names": "below2",
+      "expect": "violated",
+      "ops": [
+        "ilt"
+      ],
+      "note": "both invariants break at x = 2: the first given is named",
+      "quintCheck": "violated",
+      "detail": "3 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (8ms at 125 traces/second).",
+        "broken": [
+          "below2",
+          "doubleBelow4"
+        ]
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "invariants-same-state-reversed",
+      "file": "conformance/models/invariants.qnt",
+      "main": "invariants",
+      "invariants": [
+        "doubleBelow4",
+        "below2"
+      ],
+      "names": "doubleBelow4",
+      "expect": "violated",
+      "ops": [
+        "ilt"
+      ],
+      "note": "the same state with the order reversed: the other one is named",
+      "quintCheck": "violated",
+      "detail": "3 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (8ms at 125 traces/second).",
+        "broken": [
+          "doubleBelow4",
+          "below2"
+        ]
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "invariants-only-second",
+      "file": "conformance/models/invariants.qnt",
+      "main": "invariants",
+      "invariants": [
+        "nonNegative",
+        "below3"
+      ],
+      "names": "below3",
+      "expect": "violated",
+      "ops": [
+        "ilt"
+      ],
+      "note": "only the second breaks",
+      "quintCheck": "violated",
+      "detail": "4 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (13ms at 77 traces/second).",
+        "broken": [
+          "below3"
+        ]
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 3
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 3
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 3
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "invariants-first-fails-later",
+      "file": "conformance/models/invariants.qnt",
+      "main": "invariants",
+      "invariants": [
+        "below4",
+        "below2"
+      ],
+      "names": "below2",
+      "expect": "violated",
+      "ops": [
+        "ilt"
+      ],
+      "note": "the first given breaks later (x = 4) than the second (x = 2): the one at the first violating state is named",
+      "quintCheck": "violated",
+      "detail": "3 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (12ms at 83 traces/second).",
+        "broken": [
+          "below2"
+        ]
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 4
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "invariants-all-hold",
+      "file": "conformance/models/invariants.qnt",
+      "main": "invariants",
+      "invariants": [
+        "nonNegative",
+        "atMostFive",
+        "x >= 0 and x <= 5"
+      ],
+      "expect": "passed",
+      "ops": [
+        "ilte",
+        "igte",
+        "and"
+      ],
+      "note": "three invariants, all hold in every state",
+      "quintCheck": "passed",
+      "detail": "6 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (44ms at 6818 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (448ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-reads-after",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_reads_after",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAll",
+        "iadd"
+      ],
+      "note": "x is read after its assignment",
+      "quintCheck": "unsupported",
+      "detail": "init reads the state variable x, which Quint's evaluators reject (QNT502) and its backends read differently",
+      "simulator": {
+        "outcome": "error",
+        "detail": "Error [QNT502]: Variable x not set"
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (512ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 1,
+          "edges": 1,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states; the dump holds no states",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-reads-before",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_reads_before",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAll",
+        "iadd"
+      ],
+      "note": "x is read before its assignment",
+      "quintCheck": "unsupported",
+      "detail": "init reads the state variable x, which Quint's evaluators reject (QNT502) and its backends read differently",
+      "simulator": {
+        "outcome": "error",
+        "detail": "Error [QNT502]: Variable x not set"
+      },
+      "official": {
+        "outcome": "error",
+        "detail": "Error: In evaluation, the identifier x is either undefined or not an operator."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states; the dump holds no states",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states; the dump holds no states",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-reads-definition",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_reads_definition",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAll",
+        "plus"
+      ],
+      "note": "x is read through two definitions",
+      "quintCheck": "unsupported",
+      "detail": "init reads the state variable x, which Quint's evaluators reject (QNT502) and its backends read differently",
+      "simulator": {
+        "outcome": "error",
+        "detail": "Error [QNT502]: Variable x not set"
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (390ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 1,
+          "edges": 1,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states; the dump holds no states",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-reads-nondet",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_reads_nondet",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAll",
+        "Set"
+      ],
+      "note": "x is read in a nondet choice",
+      "quintCheck": "unsupported",
+      "detail": "init reads the state variable x, which Quint's evaluators reject (QNT502) and its backends read differently",
+      "simulator": {
+        "outcome": "error",
+        "detail": "Error [QNT502]: Variable x not set"
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (404ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": false,
+          "why": "the dump holds no states",
+          "init": 0,
+          "states": 0,
+          "edges": 0,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 2,
+          "states": 2,
+          "edges": 2,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states; the dump holds no states",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": false,
+          "why": "incomplete: the dump holds no states",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-reads-any",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_reads_any",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAny"
+      ],
+      "note": "x is read in a branch of any; both of Quint's evaluators reject it only when the simulator picks the reading branch, so the rejection depends on the seed",
+      "quintCheck": "unsupported",
+      "detail": "init reads the state variable x, which Quint's evaluators reject (QNT502) and its backends read differently",
+      "simulator": {
+        "outcome": "error",
+        "detail": "Error [QNT502]: Variable x not set"
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (442ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": false,
+          "why": "Error: The first argument of Assert evaluated to FALSE; the second argument was:",
+          "init": 1,
+          "states": 1,
+          "edges": 0,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": false,
+          "why": "Error: The first argument of Assert evaluated to FALSE; the second argument was:",
+          "init": 1,
+          "states": 1,
+          "edges": 0,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 2,
+          "states": 2,
+          "edges": 2,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": false,
+          "why": "incomplete: Error: The first argument of Assert evaluated to FALSE; the second argument was:; Error: The first argument of Assert evaluated to FALSE; the second argument was:",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": false,
+          "why": "incomplete: Error: The first argument of Assert evaluated to FALSE; the second argument was:",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-assigns",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_assigns",
+      "expect": "passed",
+      "ops": [
+        "assign",
+        "actionAll",
+        "Set",
+        "iadd",
+        "ite"
+      ],
+      "note": "only assignments and nondet choices over constants",
+      "quintCheck": "passed",
+      "detail": "5 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (59ms at 5085 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (500ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 2,
+          "states": 5,
+          "edges": 5,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 2,
+          "states": 5,
+          "edges": 5,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 2,
+          "states": 5,
+          "edges": 5,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "init-unreached-read",
+      "file": "conformance/models/init_reads.qnt",
+      "main": "init_unreached_read",
+      "expect": "passed",
+      "ops": [
+        "assign",
+        "ite"
+      ],
+      "note": "a read in a branch init never takes, which Quint's evaluators skip too",
+      "quintCheck": "passed",
+      "detail": "1 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (22ms at 13636 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (371ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 1,
+          "edges": 1,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 1,
+          "edges": 1,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 1,
+          "edges": 1,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "workers-queue",
+      "file": "conformance/models/workers_queue.qnt",
+      "main": "workers_queue",
+      "expect": "passed",
+      "ops": [
+        "Rec",
+        "field",
+        "with",
+        "mapBy",
+        "get",
+        "set",
+        "filter",
+        "map",
+        "size"
+      ],
+      "note": "two workers, a job queue, a lock; a record per worker",
+      "quintCheck": "passed",
+      "detail": "32 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (139ms at 2158 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (412ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 32,
+          "edges": 48,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 32,
+          "edges": 48,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 32,
+          "edges": 48,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "workers-queue-bug",
+      "file": "conformance/models/workers_queue_bug.qnt",
+      "main": "workers_queue_bug",
+      "expect": "violated",
+      "ops": [
+        "Rec",
+        "field",
+        "with"
+      ],
+      "note": "planted fault: acquire doesn't check the lock",
+      "quintCheck": "violated",
+      "detail": "8 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (18ms at 111 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 140,
+          "edges": 246,
+          "violating": 90
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 140,
+          "edges": 246,
+          "violating": 90
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 140,
+          "edges": 246,
+          "violating": 90
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "records-set",
+      "file": "conformance/models/records_set.qnt",
+      "main": "records_set",
+      "expect": "passed",
+      "ops": [
+        "Rec",
+        "field",
+        "fieldNames",
+        "variant",
+        "matchVariant",
+        "union",
+        "forall",
+        "in"
+      ],
+      "note": "a set of records and a record payload",
+      "quintCheck": "passed",
+      "detail": "29 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (99ms at 3030 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (495ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 29,
+          "edges": 68,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 29,
+          "edges": 68,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 29,
+          "edges": 68,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "records-set-violated",
+      "file": "conformance/models/records_set.qnt",
+      "main": "records_set",
+      "invariant": "atMostOneFromA",
+      "expect": "violated",
+      "ops": [
+        "Rec",
+        "field",
+        "filter"
+      ],
+      "note": "a sends twice",
+      "quintCheck": "violated",
+      "detail": "6 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (20ms at 250 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 29,
+          "edges": 68,
+          "violating": 8
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 29,
+          "edges": 68,
+          "violating": 8
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 29,
+          "edges": 68,
+          "violating": 8
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "public-dining-philosophers",
+      "file": "conformance/public/DiningPhilosophers5.qnt",
+      "main": "DiningPhilosophers5",
+      "invariants": [
+        "TypeOk",
+        "Safety"
+      ],
+      "expect": "passed",
+      "ops": [
+        "Tup",
+        "item",
+        "forall",
+        "filter",
+        "union",
+        "exclude",
+        "imod"
+      ],
+      "note": "Quint's examples: N = 5; tuples unpacked in its invariants",
+      "quintCheck": "passed",
+      "detail": "352 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (261ms at 1149 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (441ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 352,
+          "edges": 1360,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 352,
+          "edges": 1360,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 352,
+          "edges": 1360,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "public-tuples-holds",
+      "file": "conformance/public/tuples_check.qnt",
+      "main": "tuples_holds",
+      "expect": "passed",
+      "ops": [
+        "Tup",
+        "item",
+        "tuples",
+        "map",
+        "mapBy",
+        "get",
+        "keys"
+      ],
+      "note": "Quint's examples: tuples.qnt; its definitions and both states",
+      "quintCheck": "passed",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (203ms at 1478 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (391ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "public-tuples-changes",
+      "file": "conformance/public/tuples_check.qnt",
+      "main": "tuples_changes",
+      "expect": "violated",
+      "ops": [
+        "Tup",
+        "eq"
+      ],
+      "note": "Quint's examples: tuples.qnt; myTup changes after the first step",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "retry-idempotent",
+      "file": "conformance/models/retry_idempotent.qnt",
+      "main": "retry_idempotent",
+      "expect": "passed",
+      "ops": [
+        "Tup",
+        "item",
+        "tuples",
+        "exists",
+        "filter",
+        "forall",
+        "subseteq",
+        "mapBy",
+        "get",
+        "set"
+      ],
+      "note": "two requests, two attempts each; the server dedups by request id",
+      "quintCheck": "passed",
+      "detail": "64 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (141ms at 2128 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (398ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 64,
+          "edges": 128,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 64,
+          "edges": 128,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 64,
+          "edges": 128,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "retry-idempotent-bug",
+      "file": "conformance/models/retry_idempotent_bug.qnt",
+      "main": "retry_idempotent_bug",
+      "expect": "violated",
+      "ops": [
+        "Tup",
+        "item",
+        "contains"
+      ],
+      "note": "planted fault: the server dedups by message, so a retry is applied again",
+      "quintCheck": "violated",
+      "detail": "21 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (18ms at 167 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 49,
+          "edges": 112,
+          "violating": 13
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 49,
+          "edges": 112,
+          "violating": 13
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 49,
+          "edges": 112,
+          "violating": 13
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "itf-maps",
+      "file": "conformance/models/itf.qnt",
+      "main": "itf_maps",
+      "expect": "violated",
+      "ops": [
+        "Map",
+        "put",
+        "mapBy",
+        "to",
+        "variant",
+        "get"
+      ],
+      "note": "a one-key map beside a variant, a map on 1..3, the empty map, a unit variant",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (17ms at 59 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "itf-sets",
+      "file": "conformance/models/itf.qnt",
+      "main": "itf_sets",
+      "expect": "violated",
+      "ops": [
+        "Set",
+        "to",
+        "setOfMaps",
+        "tuples",
+        "iadd"
+      ],
+      "note": "the empty set, a set of sets, and an interval, a set of maps and a product held in variables",
+      "apalacheItf": "with a set of maps in the violating state, quint verify (Apalache 0.62.4) exits 0 and writes no counterexample",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (18ms at 56 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "quint verify wrote no counterexample (exit 1)",
+        "apalacheKnown": "with a set of maps in the violating state, quint verify (Apalache 0.62.4) exits 0 and writes no counterexample",
+        "controls": {}
+      }
+    },
+    {
+      "id": "itf-ints",
+      "file": "conformance/models/itf.qnt",
+      "main": "itf_ints",
+      "expect": "violated",
+      "ops": [
+        "iadd",
+        "isub",
+        "variant",
+        "ilt"
+      ],
+      "note": "the ends of the 32-bit range, a negative payload",
+      "itfControls": "values",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (9ms at 111 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {
+          "a changed value": "caught by transitions: the simulator didn't reach init, step 1",
+          "Apalache's unit": "caught by replay: a state differs from Quint's encoding",
+          "a variant as a map": "caught by replay: no Quint literal: a variant written as {\"#map\":[[\"Debt\",{\"#bigint\":\"-5\"}]]}"
+        }
+      }
+    },
+    {
+      "id": "itf-strings",
+      "file": "conformance/models/itf.qnt",
+      "main": "itf_strings",
+      "expect": "violated",
+      "ops": [
+        "Map",
+        "eq"
+      ],
+      "note": "strings outside ASCII as values and as map keys",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (47ms at 21 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "itf-structures",
+      "file": "conformance/models/itf.qnt",
+      "main": "itf_structures",
+      "expect": "violated",
+      "ops": [
+        "Rec",
+        "with",
+        "Tup",
+        "variant",
+        "set",
+        "field"
+      ],
+      "note": "a record, a triple, a variant with a record payload in a map",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (7ms at 143 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 2,
+          "edges": 2,
+          "violating": 1
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "itf-instances",
+      "file": "conformance/models/itf.qnt",
+      "main": "itf_instances",
+      "expect": "violated",
+      "ops": [
+        "iadd",
+        "ilt",
+        "and"
+      ],
+      "note": "two instances of one module, each with its own x",
+      "itfControls": "names",
+      "quintCheck": "violated",
+      "detail": "2 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 5
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 5
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 6,
+          "edges": 6,
+          "violating": 5
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {
+          "names by their last segment": "caught by replay: variables [\"x\",\"x\"], the model's [\"itf_instances::a::x\",\"itf_instances::b::x\"]"
+        }
+      }
+    },
+    {
+      "id": "collisions-instances",
+      "file": "conformance/models/collisions.qnt",
+      "main": "collisions_instances",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAll"
+      ],
+      "note": "a::b_c and a_b::c",
+      "quintCheck": "unsupported",
+      "detail": "the names a::b_c and a_b::c, which would both become the TLA+ name a_b_c",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (475ms)."
+      },
+      "graphs": {},
+      "comparisons": {}
+    },
+    {
+      "id": "collisions-variable",
+      "file": "conformance/models/collisions.qnt",
+      "main": "collisions_variable",
+      "expect": "unsupported",
+      "ops": [
+        "assign",
+        "actionAll"
+      ],
+      "note": "the instance's a::x and the module's a_x",
+      "quintCheck": "unsupported",
+      "detail": "the names a_x and a::x, which would both become the TLA+ name a_x",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (459ms)."
+      },
+      "graphs": {},
+      "comparisons": {}
+    },
+    {
+      "id": "collisions-generated",
+      "file": "conformance/models/collisions.qnt",
+      "main": "collisions_generated",
+      "expect": "unsupported",
+      "ops": [
+        "assign"
+      ],
+      "note": "the model's q_step and the generated q::step",
+      "quintCheck": "unsupported",
+      "detail": "the names q_step and q::step, which would both become the TLA+ name q_step",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (8ms at 125 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "error",
+        "detail": "Error: Parsing or semantic analysis failed."
+      },
+      "graphs": {},
+      "comparisons": {}
+    },
+    {
+      "id": "collisions-invariant",
+      "file": "conformance/models/collisions.qnt",
+      "main": "collisions_invariant",
+      "expect": "unsupported",
+      "ops": [
+        "assign"
+      ],
+      "note": "the model's q_inv_1 and the first invariant's name",
+      "quintCheck": "unsupported",
+      "detail": "the names q_inv_1 and invariant number 1, which would both become the TLA+ name q_inv_1",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {},
+      "comparisons": {}
+    },
+    {
+      "id": "collisions-bound",
+      "file": "conformance/models/collisions.qnt",
+      "main": "collisions_bound",
+      "expect": "passed",
+      "ops": [
+        "exists",
+        "or",
+        "igte"
+      ],
+      "note": "a bound a_lim beside a::lim: Quint's flattener renames the local, so nothing collides",
+      "quintCheck": "passed",
+      "detail": "4 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (38ms at 7895 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (398ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 4,
+          "edges": 4,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 4,
+          "edges": 4,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 4,
+          "edges": 4,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
       }
     }
   ]
