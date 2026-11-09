@@ -17,3 +17,6 @@ aidenybai/tla-ts. Its effect here: tla-ts can't load Apalache's
 `Apalache.tla`, so it can't run Apalache's translation of a Quint `fold`.
 quint-ts doesn't depend on it (it emits a recursive operator per fold, with
 no operator parameter). Reported as [aidenybai/tla-ts#363](https://github.com/aidenybai/tla-ts/issues/363) on 2026-11-07.
+
+Fixed in tla-ts 0.0.9: `Recursive.tla` checks with no error, as in TLC.
+The table and `output.txt` record the run on 0.0.8-dev.8067c48.
