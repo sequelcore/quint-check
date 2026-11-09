@@ -46,7 +46,7 @@ later, npm and Git. You don't need Bun or Java.
    ```
 
 2. Build the package. `npm pack` compiles `src/` to `dist/` and writes
-   `quint-ts-0.0.0.tgz`:
+   `quint-ts-0.1.0-alpha.1.tgz`:
 
    ```sh
    npm pack
@@ -58,7 +58,7 @@ later, npm and Git. You don't need Bun or Java.
    mkdir ../my-project
    cd ../my-project
    npm init -y
-   npm install ../quint-ts/quint-ts-0.0.0.tgz
+   npm install ../quint-ts/quint-ts-0.1.0-alpha.1.tgz
    ```
 
 4. Check the demo's correct model, which ships in the package:
