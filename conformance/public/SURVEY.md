@@ -51,7 +51,7 @@ Each file's last module is the main module, and each value of that file named as
 | `cosmos/tendermint/Tendermint.qnt` | `Tendermint` | no-init-step | no init |
 | `cosmos/tendermint/TendermintModels.qnt` | `TendermintModels` | no-init-step | no init |
 | `cosmos/tendermint/TendermintTest.qnt` | `TendermintTest` | no-init-step | no init |
-| `cosmwasm/zero-to-hero/vote.qnt` | `state` | refused | operator foldl |
+| `cosmwasm/zero-to-hero/vote.qnt` | `state` | refused | operator pred_1329 |
 | `cryptography/hashes/hashes.qnt` | `sha256` | no-init-step | no init |
 | `cryptography/hashes/hashesTest.qnt` | `sha256` | no-init-step | no init |
 | `cryptography/utxo/utxo.qnt` | `utxo` | refused | operator token_supply |
@@ -67,10 +67,10 @@ Each file's last module is the main module, and each value of that file named as
 | `language-features/instances.qnt` | `instances` | inconclusive | inv: inconclusive |
 | `language-features/instancesFrom.qnt` | `instancesFrom` | refused | a module with no state variables |
 | `language-features/integers.qnt` | `integers` | refused | operator ipow |
-| `language-features/lists.qnt` | `lists` | refused | operator foldl |
+| `language-features/lists.qnt` | `lists` | refused | an operator argument that isn't a lambda of arity 1 |
 | `language-features/maps.qnt` | `maps` | refused | operator setToMap |
 | `language-features/nondetEx.qnt` | `nondetEx` | refused | operator then |
-| `language-features/option.qnt` | `option` | refused | operator replaceAt |
+| `language-features/option.qnt` | `option` | refused | operator f_39 |
 | `language-features/records.qnt` | `records` | no-invariant | translated; no invariant of the authors to check |
 | `language-features/sets.qnt` | `sets` | refused | operator powerset |
 | `language-features/strongFairness.qnt` | `strongFairness` | refused | operator weakFair |
