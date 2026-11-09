@@ -65,7 +65,7 @@ it covers, not in general.
 
 ## Quint's own examples
 
-Of the 77 `.qnt` files in Quint's `examples/`, 12 translate today, and 5 get
-a definitive verdict with their authors' own invariants: 4 passed after a
+Of the 77 `.qnt` files in Quint's `examples/`, 14 translate today, and 7 get
+a definitive verdict with their authors' own invariants: 6 passed after a
 complete search, and 1 violated with a counterexample. The counts, and what
 would extend them, are in [conformance/public/README.md](https://github.com/sequelcore/quint-check/blob/main/conformance/public/README.md).

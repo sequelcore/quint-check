@@ -86,3 +86,10 @@ invariant to get a complete verdict.
 its authors list as a non-property, is violated, as in Quint's own route
 ([models.ts](../models.ts)). The next addition with the most models fully inside the subset is `ipow`
 (`imports.qnt`, `integers.qnt`).
+
+Lists brought no example to a verdict. The eight that used them now stop at
+another construct: `BinSearch.qnt` at `ipow`, `lists.qnt` at `foldl`,
+`two_layered_cache.qnt` at `eventually`, `lottery.qnt` at `then`,
+`bank.qnt` at `assert`, `utxo.qnt` at an operator with a parameter defined
+inside a value, and `denomTrace.qnt` and `ics20.qnt` at an operator argument
+that isn't a lambda.
