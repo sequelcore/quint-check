@@ -70,44 +70,8 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.22.1
-      - name: Is this the package's first version?
-        id: registry
-        run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' https://registry.npmjs.org/@sequelcore%2fquint-check)
-          case "$code" in
-            404) echo "first=true" >> "$GITHUB_OUTPUT" ;;
-            200) echo "first=false" >> "$GITHUB_OUTPUT" ;;
-            *) echo "the registry answered $code for the package"; exit 1 ;;
-          esac
-      # Temporary, for the package's first version only (#24): npm's trusted publishing can't be configured until
-      # the package exists, so that version stages with a short-lived npm token read from Doppler's API at
-      # publish time, with no third-party action. The project and config are environment secrets, so the logs
-      # mask them. Once the package exists, this step doesn't run, so a later release has only the workflow's
-      # OIDC identity and fails if npm refuses it. #24 removes it, the environment's secrets and the token.
-      - name: Stage the first version with its token
-        if: steps.registry.outputs.first == 'true'
-        working-directory: release
-        env:
-          TARBALL: ${{ needs.build.outputs.tarball }}
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-          DOPPLER_PROJECT: ${{ secrets.DOPPLER_PROJECT }}
-          DOPPLER_CONFIG: ${{ secrets.DOPPLER_CONFIG }}
-        run: |
-          set -o pipefail
-          sha256sum --check SHA256SUMS
-          token=$(curl -fsS -G https://api.doppler.com/v3/configs/config/secret \
-            -H "Authorization: Bearer $DOPPLER_TOKEN" \
-            --data-urlencode "project=$DOPPLER_PROJECT" --data-urlencode "config=$DOPPLER_CONFIG" \
-            --data-urlencode "name=NPM_PUBLISH_TOKEN" \
-            | node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(0, "utf8")).value.computed.trim())')
-          [ -n "$token" ] || { echo "Doppler returned no token"; exit 1; }
-          echo "::add-mask::$token"
-          npmrc="$RUNNER_TEMP/.npmrc"
-          trap 'rm -f "$npmrc"' EXIT
-          (umask 077 && printf '//registry.npmjs.org/:_authToken=%s\n' "$token" > "$npmrc")
-          NPM_CONFIG_USERCONFIG="$npmrc" npm stage publish "./$TARBALL" --tag alpha --access public --provenance
+      # Through the package's trusted publisher: the workflow's OIDC identity, with no token.
       - name: Stage the tested tarball on npm
-        if: steps.registry.outputs.first == 'false'
         working-directory: release
         env:
           TARBALL: ${{ needs.build.outputs.tarball }}
