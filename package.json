@@ -1,9 +1,12 @@
 {
   "name": "@sequelcore/quint-check",
-  "version": "0.1.0-alpha.1",
-  "private": true,
+  "version": "0.1.0-alpha.2",
   "license": "Apache-2.0",
   "description": "A Java-free Quint model checker for TypeScript, powered by tla-ts. Experimental.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sequelcore/quint-check.git"
+  },
   "type": "module",
   "bin": {
     "quint-check": "dist/cli.js"
