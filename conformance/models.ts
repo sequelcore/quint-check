@@ -35,6 +35,12 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["Bool", "setOfMaps", "in", "not", "set", "get", "keys", "forall"], note: "values chosen from Bool, in a map from setOfMaps(Bool) and as a nondet choice" },
   { id: "bool-lights-all-on", file: "conformance/models/bool.qnt", main: "bool_lights", expect: "violated", invariant: "notAllOnWhileOff",
     ops: ["Bool", "setOfMaps"], note: "both lights on with the switch off, which an initial state can already be" },
+  { id: "fifo", file: "conformance/models/fifo.qnt", main: "fifo", expect: "passed",
+    ops: ["List", "append", "head", "tail", "length", "nth", "indices"], note: "a queue: the sender appends, the receiver takes from the front" },
+  { id: "fifo-back", file: "conformance/models/fifo.qnt", main: "fifo_back", expect: "violated",
+    ops: ["List", "append", "concat", "tail", "nth"], note: "planted fault: the receiver takes from the back" },
+  { id: "mutex-list", file: "conformance/models/mutex_list.qnt", main: "mutex_list", expect: "passed",
+    ops: ["List"], note: "the demo's mutex with the lock as [] or [owner]" },
   // The mutex with integers for the phases; it also guards the translation of a `_` parameter, which Quint names without a letter.
   { id: "mutex-int", file: "conformance/models/mutex_int.qnt", main: "mutex_int", expect: "passed",
     ops: ["mapBy", "get", "set", "filter", "size", "ilte", "eq"], note: "three processes, one lock" },

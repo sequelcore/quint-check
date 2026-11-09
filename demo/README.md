@@ -9,7 +9,7 @@ checks each one from an installed package.
 | --- | --- | --- |
 | [mutex.qnt](mutex.qnt) | The correct model, with a sum type for each process's phase (`Idle \| Waiting \| Critical`) | `passed`: all 20 reachable states explored, `inv` holds in each |
 | [mutex_bug.qnt](mutex_bug.qnt) | A deliberate bug: `enter` doesn't check that the lock is free | `violated`, with a counterexample in which two processes enter |
-| [mutex_list.qnt](mutex_list.qnt) | The correct model with the lock kept as a list of its holder | `unsupported`: lists are outside quint-check's subset, so it proves nothing rather than guess |
+| [mutex_pairs.qnt](mutex_pairs.qnt) | The correct model, with its invariant stated over every pair of processes from `powerset` | `unsupported`: `powerset` is outside quint-check's subset, so it proves nothing rather than guess |
 
 In this repository, `bun demo/run.ts` checks all three through the API and
 prints a summary, and `node dist/cli.js check demo/mutex.qnt --main mutex

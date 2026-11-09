@@ -17,6 +17,7 @@ that passes, and `tests/coverage.test.ts` enforces that.
 | Maps | literals with literal keys, `get`, `set`, `put`, `setBy`, `keys`, `mapBy`, `setOfMaps` |
 | Records | `{ a: 1 }`, `r.a`, `r.with("a", v)`, `{ ...r, a: v }`, `fieldNames`, nested, and in sets, maps and variants |
 | Tuples | two or more items: `(a, b)`, `Tup`, `t._1`, `item`, `tuples`, unpacking as in `((a, b)) => a + b`, nested, and in sets, maps, records and variants |
+| Lists | `[1, 2]` and `List(1, 2)`, `append`, `concat`, `head`, `tail`, `length`, `l[i]` and `nth`, `indices`, nested, and in sets, maps and records |
 | Sum types | variants and `match` |
 | Other | `fold` over a set as a sum (`acc + f(x)`), `all`, `any`, `nondet … oneOf`, `if`, parameterized actions, and instances with constants |
 
@@ -28,7 +29,7 @@ any state is explored.
 | Construct | Why |
 | --- | --- |
 | Temporal properties | Only safety invariants are checked. |
-| Lists, `Int` and `Nat`, `then`, `powerset`, `ipow`, `chooseSome` | Not in the subset yet. |
+| `replaceAt`, `slice`, `range`, `select`, `foldl` and the other list operators, `Int` and `Nat`, `then`, `powerset`, `ipow`, `chooseSome` | Not in the subset yet. |
 | A `fold` whose step isn't `acc + f(x)` | Quint leaves a fold undefined unless its operator is associative and commutative; a sum is both. |
 | Uninstantiated constants | Instances with constants are checked; give the constants values in an instance. |
 | A record with no fields | Quint's documentation doesn't define it, and Quint's official route rejects it. |
@@ -47,6 +48,7 @@ reachable state needs them. A model that never reaches them is checked.
 | --- | --- |
 | `/` and `%` on negative operands | Quint's sources disagree on their value ([quint-co/quint#2070](https://github.com/quint-co/quint/issues/2070)). |
 | `get`, `set` or `setBy` on a key the map lacks | Quint leaves the result undefined. |
+| `head` or `tail` of an empty list, and `nth` outside `0` to `length() - 1` | Quint leaves the result undefined. |
 | A computed integer outside the checker's 32-bit range | Quint's integers are unbounded; the checker's aren't, and it stops rather than wrap. |
 | An init that reads a state variable, directly or through a definition, where init evaluates the read | Quint's evaluators reject it (QNT502), and TLC solves it as an equation. |
 
@@ -63,7 +65,7 @@ it covers, not in general.
 
 ## Quint's own examples
 
-Of the 77 `.qnt` files in Quint's `examples/`, 12 translate today, and 5 get
-a definitive verdict with their authors' own invariants: 4 passed after a
+Of the 77 `.qnt` files in Quint's `examples/`, 14 translate today, and 7 get
+a definitive verdict with their authors' own invariants: 6 passed after a
 complete search, and 1 violated with a counterexample. The counts, and what
 would extend them, are in [conformance/public/README.md](https://github.com/sequelcore/quint-check/blob/main/conformance/public/README.md).

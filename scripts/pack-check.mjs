@@ -54,7 +54,7 @@ try {
   run(npm, ["install", "--no-audit", "--no-fund", tarball], project);
   for (const dev of ["typescript", "@types/bun"]) expect(!existsSync(join(project, "node_modules", dev)), `development dependency ${dev} is not installed`);
 
-  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_list", "unsupported", 21]];
+  const demos = [["mutex", "passed", 0], ["mutex_bug", "violated", 20], ["mutex_pairs", "unsupported", 21]];
   for (const [name, status, code] of demos) {
     const args = ["--no-install", "quint-check", "check", `node_modules/@sequelcore/quint-check/demo/${name}.qnt`, "--main", name, "--invariant", "inv"];
     const ran = spawnSync(npx, args, { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });

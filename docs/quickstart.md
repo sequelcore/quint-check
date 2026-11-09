@@ -74,23 +74,23 @@ keep the trace for Quint's tools, add `--out-itf cex.itf.json`; see
 
 ## See a refusal
 
-`mutex_list.qnt` is the correct model again, with the lock kept as a list,
-which is outside quint-check's subset:
+`mutex_pairs.qnt` is the correct model again, with its invariant stated over
+every pair of processes from `powerset`, which is outside quint-check's subset:
 
 ```sh
-npx quint-check check node_modules/@sequelcore/quint-check/demo/mutex_list.qnt --main mutex_list --invariant inv
+npx quint-check check node_modules/@sequelcore/quint-check/demo/mutex_pairs.qnt --main mutex_pairs --invariant inv
 ```
 
 quint-check proves nothing rather than guess:
 
 ```text
-unsupported: operator List, outside quint-check's subset (found during translation); nothing was checked
+unsupported: operator powerset, outside quint-check's subset (found during translation); nothing was checked
 ```
 
 On stderr, it names the command that checks the whole language, with Java:
 
 ```text
-quint verify --backend=tlc node_modules/@sequelcore/quint-check/demo/mutex_list.qnt --main=mutex_list --invariant=inv checks the whole language (needs Java)
+quint verify --backend=tlc node_modules/@sequelcore/quint-check/demo/mutex_pairs.qnt --main=mutex_pairs --invariant=inv checks the whole language (needs Java)
 ```
 
 The command exits with 21.

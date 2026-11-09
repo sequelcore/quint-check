@@ -19,6 +19,9 @@ test("the same structure is a map, a variant, a record or a tuple by its type", 
   const onTwo: Dump = { fn: [[1, "x"], [2, "y"]] };
   expect(toItf(onTwo, { kind: "fun", arg: int, res: str })).toEqual({ "#map": [[{ "#bigint": "1" }, "x"], [{ "#bigint": "2" }, "y"]] });
   expect(toItf(onTwo, { kind: "tup", fields: row([["0", str], ["1", str]]) })).toEqual({ "#tup": ["x", "y"] });
+  // A list is a sequence, indexed from 1 in the checker, in its own order whatever order the pairs come in.
+  expect(toItf({ fn: [[2, "y"], [1, "x"]] }, { kind: "list", elem: str })).toEqual(["x", "y"]);
+  expect(toItf({ fn: [] }, { kind: "list", elem: int })).toEqual([]);
 });
 
 test("scalars, sets and a unit variant are written as Quint's own writer writes them", () => {
@@ -56,18 +59,25 @@ test("a structure that doesn't fit its type is an encoding error, never a value"
     [{ fn: [[1, 1], [3, 2]] }, { kind: "tup", fields: row([["0", int], ["1", int]]) }],
     [{ fn: [[1, 1], [1, 2]] }, { kind: "tup", fields: row([["0", int], ["1", int]]) }],
     [unitPayload, unitType],
+    // A list has exactly the indexes 1..n, each once.
+    [{ fn: [[0, 1]] }, { kind: "list", elem: int }],
+    [{ fn: [[1, 1], [3, 2]] }, { kind: "list", elem: int }],
+    [{ fn: [[1, 1], [1, 2]] }, { kind: "list", elem: int }],
+    [{ fn: [["a", 1]] }, { kind: "list", elem: int }],
+    [{ set: [1] }, { kind: "list", elem: int }],
   ];
   for (const [d, t] of wrong) expect(() => toItf(d, t), JSON.stringify([d, t])).toThrow(EncodingError);
 });
 
 test("a variable whose type has no encoding here is named at translation", () => {
-  expect(typeProblem({ kind: "list", elem: int })).toBe("the type list");
+  expect(typeProblem({ kind: "oper", args: [], res: int })).toBe("the type oper");
+  expect(typeProblem({ kind: "list", elem: { kind: "var", name: "a" } })).toBe("the type var");
   expect(typeProblem({ kind: "set", elem: { kind: "var", name: "a" } })).toBe("the type var");
   expect(typeProblem(undefined)).toBe("none in Quint's IR, or a polymorphic one");
   expect(typeProblem(unitType)).toBe("the unit type outside a variant");
   expect(typeProblem({ kind: "rec", fields: { ...row([["a", int]]), other: { kind: "var", name: "r" } } })).toBe("a rec type with an open row");
   expect(typeProblem(sum([["Idle", unitType], ["Busy", { kind: "tup", fields: row([["0", int], ["1", unitType]]) }]]))).toBe("the unit type outside a variant");
-  for (const ok of [int, str, bool, sum([["Idle", unitType], ["Job", int]]), { kind: "fun", arg: str, res: { kind: "rec", fields: row([["a", { kind: "set", elem: int }]]) } }]) {
+  for (const ok of [int, str, bool, sum([["Idle", unitType], ["Job", int]]), { kind: "fun", arg: str, res: { kind: "rec", fields: row([["a", { kind: "set", elem: int }]]) } }, { kind: "list", elem: { kind: "list", elem: str } }]) {
     expect(typeProblem(ok), JSON.stringify(ok)).toBeUndefined();
   }
 });

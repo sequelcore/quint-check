@@ -70,7 +70,7 @@ A union on `status`. Every variant carries [`guarantee`](#guarantee).
 - **`trace`** is the counterexample as an ITF document; see
   [Counterexamples](counterexamples.md).
 - **`reason`**, on `unsupported`, names the construct or operation, such as
-  `operator List`.
+  `operator powerset`.
 - **`output`**, on `error`, is what the failing stage printed or why it
   couldn't run.
 

@@ -1,6 +1,6 @@
 {
   "environment": {
-    "date": "2026-11-09T14:20:20.414Z",
+    "date": "2026-11-09T17:46:18.379Z",
     "platform": "win32 x64",
     "bun": "1.4.4",
     "node": "v24.22.1",
@@ -9,7 +9,7 @@
     "java": "openjdk version \"25.0.5\" 2026-10-20 LTS",
     "apalache": "0.62.4",
     "apalacheJarSha256": "e5223915507b65cc5f1638bd037ede60f8a4fc1644aff46355779f9b05df9262",
-    "commit": "ff84d1ddd30f0ba307bb5abdd20eefd79eb1c8cc",
+    "commit": "a2b5370c119e30faf509b301f5e6c8e6d9ee5d7e",
     "dirty": false
   },
   "failures": [],
@@ -38,7 +38,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (781ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -74,7 +74,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (774ms)."
+          "detail": "[ok] No violation found (770ms)."
         }
       },
       "verdicts": {
@@ -103,11 +103,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (774ms)."
+          "detail": "[ok] No violation found (770ms)."
         }
       },
       "verdicts": {
@@ -142,7 +142,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (772ms)."
+          "detail": "[ok] No violation found (775ms)."
         }
       },
       "verdicts": {
@@ -177,7 +177,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (773ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -210,7 +210,7 @@
       "routes": {
         "quint-check": {
           "outcome": "unsupported",
-          "detail": "an integer outside the checker's 32-bit range (TLC can't handle a number this big: 4294967296 at line 26, column 12); Quint's integers are unbounded"
+          "detail": "an integer outside the checker's 32-bit range (TLC can't handle a number this big: 4294967296 at line 32, column 12); Quint's integers are unbounded"
         },
         "evaluator-ts": {
           "outcome": "passed",
@@ -259,7 +259,7 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -296,7 +296,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (772ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -330,7 +330,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (775ms)."
+          "detail": "[ok] No violation found (777ms)."
         }
       },
       "verdicts": {
@@ -364,7 +364,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (773ms)."
+          "detail": "[ok] No violation found (767ms)."
         }
       },
       "verdicts": {
@@ -393,12 +393,12 @@
         },
         "evaluator-rust": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (19ms at 53 traces/second).",
+          "detail": "[violation] Found an issue (18ms at 56 traces/second).",
           "broken": []
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (797ms)."
+          "detail": "[ok] No violation found (771ms)."
         }
       },
       "verdicts": {
@@ -426,7 +426,7 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -487,15 +487,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (770ms)."
+          "detail": "[ok] No violation found (781ms)."
         }
       },
       "verdicts": {
@@ -528,7 +528,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (801ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -557,11 +557,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (770ms)."
         }
       },
       "verdicts": {
@@ -588,7 +588,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -596,7 +596,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (774ms)."
+          "detail": "[ok] No violation found (769ms)."
         }
       },
       "verdicts": {
@@ -621,15 +621,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (89ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (765ms)."
+          "detail": "[ok] No violation found (776ms)."
         }
       },
       "verdicts": {
@@ -662,7 +662,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (769ms)."
+          "detail": "[ok] No violation found (777ms)."
         }
       },
       "verdicts": {
@@ -695,7 +695,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (770ms)."
+          "detail": "[ok] No violation found (835ms)."
         }
       },
       "verdicts": {
@@ -719,15 +719,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (773ms)."
+          "detail": "[ok] No violation found (771ms)."
         }
       },
       "verdicts": {
@@ -755,11 +755,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (88ms at 11 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (773ms)."
+          "detail": "[ok] No violation found (771ms)."
         }
       },
       "verdicts": {
@@ -787,12 +787,12 @@
         },
         "evaluator-rust": {
           "outcome": "violated",
-          "detail": "[violation] Found an issue (88ms at 11 traces/second).",
+          "detail": "[violation] Found an issue (19ms at 53 traces/second).",
           "broken": []
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (769ms)."
+          "detail": "[ok] No violation found (771ms)."
         }
       },
       "verdicts": {
@@ -821,11 +821,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (772ms)."
+          "detail": "[ok] No violation found (777ms)."
         }
       },
       "verdicts": {
@@ -859,7 +859,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (841ms)."
+          "detail": "[ok] No violation found (774ms)."
         }
       },
       "verdicts": {
@@ -892,7 +892,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (770ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -956,7 +956,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (774ms)."
+          "detail": "[ok] No violation found (769ms)."
         }
       },
       "verdicts": {
@@ -980,7 +980,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1015,7 +1015,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1023,7 +1023,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (777ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -1049,15 +1049,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (855ms)."
         }
       },
       "verdicts": {
@@ -1090,7 +1090,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (841ms)."
+          "detail": "[ok] No violation found (778ms)."
         }
       },
       "verdicts": {
@@ -1117,7 +1117,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1125,7 +1125,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (780ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -1160,7 +1160,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (780ms)."
         }
       },
       "verdicts": {
@@ -1186,7 +1186,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1194,7 +1194,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (778ms)."
+          "detail": "[ok] No violation found (780ms)."
         }
       },
       "verdicts": {
@@ -1222,11 +1222,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -1250,15 +1250,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -1284,7 +1284,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1292,7 +1292,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (779ms)."
+          "detail": "[ok] No violation found (776ms)."
         }
       },
       "verdicts": {
@@ -1324,7 +1324,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (770ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -1349,15 +1349,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (89ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (778ms)."
         }
       },
       "verdicts": {
@@ -1389,7 +1389,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (776ms)."
+          "detail": "[ok] No violation found (775ms)."
         }
       },
       "verdicts": {
@@ -1417,11 +1417,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (775ms)."
+          "detail": "[ok] No violation found (774ms)."
         }
       },
       "verdicts": {
@@ -1481,15 +1481,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (770ms)."
+          "detail": "[ok] No violation found (769ms)."
         }
       },
       "verdicts": {
@@ -1520,7 +1520,7 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (88ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
@@ -1559,7 +1559,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (778ms)."
+          "detail": "[ok] No violation found (769ms)."
         }
       },
       "verdicts": {
@@ -1589,17 +1589,418 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (773ms)."
+          "detail": "[ok] No violation found (848ms)."
         }
       },
       "verdicts": {
         "evaluator-ts": "agrees",
         "evaluator-rust": "agrees",
         "official": "agrees"
+      }
+    },
+    {
+      "id": "list-literal",
+      "ops": [
+        "List",
+        "eq",
+        "neq"
+      ],
+      "expr": "[1, 2, 3] == List(1, 2, 3) and [1, 2] != [2, 1] and [1, 2] != [1, 2, 3] and [] == List()",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1296 (Lists: 0-indexed; [e_1, ..., e_n] is << e_1, ..., e_n >>; l[i] is s[i + 1]; l.indices() is the indices from 0)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (775ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-append",
+      "ops": [
+        "List",
+        "append"
+      ],
+      "expr": "List(1, 2, 3).append(4) == List(1, 2, 3, 4) and List().append(1) == [1] and [1].append(1) != [1]",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:395 (append; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (774ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-concat",
+      "ops": [
+        "List",
+        "concat"
+      ],
+      "expr": "List(1, 2, 3).concat(List(4, 5, 6)) == List(1, 2, 3, 4, 5, 6) and [1].concat([]) == [1] and [].concat([2]) == [2] and [1].concat([2]) != [2, 1]",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:404 (concat: l1 with l2 concatenated at the end; its example uses append by mistake)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (775ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-head-tail",
+      "ops": [
+        "List",
+        "head",
+        "tail"
+      ],
+      "expr": "List(1, 2, 3).head() == 1 and List(1, 2, 3).tail() == List(2, 3) and [7].tail() == [] and [7].head() == 7",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:415, :426 (head, tail; the documentation's own examples)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (772ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-length",
+      "ops": [
+        "List",
+        "length"
+      ],
+      "expr": "List(1, 2, 3).length() == 3 and [].length() == 0 and [5, 5].length() == 2",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:435 (length; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (778ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-nth",
+      "ops": [
+        "List",
+        "nth"
+      ],
+      "expr": "List(1, 2, 3).nth(1) == 2 and [4, 5, 6][0] == 4 and [4, 5, 6][2] == 6 and [4, 5, 6][1] != 4",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:446 (nth: the i+1th element; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (771ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-indices",
+      "ops": [
+        "List",
+        "indices"
+      ],
+      "expr": "List(1, 2, 3).indices() == Set(0, 1, 2) and [9].indices() == Set(0) and [].indices().size() == 0",
+      "semantics": "defined",
+      "source": "quint/src/builtin.qnt:455 (indices; the documentation's own example)",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (778ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-nested",
+      "ops": [
+        "List",
+        "append",
+        "nth",
+        "length"
+      ],
+      "expr": "[[1], [2, 3]].nth(1).length() == 2 and Set([1], [1]).size() == 1 and Map(1 -> [true]).get(1) == [true] and { a: [1, 2] }.a.append(3) == [1, 2, 3]",
+      "semantics": "defined",
+      "source": "docs/content/docs/lang.md:1296 (Lists: 0-indexed; [e_1, ..., e_n] is << e_1, ..., e_n >>; l[i] is s[i + 1]; l.indices() is the indices from 0); lists in lists, sets, maps and records",
+      "routes": {
+        "quint-check": {
+          "outcome": "passed",
+          "detail": "1 states"
+        },
+        "evaluator-ts": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+        },
+        "evaluator-rust": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+        },
+        "official": {
+          "outcome": "passed",
+          "detail": "[ok] No violation found (782ms)."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "agrees",
+        "evaluator-rust": "agrees",
+        "official": "agrees"
+      }
+    },
+    {
+      "id": "list-head-empty",
+      "ops": [
+        "List",
+        "head"
+      ],
+      "expr": "List(1).tail().head() == 0",
+      "semantics": "undefined",
+      "source": "quint/src/builtin.qnt:417 (head: \"If `l` is empty, the behavior is undefined\")",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "head of an empty list"
+        },
+        "evaluator-ts": {
+          "outcome": "error",
+          "detail": "Error [QNT505]: Called 'head' on an empty list"
+        },
+        "evaluator-rust": {
+          "outcome": "error",
+          "detail": "Error [QNT505]: Called 'head' on an empty list"
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Attempted to apply Head to the empty sequence."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "list-tail-empty",
+      "ops": [
+        "List",
+        "tail"
+      ],
+      "expr": "List(1).tail().tail() == List()",
+      "semantics": "undefined",
+      "source": "quint/src/builtin.qnt:428 (tail: \"If `l` is empty, the behavior is undefined\")",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "tail of an empty list"
+        },
+        "evaluator-ts": {
+          "outcome": "error",
+          "detail": "Error [QNT505]: Called 'tail' on an empty list"
+        },
+        "evaluator-rust": {
+          "outcome": "error",
+          "detail": "Error [QNT505]: Called 'tail' on an empty list"
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Attempted to apply Tail to the empty sequence."
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "list-nth-past-end",
+      "ops": [
+        "List",
+        "nth"
+      ],
+      "expr": "List(1, 2).nth(2) == 0",
+      "semantics": "undefined",
+      "source": "quint/src/builtin.qnt:448 (nth: \"If `i` is negative or greater than or equal to `l.length()`, the behavior is undefined\")",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "nth outside the list"
+        },
+        "evaluator-ts": {
+          "outcome": "error",
+          "detail": "Error [QNT510]: Out of bounds, nth(2)"
+        },
+        "evaluator-rust": {
+          "outcome": "error",
+          "detail": "Error [QNT510]: Out of bounds, nth(2)"
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Attempted to access index 3 of tuple"
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
+      }
+    },
+    {
+      "id": "list-nth-negative",
+      "ops": [
+        "List",
+        "nth",
+        "iuminus"
+      ],
+      "expr": "List(1, 2).nth(-1) == 0",
+      "semantics": "undefined",
+      "source": "quint/src/builtin.qnt:448 (nth: \"If `i` is negative or greater than or equal to `l.length()`, the behavior is undefined\")",
+      "routes": {
+        "quint-check": {
+          "outcome": "unsupported",
+          "detail": "nth outside the list"
+        },
+        "evaluator-ts": {
+          "outcome": "error",
+          "detail": "Error [QNT510]: Out of bounds, nth(-1)"
+        },
+        "evaluator-rust": {
+          "outcome": "error",
+          "detail": "Error [QNT510]: Out of bounds, nth(-1)"
+        },
+        "official": {
+          "outcome": "error",
+          "detail": "Error: Attempted to access index 0 of tuple"
+        }
+      },
+      "verdicts": {
+        "evaluator-ts": "recorded",
+        "evaluator-rust": "recorded",
+        "official": "recorded"
       }
     },
     {
@@ -1626,7 +2027,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (775ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -1651,7 +2052,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1659,7 +2060,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (781ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -1683,7 +2084,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1691,7 +2092,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (771ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -1716,7 +2117,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -1724,7 +2125,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (786ms)."
+          "detail": "[ok] No violation found (776ms)."
         }
       },
       "verdicts": {
@@ -1750,15 +2151,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (772ms)."
+          "detail": "[ok] No violation found (775ms)."
         }
       },
       "verdicts": {
@@ -1784,15 +2185,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (89ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (814ms)."
+          "detail": "[ok] No violation found (770ms)."
         }
       },
       "verdicts": {
@@ -1825,7 +2226,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (792ms)."
+          "detail": "[ok] No violation found (777ms)."
         }
       },
       "verdicts": {
@@ -1850,15 +2251,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (88ms at 11 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (857ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -1888,11 +2289,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (779ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -1920,15 +2321,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (773ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -1960,11 +2361,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (87ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (777ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -1996,11 +2397,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (781ms)."
+          "detail": "[ok] No violation found (801ms)."
         }
       },
       "verdicts": {
@@ -2026,15 +2427,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (89ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (778ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -2058,11 +2459,11 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -2103,7 +2504,7 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (90ms at 11 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -2177,11 +2578,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (21ms at 48 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (808ms)."
+          "detail": "[ok] No violation found (774ms)."
         }
       },
       "verdicts": {
@@ -2215,7 +2616,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (784ms)."
+          "detail": "[ok] No violation found (779ms)."
         }
       },
       "verdicts": {
@@ -2240,7 +2641,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -2248,7 +2649,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (780ms)."
+          "detail": "[ok] No violation found (771ms)."
         }
       },
       "verdicts": {
@@ -2275,15 +2676,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (780ms)."
+          "detail": "[ok] No violation found (774ms)."
         }
       },
       "verdicts": {
@@ -2310,7 +2711,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -2318,7 +2719,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (781ms)."
+          "detail": "[ok] No violation found (777ms)."
         }
       },
       "verdicts": {
@@ -2344,7 +2745,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -2352,7 +2753,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (848ms)."
+          "detail": "[ok] No violation found (790ms)."
         }
       },
       "verdicts": {
@@ -2378,7 +2779,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (5ms at 200 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -2386,7 +2787,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (789ms)."
+          "detail": "[ok] No violation found (774ms)."
         }
       },
       "verdicts": {
@@ -2418,11 +2819,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (21ms at 48 traces/second)."
+          "detail": "[ok] No violation found (20ms at 50 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (808ms)."
+          "detail": "[ok] No violation found (788ms)."
         }
       },
       "verdicts": {
@@ -2448,15 +2849,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (21ms at 48 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (938ms)."
+          "detail": "[ok] No violation found (774ms)."
         }
       },
       "verdicts": {
@@ -2490,7 +2891,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (792ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -2521,11 +2922,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (784ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -2552,7 +2953,7 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (7ms at 143 traces/second)."
+          "detail": "[ok] No violation found (6ms at 167 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
@@ -2560,7 +2961,7 @@
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (784ms)."
+          "detail": "[ok] No violation found (768ms)."
         }
       },
       "verdicts": {
@@ -2592,11 +2993,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (19ms at 53 traces/second)."
+          "detail": "[ok] No violation found (87ms at 11 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (785ms)."
+          "detail": "[ok] No violation found (788ms)."
         }
       },
       "verdicts": {
@@ -2623,15 +3024,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (5ms at 200 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (19ms at 53 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (793ms)."
+          "detail": "[ok] No violation found (767ms)."
         }
       },
       "verdicts": {
@@ -2660,11 +3061,11 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (849ms)."
+          "detail": "[ok] No violation found (772ms)."
         }
       },
       "verdicts": {
@@ -2693,7 +3094,7 @@
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (20ms at 50 traces/second)."
+          "detail": "[ok] No violation found (18ms at 56 traces/second)."
         },
         "official": {
           "outcome": "error",
@@ -2757,15 +3158,15 @@
         },
         "evaluator-ts": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (6ms at 167 traces/second)."
+          "detail": "[ok] No violation found (7ms at 143 traces/second)."
         },
         "evaluator-rust": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (22ms at 45 traces/second)."
+          "detail": "[ok] No violation found (21ms at 48 traces/second)."
         },
         "official": {
           "outcome": "passed",
-          "detail": "[ok] No violation found (806ms)."
+          "detail": "[ok] No violation found (773ms)."
         }
       },
       "verdicts": {
@@ -2792,9 +3193,9 @@
       "reason": "operator chooseSome"
     },
     {
-      "id": "list",
+      "id": "list-replace-at",
       "status": "unsupported",
-      "reason": "operator nth"
+      "reason": "operator replaceAt"
     },
     {
       "id": "set-to-map",
@@ -2861,9 +3262,9 @@
     {
       "id": "BinSearch",
       "group": "refused",
-      "expected": "unsupported: operator List",
+      "expected": "unsupported: operator ipow",
       "status": "unsupported",
-      "reason": "operator List"
+      "reason": "operator ipow"
     },
     {
       "id": "generate",
@@ -2887,11 +3288,11 @@
       "reason": "unresolved name Nat"
     },
     {
-      "id": "demo-mutex-list",
+      "id": "demo-mutex-pairs",
       "group": "refused",
-      "expected": "unsupported: operator List",
+      "expected": "unsupported: operator powerset",
       "status": "unsupported",
-      "reason": "operator List"
+      "reason": "operator powerset"
     }
   ],
   "modelRows": [
@@ -2917,11 +3318,11 @@
       "detail": "20 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (84ms at 3571 traces/second)."
+        "detail": "[ok] No violation found (83ms at 3614 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (790ms)."
+        "detail": "[ok] No violation found (782ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3065,11 +3466,11 @@
       "detail": "107 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (249ms at 1205 traces/second)."
+        "detail": "[ok] No violation found (242ms at 1240 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (798ms)."
+        "detail": "[ok] No violation found (802ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3125,7 +3526,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (16ms at 63 traces/second).",
+        "detail": "[violation] Found an issue (17ms at 59 traces/second).",
         "broken": []
       },
       "official": {
@@ -3196,7 +3597,7 @@
       "detail": "/ with a negative operand or a zero divisor",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (26ms at 11538 traces/second)."
+        "detail": "[ok] No violation found (25ms at 12000 traces/second)."
       },
       "official": {
         "outcome": "violated",
@@ -3261,11 +3662,11 @@
       "detail": "32 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (75ms at 4000 traces/second)."
+        "detail": "[ok] No violation found (74ms at 4054 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (776ms)."
+        "detail": "[ok] No violation found (778ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3380,6 +3781,203 @@
       }
     },
     {
+      "id": "fifo",
+      "file": "conformance/models/fifo.qnt",
+      "main": "fifo",
+      "expect": "passed",
+      "ops": [
+        "List",
+        "append",
+        "head",
+        "tail",
+        "length",
+        "nth",
+        "indices"
+      ],
+      "note": "a queue: the sender appends, the receiver takes from the front",
+      "quintCheck": "passed",
+      "detail": "10 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (76ms at 3947 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (784ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 10,
+          "edges": 12,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 10,
+          "edges": 12,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 10,
+          "edges": 12,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
+      "id": "fifo-back",
+      "file": "conformance/models/fifo.qnt",
+      "main": "fifo_back",
+      "expect": "violated",
+      "ops": [
+        "List",
+        "append",
+        "concat",
+        "tail",
+        "nth"
+      ],
+      "note": "planted fault: the receiver takes from the back",
+      "quintCheck": "violated",
+      "detail": "6 states",
+      "simulator": {
+        "outcome": "violated",
+        "detail": "[violation] Found an issue (8ms at 125 traces/second).",
+        "broken": []
+      },
+      "official": {
+        "outcome": "violated",
+        "detail": "Error: Invariant q_inv is violated."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 22,
+          "edges": 21,
+          "violating": 12
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 22,
+          "edges": 21,
+          "violating": 12
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 22,
+          "edges": 21,
+          "violating": 12
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      },
+      "trace": {
+        "qc/tla-ts": "valid",
+        "qc/tlc": "valid",
+        "official/tlc": "valid"
+      },
+      "itf": {
+        "replay": "ok",
+        "violation": "ok",
+        "transitions": "ok",
+        "apalache": "ok",
+        "controls": {}
+      }
+    },
+    {
+      "id": "mutex-list",
+      "file": "conformance/models/mutex_list.qnt",
+      "main": "mutex_list",
+      "expect": "passed",
+      "ops": [
+        "List"
+      ],
+      "note": "the demo's mutex with the lock as [] or [owner]",
+      "quintCheck": "passed",
+      "detail": "20 states",
+      "simulator": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (86ms at 3488 traces/second)."
+      },
+      "official": {
+        "outcome": "passed",
+        "detail": "[ok] No violation found (782ms)."
+      },
+      "graphs": {
+        "qc/tla-ts": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 20,
+          "edges": 48,
+          "violating": 0
+        },
+        "qc/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 20,
+          "edges": 48,
+          "violating": 0
+        },
+        "official/tlc": {
+          "complete": true,
+          "why": "",
+          "init": 1,
+          "states": 20,
+          "edges": 48,
+          "violating": 0
+        }
+      },
+      "comparisons": {
+        "qc/tla-ts vs qc/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        },
+        "qc/tlc vs official/tlc": {
+          "equal": true,
+          "why": "",
+          "differences": {}
+        }
+      }
+    },
+    {
       "id": "mutex-int",
       "file": "conformance/models/mutex_int.qnt",
       "main": "mutex_int",
@@ -3398,11 +3996,11 @@
       "detail": "20 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (81ms at 3704 traces/second)."
+        "detail": "[ok] No violation found (82ms at 3659 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (786ms)."
+        "detail": "[ok] No violation found (780ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3458,7 +4056,7 @@
       "detail": "18 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (14ms at 71 traces/second).",
+        "detail": "[violation] Found an issue (15ms at 67 traces/second).",
         "broken": []
       },
       "official": {
@@ -3535,11 +4133,11 @@
       "detail": "20 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (86ms at 3488 traces/second)."
+        "detail": "[ok] No violation found (84ms at 3571 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (792ms)."
+        "detail": "[ok] No violation found (786ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3669,11 +4267,11 @@
       "detail": "19 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (58ms at 5172 traces/second)."
+        "detail": "[ok] No violation found (60ms at 5000 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (786ms)."
+        "detail": "[ok] No violation found (792ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3732,7 +4330,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (816ms)."
+        "detail": "[ok] No violation found (815ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3787,7 +4385,7 @@
       "detail": "193 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (16ms at 63 traces/second).",
+        "detail": "[violation] Found an issue (15ms at 67 traces/second).",
         "broken": []
       },
       "official": {
@@ -3859,11 +4457,11 @@
       "detail": "70 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (86ms at 3488 traces/second)."
+        "detail": "[ok] No violation found (85ms at 3529 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (794ms)."
+        "detail": "[ok] No violation found (790ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3921,11 +4519,11 @@
       "detail": "117649 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (108ms at 2778 traces/second)."
+        "detail": "[ok] No violation found (109ms at 2752 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (1486ms)."
+        "detail": "[ok] No violation found (1489ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -3980,11 +4578,11 @@
       "detail": "16 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (95ms at 3158 traces/second)."
+        "detail": "[ok] No violation found (93ms at 3226 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (859ms)."
+        "detail": "[ok] No violation found (782ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -4040,11 +4638,11 @@
       "detail": "729 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (126ms at 2381 traces/second)."
+        "detail": "[ok] No violation found (124ms at 2419 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (876ms)."
+        "detail": "[ok] No violation found (846ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -4104,11 +4702,11 @@
       "detail": "1024 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (178ms at 1685 traces/second)."
+        "detail": "[ok] No violation found (186ms at 1613 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (886ms)."
+        "detail": "[ok] No violation found (887ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -4321,7 +4919,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (775ms)."
+        "detail": "[ok] No violation found (772ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -4377,7 +4975,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (6ms at 167 traces/second).",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
         "broken": []
       },
       "official": {
@@ -4453,7 +5051,7 @@
       "detail": "3 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (11ms at 91 traces/second).",
+        "detail": "[violation] Found an issue (10ms at 100 traces/second).",
         "broken": [
           "below2",
           "doubleBelow4"
@@ -4611,7 +5209,7 @@
       "detail": "4 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (9ms at 111 traces/second).",
+        "detail": "[violation] Found an issue (10ms at 100 traces/second).",
         "broken": [
           "below3"
         ]
@@ -4769,11 +5367,11 @@
       "detail": "6 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (34ms at 8824 traces/second)."
+        "detail": "[ok] No violation found (35ms at 8571 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (784ms)."
+        "detail": "[ok] No violation found (775ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -4833,7 +5431,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (776ms)."
+        "detail": "[ok] No violation found (774ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -4953,7 +5551,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (776ms)."
+        "detail": "[ok] No violation found (779ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5013,7 +5611,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (785ms)."
+        "detail": "[ok] No violation found (845ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5072,7 +5670,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (775ms)."
+        "detail": "[ok] No violation found (791ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5130,11 +5728,11 @@
       "detail": "5 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (36ms at 8333 traces/second)."
+        "detail": "[ok] No violation found (35ms at 8571 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (772ms)."
+        "detail": "[ok] No violation found (771ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5189,11 +5787,11 @@
       "detail": "1 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (28ms at 10714 traces/second)."
+        "detail": "[ok] No violation found (29ms at 10345 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (779ms)."
+        "detail": "[ok] No violation found (776ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5255,11 +5853,11 @@
       "detail": "32 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (153ms at 1961 traces/second)."
+        "detail": "[ok] No violation found (150ms at 2000 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (784ms)."
+        "detail": "[ok] No violation found (785ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5315,7 +5913,7 @@
       "detail": "8 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (18ms at 111 traces/second).",
+        "detail": "[violation] Found an issue (17ms at 118 traces/second).",
         "broken": []
       },
       "official": {
@@ -5393,11 +5991,11 @@
       "detail": "29 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (123ms at 2439 traces/second)."
+        "detail": "[ok] No violation found (120ms at 2500 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (784ms)."
+        "detail": "[ok] No violation found (785ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5539,7 +6137,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (828ms)."
+        "detail": "[ok] No violation found (824ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5603,7 +6201,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (786ms)."
+        "detail": "[ok] No violation found (797ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5738,11 +6336,11 @@
       "detail": "64 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (131ms at 2290 traces/second)."
+        "detail": "[ok] No violation found (129ms at 2326 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (786ms)."
+        "detail": "[ok] No violation found (792ms)."
       },
       "graphs": {
         "qc/tla-ts": {
@@ -5798,7 +6396,7 @@
       "detail": "21 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (21ms at 143 traces/second).",
+        "detail": "[violation] Found an issue (20ms at 150 traces/second).",
         "broken": []
       },
       "official": {
@@ -5874,7 +6472,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (13ms at 77 traces/second).",
+        "detail": "[violation] Found an issue (14ms at 71 traces/second).",
         "broken": []
       },
       "official": {
@@ -5950,7 +6548,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (15ms at 67 traces/second).",
+        "detail": "[violation] Found an issue (14ms at 71 traces/second).",
         "broken": []
       },
       "official": {
@@ -6026,7 +6624,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "detail": "[violation] Found an issue (6ms at 167 traces/second).",
         "broken": []
       },
       "official": {
@@ -6102,7 +6700,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (13ms at 77 traces/second).",
+        "detail": "[violation] Found an issue (15ms at 67 traces/second).",
         "broken": []
       },
       "official": {
@@ -6178,7 +6776,7 @@
       "detail": "2 states",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (6ms at 167 traces/second).",
+        "detail": "[violation] Found an issue (7ms at 143 traces/second).",
         "broken": []
       },
       "official": {
@@ -6326,12 +6924,12 @@
       "detail": "the names a::b_c and a_b::c, which would both become the TLA+ name a_b_c",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
+        "detail": "[violation] Found an issue (6ms at 167 traces/second).",
         "broken": []
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (768ms)."
+        "detail": "[ok] No violation found (775ms)."
       },
       "graphs": {},
       "comparisons": {}
@@ -6355,7 +6953,7 @@
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (767ms)."
+        "detail": "[ok] No violation found (781ms)."
       },
       "graphs": {},
       "comparisons": {}
@@ -6396,7 +6994,7 @@
       "detail": "the names q_inv_1 and invariant number 1, which would both become the TLA+ name q_inv_1",
       "simulator": {
         "outcome": "violated",
-        "detail": "[violation] Found an issue (6ms at 167 traces/second).",
+        "detail": "[violation] Found an issue (5ms at 200 traces/second).",
         "broken": []
       },
       "official": {
@@ -6421,11 +7019,11 @@
       "detail": "4 states",
       "simulator": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (42ms at 7143 traces/second)."
+        "detail": "[ok] No violation found (43ms at 6977 traces/second)."
       },
       "official": {
         "outcome": "passed",
-        "detail": "[ok] No violation found (773ms)."
+        "detail": "[ok] No violation found (774ms)."
       },
       "graphs": {
         "qc/tla-ts": {

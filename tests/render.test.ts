@@ -56,6 +56,8 @@ test("each ITF value prints as the Quint expression that builds it", () => {
   expect(quintValue({ "#map": [["a", true], ["b", false]] })).toBe(`Map("a" -> true, "b" -> false)`);
   expect(quintValue({ "#tup": [{ "#bigint": "1" }, "x"] })).toBe(`(1, "x")`);
   expect(quintValue({ "#tup": [] })).toBe("()");
+  expect(quintValue([])).toBe("[]");
+  expect(quintValue([{ "#bigint": "1" }, ["x"]])).toBe(`[1, ["x"]]`);
   expect(quintValue({ a: { "#bigint": "1" }, b: { "#set": [] } })).toBe("{ a: 1, b: Set() }");
   expect(quintValue({ tag: "Some", value: { x: true } })).toBe("Some({ x: true })");
   expect(quintValue({ tag: "None", value: { "#tup": [] } })).toBe("None");

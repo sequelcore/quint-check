@@ -9,10 +9,11 @@
 
 import type { Value } from "tla-ts";
 
-/** A value as ITF encodes it. Integers are always `#bigint`; a record is a JSON object. */
+/** A value as ITF encodes it. Integers are always `#bigint`; a list is a JSON array; a record is a JSON object. */
 export type ItfValue =
   | boolean
   | string
+  | readonly ItfValue[]
   | { readonly "#bigint": string }
   | { readonly "#set": readonly ItfValue[] }
   | { readonly "#map": readonly (readonly [ItfValue, ItfValue])[] }
@@ -47,7 +48,7 @@ export type Dump = boolean | number | string | { readonly set: readonly Dump[] }
 /** A Quint type from the IR's `types` table; only the kinds below have an ITF encoding here. */
 export type QuintType =
   | { readonly kind: "bool" | "int" | "str" }
-  | { readonly kind: "set"; readonly elem: QuintType }
+  | { readonly kind: "set" | "list"; readonly elem: QuintType }
   | { readonly kind: "fun"; readonly arg: QuintType; readonly res: QuintType }
   | { readonly kind: "rec" | "tup" | "sum"; readonly fields: Row };
 
@@ -70,7 +71,7 @@ export function typeProblem(t: unknown, inPayload = false): string | undefined {
   const type = t as { kind?: unknown; elem?: unknown; arg?: unknown; res?: unknown; fields?: { kind?: unknown; fields?: unknown; other?: { kind?: unknown } } };
   switch (type?.kind) {
     case "bool": case "int": case "str": return undefined;
-    case "set": return typeProblem(type.elem);
+    case "set": case "list": return typeProblem(type.elem);
     case "fun": return typeProblem(type.arg) ?? typeProblem(type.res);
     case "rec": case "tup": case "sum": {
       const row = type.fields;
@@ -117,6 +118,16 @@ export function toItf(d: Dump, t: QuintType): ItfValue {
     case "set": {
       if (!isObject(d) || !("set" in d)) throw new EncodingError(`a set that the checker holds as ${JSON.stringify(d).slice(0, 80)}`);
       return { "#set": sorted(d.set.map((e) => toItf(e, t.elem)), (e) => e) };
+    }
+    case "list": {
+      // The checker holds a list as a TLA+ sequence: a function on 1 .. n, whose order is the list's.
+      const entries = fnOf(d, "a list");
+      const byKey = new Map(entries);
+      const n = entries.length;
+      if (byKey.size !== n || ![...byKey.keys()].every((k) => typeof k === "number" && Number.isInteger(k) && k >= 1 && k <= n)) {
+        throw new EncodingError(`a list that the checker holds as ${JSON.stringify(d).slice(0, 80)}`);
+      }
+      return Array.from({ length: n }, (_, k) => toItf(byKey.get(k + 1) as Dump, t.elem));
     }
     case "fun":
       return { "#map": sorted(fnOf(d, "a map").map(([k, v]) => [toItf(k, t.arg), toItf(v, t.res)] as const), ([k]) => k) };

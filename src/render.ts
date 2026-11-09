@@ -29,6 +29,7 @@ const arg = (a: string): string => /^[\w./:=@+,-]+$/.test(a) ? a : JSON.stringif
 export function quintValue(value: ItfValue): string {
   if (typeof value === "boolean") return String(value);
   if (typeof value === "string") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(quintValue).join(", ")}]`;
   if ("#bigint" in value) return value["#bigint"] as string;
   if ("#set" in value) return `Set(${(value["#set"] as readonly ItfValue[]).map(quintValue).join(", ")})`;
   if ("#map" in value) return `Map(${(value["#map"] as readonly (readonly [ItfValue, ItfValue])[]).map(([k, v]) => `${quintValue(k)} -> ${quintValue(v)}`).join(", ")})`;
