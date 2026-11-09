@@ -64,6 +64,29 @@ try {
     const result = JSON.parse(json.stdout);
     expect(result.status === status && json.status === code, `CLI ${name} --json: ${result.status}, exit ${json.status} (expected ${status}, exit ${code})`);
   }
+  // The docs as installed: each `npx quint-check check` command they show runs, and its stdout (and stderr, when
+  // a second text block follows) equals the text blocks after it, so a page can't show output the tool doesn't print.
+  for (const page of ["README.md", "docs/quickstart.md"]) {
+    const text = readFileSync(join(project, "node_modules", "@sequelcore", "quint-check", page), "utf8").replaceAll("\r\n", "\n");
+    const blocks = [...text.matchAll(/```(\w+)\n([\s\S]*?)```/g)].map((m) => ({ lang: m[1], body: m[2] }));
+    let shown = 0;
+    blocks.forEach((block, i) => {
+      const command = block.lang === "sh" && block.body.trim().startsWith("npx quint-check check ") ? block.body.trim() : undefined;
+      if (command === undefined) return;
+      const outputs = [];
+      for (const next of blocks.slice(i + 1)) {
+        if (next.lang !== "text") break;
+        outputs.push(next.body);
+      }
+      if (outputs.length === 0) return;
+      const ran = spawnSync(npx, ["--no-install", ...command.split(/\s+/).slice(1)], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
+      const same = (actual, expected) => actual.replaceAll("\r\n", "\n") === expected;
+      expect(same(ran.stdout, outputs[0]) && (outputs[1] === undefined || same(ran.stderr, outputs[1])),
+        `${page}: "${command.slice(0, 60)}…" prints what the page shows`);
+      shown += 1;
+    });
+    expect(shown > 0, `${page} shows at least one command with its output`);
+  }
   // The old name of the time limit is refused with a hint, never accepted.
   const oldName = spawnSync(npx, ["--no-install", "quint-check", "check", "node_modules/@sequelcore/quint-check/demo/mutex.qnt", "--main", "mutex", "--invariant", "inv", "--timeout", "5000"],
     { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
