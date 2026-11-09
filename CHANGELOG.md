@@ -6,6 +6,13 @@ recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Before 1.0.0, any
 release may change the API, the command line or the result format.
 
+## [Unreleased]
+
+### Added
+
+- `Bool`, the set of Booleans, in the supported subset. Quint's `ewd840` and
+  `prisoners` examples now check with their authors' invariants.
+
 ## [0.1.0-alpha.2] - 2026-11-08
 
 The first version on npm, as `@sequelcore/quint-check` under the `alpha`

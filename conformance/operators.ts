@@ -34,6 +34,7 @@ const BUILTIN = "quint/src/builtin.qnt";
 const LANG_DIV = "docs/content/docs/lang.md:1401 (\"integer division, lik m \\div n in TLA+\"), :1406 (\"like m % n in TLA+\")";
 const LESSON_DIV = "docs/content/docs/lessons/integers.md:242 (\"compute the integer part and the remainder\")";
 const RECORDS = "docs/content/docs/lang.md:1195 (Records)";
+const BOOL = "quint/src/builtin.qnt:17 (Bool: \"The set of all booleans. That is, Set(false, true)\")";
 const TUPLES = "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n)";
 const EVALUATORS_TRUNCATE = "Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)";
 
@@ -86,6 +87,10 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "set-by-missing-key", ops: ["setBy"], expr: "Map(1 -> 0).setBy(2, x => x + 1) == Map(1 -> 0)", semantics: "undefined", source: "quint/src/builtin.qnt:362 (\"If `k` is not present in `m`, this operator has undefined behavior\")" },
   { id: "set-of-maps", ops: ["setOfMaps"], expr: "Set(1, 2).setOfMaps(Set(true, false)) == Set(Map(1 -> true, 2 -> true), Map(1 -> true, 2 -> false), Map(1 -> false, 2 -> true), Map(1 -> false, 2 -> false))", semantics: "defined", source: "quint/src/builtin.qnt:331 (setOfMaps; the documentation's own example)" },
   { id: "set-of-maps-size", ops: ["setOfMaps", "size"], expr: "Set(1, 2, 3).setOfMaps(Set(0, 1)).size() == 8 and Map(1 -> 0, 2 -> 1, 3 -> 1).in(Set(1, 2, 3).setOfMaps(Set(0, 1)))", semantics: "defined", source: "quint/src/builtin.qnt:331 (setOfMaps: the set of all maps from keys to values)" },
+  { id: "bool-set", ops: ["Bool", "eq", "size", "contains"], expr: "Bool == Set(false, true) and Bool.size() == 2 and Bool.contains(true) and Bool.contains(false)", semantics: "defined", source: `${BOOL}` },
+  { id: "bool-false", ops: ["Bool", "neq", "subseteq", "not"], expr: "Bool != Set(true) and Bool != Set(false) and not(Bool.subseteq(Set(true))) and Set(true).subseteq(Bool)", semantics: "defined", source: `${BOOL}` },
+  { id: "bool-quantifiers", ops: ["Bool", "forall", "exists", "filter"], expr: "Bool.forall(b => b or not(b)) and Bool.exists(b => b) and Bool.exists(b => not(b)) and Bool.filter(b => b) == Set(true)", semantics: "defined", source: `${BOOL}` },
+  { id: "bool-set-of-maps", ops: ["Bool", "setOfMaps", "size"], expr: "Set(1, 2).setOfMaps(Bool).size() == 4 and Map(1 -> true, 2 -> false).in(Set(1, 2).setOfMaps(Bool))", semantics: "defined", source: `${BOOL}; quint/src/builtin.qnt:331 (setOfMaps)` },
   { id: "set-of-maps-empty", ops: ["setOfMaps", "size"], expr: "Set(1).exclude(Set(1)).setOfMaps(Set(0, 1)).size() == 1 and Set(1).setOfMaps(Set(1).exclude(Set(1))).size() == 0", semantics: "defined", source: "quint/src/builtin.qnt:331 (setOfMaps: all maps from no keys is the one empty map; to no values, none)" },
   { id: "map-empty", ops: ["Map", "put"], expr: "Map().put(1, 2) == Map(1 -> 2) and Map(1 -> 2).keys().exclude(Set(1)).size() == 0", semantics: "defined", source: "docs/content/docs/lang.md Maps (Map() is the map with no keys)" },
   { id: "ite", ops: ["ite"], expr: "(if (1 < 2) 3 else 4) == 3 and (if (2 < 1) 3 else 4) == 4", semantics: "defined", source: "docs/content/docs/lang.md if-then-else" },

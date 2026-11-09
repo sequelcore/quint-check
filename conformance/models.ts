@@ -31,6 +31,10 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["assign", "ite", "set"], note: "planted fault: one transfer moves two tokens" },
   { id: "div-negative", file: "conformance/models/div_negative.qnt", main: "div_negative", expect: "unsupported",
     ops: ["idiv"], note: "reaches (-7) / 2, whose value Quint's sources disagree on" },
+  { id: "bool-lights", file: "conformance/models/bool.qnt", main: "bool_lights", expect: "passed",
+    ops: ["Bool", "setOfMaps", "in", "not", "set", "get", "keys", "forall"], note: "values chosen from Bool, in a map from setOfMaps(Bool) and as a nondet choice" },
+  { id: "bool-lights-all-on", file: "conformance/models/bool.qnt", main: "bool_lights", expect: "violated", invariant: "notAllOnWhileOff",
+    ops: ["Bool", "setOfMaps"], note: "both lights on with the switch off, which an initial state can already be" },
   // The mutex with integers for the phases; it also guards the translation of a `_` parameter, which Quint names without a letter.
   { id: "mutex-int", file: "conformance/models/mutex_int.qnt", main: "mutex_int", expect: "passed",
     ops: ["mapBy", "get", "set", "filter", "size", "ilte", "eq"], note: "three processes, one lock" },
@@ -44,6 +48,13 @@ export const MODEL_CASES: readonly ModelCase[] = [
   // Quint's public play_rock_paper_scissors.qnt, with the invariant it declares, and a violation added by an importing module.
   { id: "public-rock-paper-scissors", file: "conformance/public/play_rock_paper_scissors.qnt", main: "play_rock_paper_scissors", invariant: "winInv",
     expect: "passed", ops: ["variant", "ite", "eq", "implies"], note: "Quint's examples: variants with and without payload, compared with ==; its own invariant" },
+  // Quint's public ewd840.qnt (Dijkstra's termination detection on a ring) and prisoners.qnt, both needing Bool, with their authors' invariants.
+  { id: "public-ewd840", file: "conformance/public/ewd840.qnt", main: "ewd840_3", invariant: "IndInv", expect: "passed",
+    ops: ["Bool"], note: "Quint's examples: N = 3; the authors' inductive invariant TypeOK and Inv; 302 states" },
+  { id: "public-ewd840-token", file: "conformance/public/ewd840.qnt", main: "ewd840_3", invariant: "TokenAlwaysBlack", expect: "violated",
+    ops: ["Bool"], note: "Quint's examples: a property its authors list as one that doesn't hold, to validate the specification" },
+  { id: "public-prisoners", file: "conformance/public/prisoners.qnt", main: "prisoners3", invariant: "safetyInv", expect: "passed",
+    ops: ["Bool"], note: "Quint's examples: three prisoners; the authors' safetyInv; 70 states" },
   // Quint's public ewd426.qnt and ewd426_3.qnt (Dijkstra's self-stabilizing token rings), with their authors' tokenInv.
   { id: "public-ewd426", file: "conformance/public/ewd426.qnt", main: "ewd426", invariant: "tokenInv", expect: "passed",
     ops: ["setOfMaps", "get", "set", "ite"], note: "Quint's examples: N = 5, K = 7; 117,649 states" },

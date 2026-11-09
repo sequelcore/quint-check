@@ -28,6 +28,7 @@ export const SUPPORTED_OPCODES: readonly string[] = [
   "variant", "matchVariant",
   "Rec", "field", "with", "fieldNames",
   "Tup", "item", "tuples",
+  "Bool",
 ];
 
 // The IR is JSON; its shapes are checked where they are read.
@@ -111,6 +112,8 @@ function name(n: string, ctx: Ctx): string {
   if (ctx.locals.has(n)) return mangle(n);
   if (ctx.vars.has(n)) return ctx.mode === "init" ? initRead(n) : mangle(n);
   const def = ctx.defs.get(n);
+  // Quint's set of Booleans, Set(false, true) (builtin.qnt), is TLA+'s BOOLEAN.
+  if (def === undefined && n === "Bool") return "BOOLEAN";
   if (def === undefined) throw new Unsupported(`unresolved name ${n}`);
   if (ctx.mode === "init" && inlinedInInit(n, def, ctx)) return `(${initBody(def, [], ctx)})`;
   if (def.qualifier === "action" && ctx.mode === "state") throw new Unsupported(`action ${n} used in a state expression`);
