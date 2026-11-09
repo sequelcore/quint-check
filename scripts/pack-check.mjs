@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// node scripts/pack-check.mjs
+// node scripts/pack-check.mjs [<tarball>]
 //
-// Packs quint-check with npm, installs the tarball into a new project outside
+// Packs quint-check with npm, or takes the given tarball (the release workflow's, which it then publishes
+// unchanged), installs the tarball into a new project outside
 // this repository, and checks the three demo models through the installed
 // CLI and API, with Node only: the check fails if Bun or Java is on PATH,
 // and if a development dependency got installed. Exits non-zero on any
@@ -43,9 +44,10 @@ try {
       expect(!found, `${tool} is not on PATH`);
     }
   }
-  const packed = run(npm, ["pack", "--pack-destination", work, "--silent"], root).trim().split(/\r?\n/).at(-1);
-  const tarball = join(work, packed);
-  expect(existsSync(tarball), `npm pack wrote ${packed}`);
+  const given = process.argv[2];
+  const packed = given === undefined ? run(npm, ["pack", "--pack-destination", work, "--silent"], root).trim().split(/\r?\n/).at(-1) : given;
+  const tarball = given === undefined ? join(work, packed) : resolve(given);
+  expect(existsSync(tarball), given === undefined ? `npm pack wrote ${packed}` : `the tarball ${given} exists`);
   const project = join(work, "consumer");
   mkdirSync(project);
   run(npm, ["init", "-y"], project);
