@@ -289,24 +289,15 @@ with the cache off, empty, warm or corrupted (`tests/cache.test.ts`).
 | Package | Version | Role | Notes |
 | --- | --- | --- | --- |
 | `@informalsystems/quint` | 0.33.1 | Quint's official frontend | Published by Quint's CI with a provenance attestation |
-| `tla-ts` | 0.0.8-dev.8067c48 | The model checker | A development build, see below |
+| `tla-ts` | 0.0.9 | The model checker | A stable release |
 
 Both are pinned to exact versions, and the lockfile pins their content.
 
-**tla-ts is a development build.** `0.0.8-dev.8067c48` is
-[aidenybai/tla-ts@8067c48](https://github.com/aidenybai/tla-ts/commit/8067c48004dbda038547adf1a125c835a32d16be),
-the latest stable release, 0.0.8, plus three commits:
-
-- a lexer refactor;
-- a refactor of the evaluator's caches;
-- `-continue` (tla-ts#358), which the conformance harness uses to explore a
-  model's whole graph past its violations.
-
-It was published to npm by tla-ts's GitHub Actions with an SLSA provenance
-attestation, and `npm audit signatures` verifies it. The risks: a
-development build has no stability promise, and the next stable release may
-behave differently. quint-ts moves to the first stable release that includes
-`-continue`, with the conformance harness run again on it.
+tla-ts 0.0.9 is the first stable release with `-continue`
+([tla-ts#358](https://github.com/aidenybai/tla-ts/pull/358)), which the
+conformance harness uses to explore a model's whole graph past its
+violations; quint-ts's own checks never set it. It was published to npm
+with an SLSA provenance attestation, and `npm audit signatures` verifies it.
 
 ## Performance
 

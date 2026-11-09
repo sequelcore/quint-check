@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@informalsystems/quint": "0.33.1",
-    "tla-ts": "0.0.8-dev.8067c48"
+    "tla-ts": "0.0.9"
   },
   "devDependencies": {
     "@types/bun": "1.4.4",
