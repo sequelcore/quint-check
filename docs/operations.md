@@ -50,8 +50,8 @@ output, and never reports `passed`.
 ## The time limit
 
 `timeoutMs`, or `--timeout-ms`, covers the whole check, Quint's frontend
-included. Creating and removing the folder happen outside it, and can add a
-little time to a check that ran up to its limit. Reading Quint's output
+included, from creating the check's folder on. Removing the folder happens
+after it, and can add a little time to a check that ran up to its limit. Reading Quint's output
 (`frontend.json`) and translating it run in the process that called `check`.
 Neither `timeoutMs` nor the signal interrupts them, and the check stops only
 once they finish.

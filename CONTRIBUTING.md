@@ -41,9 +41,32 @@ passes, and `tests/coverage.test.ts` enforces it. Update
 
 Both are pinned to exact versions in `package.json`, and the lockfile pins
 their content. `npm install` resolves their own dependencies again, so the
-fully pinned install is `bun install --frozen-lockfile`. tla-ts's `-continue`
-lets the conformance harness explore a model's whole graph past its
-violations; quint-check's own checks never set it.
+fully pinned install is `bun install --frozen-lockfile`. `npm audit
+signatures` verifies both attestations.
+
+tla-ts 0.0.9 is the first stable release with `-continue`
+([tla-ts#358](https://github.com/aidenybai/tla-ts/pull/358)), which lets the
+conformance harness explore a model's whole graph past its violations;
+quint-check's own checks never set it.
+
+## Try a checkout without Bun
+
+To try a checkout with Node and npm only, pack it and install the tarball
+into a project of your own:
+
+```sh
+git clone https://github.com/sequelcore/quint-check.git
+cd quint-check
+npm install
+npm pack
+mkdir ../my-project
+cd ../my-project
+npm init -y
+npm install ../quint-check/sequelcore-quint-check-0.1.0-alpha.2.tgz
+```
+
+`npm pack` compiles `src/` to `dist/` and writes the tarball, named after the
+version in `package.json`.
 
 ## Benchmarks
 

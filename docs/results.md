@@ -62,8 +62,9 @@ forwards its caveats with it.
 
 ## What it runs on
 
-quint-check runs Quint's own frontend (`@informalsystems/quint`), so a model
-is parsed, typechecked and flattened exactly as Quint does it. It then
+quint-check runs Quint's own frontend (`@informalsystems/quint`, as `quint
+compile --target json`), so a model is parsed, typechecked and flattened
+exactly as Quint does it. It then
 translates the subset to TLA+ and checks it with
 [tla-ts](https://github.com/aidenybai/tla-ts), a TLA+ model checker written in
 TypeScript, which is why no Java is needed. Both dependencies are pinned to

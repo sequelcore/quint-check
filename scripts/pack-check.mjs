@@ -64,25 +64,29 @@ try {
     const result = JSON.parse(json.stdout);
     expect(result.status === status && json.status === code, `CLI ${name} --json: ${result.status}, exit ${json.status} (expected ${status}, exit ${code})`);
   }
-  // The docs as installed: each `npx quint-check check` command they show runs, and its stdout (and stderr, when
-  // a second text block follows) equals the text blocks after it, so a page can't show output the tool doesn't print.
+  // The docs as installed: every `sh` block followed by output is run, and its stdout (and stderr, when a second
+  // text block follows; else stderr must be empty) equals the blocks after it, so a page can't show output the
+  // tool doesn't print. A shown command that isn't a single `npx quint-check` line fails rather than being skipped.
   for (const page of ["README.md", "docs/quickstart.md"]) {
     const text = readFileSync(join(project, "node_modules", "@sequelcore", "quint-check", page), "utf8").replaceAll("\r\n", "\n");
-    const blocks = [...text.matchAll(/```(\w+)\n([\s\S]*?)```/g)].map((m) => ({ lang: m[1], body: m[2] }));
+    const blocks = [...text.matchAll(/```(\w*)\n([\s\S]*?)```/g)].map((m) => ({ lang: m[1], body: m[2] }));
     let shown = 0;
     blocks.forEach((block, i) => {
-      const command = block.lang === "sh" && block.body.trim().startsWith("npx quint-check check ") ? block.body.trim() : undefined;
-      if (command === undefined) return;
+      if (block.lang !== "sh") return;
       const outputs = [];
       for (const next of blocks.slice(i + 1)) {
         if (next.lang !== "text") break;
         outputs.push(next.body);
       }
       if (outputs.length === 0) return;
+      const command = block.body.trim();
+      const runnable = /^npx quint-check [^\n]+$/.test(command) && outputs.length <= 2;
+      expect(runnable, `${page}: "${command.slice(0, 60)}" shows output, so it must be one npx quint-check line with at most stdout and stderr`);
+      if (!runnable) return;
       const ran = spawnSync(npx, ["--no-install", ...command.split(/\s+/).slice(1)], { cwd: project, env, encoding: "utf8", shell: shellFor(npx) });
       const same = (actual, expected) => actual.replaceAll("\r\n", "\n") === expected;
-      expect(same(ran.stdout, outputs[0]) && (outputs[1] === undefined || same(ran.stderr, outputs[1])),
-        `${page}: "${command.slice(0, 60)}…" prints what the page shows`);
+      expect([0, 20, 21, 22, 23].includes(ran.status ?? -1) && same(ran.stdout, outputs[0]) && same(ran.stderr, outputs[1] ?? ""),
+        `${page}: "${command.slice(0, 60)}…" prints what the page shows (exit ${ran.status})`);
       shown += 1;
     });
     expect(shown > 0, `${page} shows at least one command with its output`);

@@ -47,8 +47,13 @@ reachable state needs them. A model that never reaches them is checked.
 | --- | --- |
 | `/` and `%` on negative operands | Quint's sources disagree on their value ([quint-co/quint#2070](https://github.com/quint-co/quint/issues/2070)). |
 | `get`, `set` or `setBy` on a key the map lacks | Quint leaves the result undefined. |
-| An integer outside the checker's 32-bit range | Quint's integers are unbounded; the checker's aren't, and it stops rather than wrap. |
+| A computed integer outside the checker's 32-bit range | Quint's integers are unbounded; the checker's aren't, and it stops rather than wrap. |
 | An init that reads a state variable, directly or through a definition, where init evaluates the read | Quint's evaluators reject it (QNT502), and TLC solves it as an equation. |
+
+An integer *literal* outside the 32-bit range is the exception: the checker
+refuses it while reading the translation, so a model that holds one gets
+`unsupported` before any state is explored, even in a branch the search would
+never take. The result still says `where: "reached-state"`.
 
 A read is refused when tla-ts evaluates it, so a construct where tla-ts skips
 a read that Quint's evaluators would reach could still pass; none is known.

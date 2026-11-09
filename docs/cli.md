@@ -33,7 +33,8 @@ When stderr is a terminal, one line on stderr says the check started.
 
 With `--json`, stdout holds one JSON document, the
 [`CheckResult`](api.md#checkresult) that `check()` returns, with the same exit
-code. The JSON has no timestamps, so the same input gives the same bytes.
+code. The JSON has no timestamps. An `error`'s `output` can name the check's
+temporary folder, whose name differs from run to run.
 
 ### `--out-itf`
 
@@ -63,7 +64,9 @@ stdout, and exit 2:
 ## `quint-check translate`
 
 Prints the TLA+ module and configuration that `check` would run, with the
-configuration as TLA+ comments after the module.
+configuration as TLA+ comments after the module. `check` also adds
+`CHECK_DEADLOCK FALSE` to that configuration; without it, a checker run on the
+printed files reports deadlock, which `check` doesn't check.
 
 ```text
 quint-check translate <file.qnt> [--invariant <expr>...] [options]

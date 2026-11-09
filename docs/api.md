@@ -42,7 +42,9 @@ rejects:
 - with a `RangeError`, before anything runs, when `timeoutMs` isn't a whole
   number from 1 to 2147483647;
 - with `signal.reason` when `signal` aborts, once every process the check
-  started is gone.
+  started is gone;
+- with the file system's error when quint-check can't create its temporary
+  folder or write in it, such as `EACCES` or `ENOSPC`.
 
 ```ts
 const controller = new AbortController();
