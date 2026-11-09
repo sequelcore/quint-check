@@ -80,20 +80,27 @@ jobs:
             *) echo "the registry answered $code for the package"; exit 1 ;;
           esac
       # Temporary, for the package's first version only (#24): npm's trusted publishing can't be configured until
-      # the package exists, so that version stages with a short-lived npm token read from Doppler at publish
-      # time. Once the package exists, these steps don't run, so a later release has only the workflow's OIDC
-      # identity and fails if npm refuses it. #24 removes them, the environment's DOPPLER_TOKEN and the token.
-      - if: steps.registry.outputs.first == 'true'
-        uses: dopplerhq/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73 # v4.0.1
+      # the package exists, so that version stages with a short-lived npm token read from Doppler's API at
+      # publish time, with no third-party action. The project and config are environment secrets, so the logs
+      # mask them. Once the package exists, this step doesn't run, so a later release has only the workflow's
+      # OIDC identity and fails if npm refuses it. #24 removes it, the environment's secrets and the token.
       - name: Stage the first version with its token
         if: steps.registry.outputs.first == 'true'
         working-directory: release
         env:
           TARBALL: ${{ needs.build.outputs.tarball }}
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          DOPPLER_PROJECT: ${{ secrets.DOPPLER_PROJECT }}
+          DOPPLER_CONFIG: ${{ secrets.DOPPLER_CONFIG }}
         run: |
+          set -o pipefail
           sha256sum --check SHA256SUMS
-          token=$(doppler secrets get NPM_PUBLISH_TOKEN --plain)
+          token=$(curl -fsS -G https://api.doppler.com/v3/configs/config/secret \
+            -H "Authorization: Bearer $DOPPLER_TOKEN" \
+            --data-urlencode "project=$DOPPLER_PROJECT" --data-urlencode "config=$DOPPLER_CONFIG" \
+            --data-urlencode "name=NPM_PUBLISH_TOKEN" \
+            | node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(0, "utf8")).value.computed.trim())')
+          [ -n "$token" ] || { echo "Doppler returned no token"; exit 1; }
           echo "::add-mask::$token"
           npmrc="$RUNNER_TEMP/.npmrc"
           trap 'rm -f "$npmrc"' EXIT
