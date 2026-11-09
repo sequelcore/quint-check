@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import { canonValue } from "../conformance/graph.ts";
+import { canonValue, violatingStates } from "../conformance/graph.ts";
+import type { Translation } from "../src/translate.ts";
 
 test("a record's fields compare in any order, as TLC prints them in its own", () => {
   expect(canonValue("[holding |-> FALSE, job |-> 0, id |-> \"w1\"]")).toBe(canonValue("[id |-> \"w1\", holding |-> FALSE, job |-> 0]"));
@@ -24,4 +25,25 @@ test("different values stay different", () => {
 test("whitespace outside string literals means nothing, inside them it does", () => {
   expect(canonValue("[ a |-> 1,\n    b |-> 2 ]")).toBe(canonValue("[a|->1,b|->2]"));
   expect(canonValue("{\"a b\"}")).not.toBe(canonValue("{\"ab\"}"));
+});
+
+test("a violation in an initial state counts as violating, as one after a step does", () => {
+  const t = { variables: new Map() } as unknown as Translation;
+  const output = [
+    "Error: Invariant Inv is violated by the initial state:",
+    "/\\ x = 1",
+    "/\\ y = TRUE",
+    "",
+    "Error: Invariant Inv is violated.",
+    "Error: The behavior up to this point is:",
+    "State 1: <Initial predicate>",
+    "/\\ x = 0",
+    "/\\ y = FALSE",
+    "",
+    "State 2: <Next line 5>",
+    "/\\ x = 2",
+    "/\\ y = FALSE",
+    "",
+  ].join("\n");
+  expect([...violatingStates(output, t)].sort()).toEqual(["x = 1; y = TRUE", "x = 2; y = FALSE"]);
 });
