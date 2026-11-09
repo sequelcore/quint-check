@@ -41,6 +41,10 @@ export const MODEL_CASES: readonly ModelCase[] = [
     ops: ["List", "append", "concat", "tail", "nth"], note: "planted fault: the receiver takes from the back" },
   { id: "mutex-list", file: "conformance/models/mutex_list.qnt", main: "mutex_list", expect: "passed",
     ops: ["List"], note: "the demo's mutex with the lock as [] or [owner]" },
+  { id: "ranking", file: "conformance/models/ranking.qnt", main: "ranking", expect: "passed",
+    ops: ["range", "foldl", "select", "replaceAt", "slice"], note: "a ranking as a list: overtaking swaps two places, the leaderboard selects" },
+  { id: "ranking-few-leaders", file: "conformance/models/ranking.qnt", main: "ranking", expect: "violated", invariant: "fewLeaders",
+    ops: ["select", "length"], note: "planted fault: the leaderboard never fills up" },
   // The mutex with integers for the phases; it also guards the translation of a `_` parameter, which Quint names without a letter.
   { id: "mutex-int", file: "conformance/models/mutex_int.qnt", main: "mutex_int", expect: "passed",
     ops: ["mapBy", "get", "set", "filter", "size", "ilte", "eq"], note: "three processes, one lock" },

@@ -93,3 +93,7 @@ another construct: `BinSearch.qnt` at `ipow`, `lists.qnt` at `foldl`,
 `bank.qnt` at `assert`, `utxo.qnt` at an operator with a parameter defined
 inside a value, and `denomTrace.qnt` and `ics20.qnt` at an operator argument
 that isn't a lambda.
+
+The other list operators brought no example to a verdict either.
+`lists.qnt`, `option.qnt` and `vote.qnt`, which stopped at `foldl` or
+`replaceAt`, now stop at an operator passed as an argument to another.

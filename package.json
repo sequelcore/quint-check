@@ -1,8 +1,9 @@
 {
   "name": "@sequelcore/quint-check",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "license": "Apache-2.0",
   "description": "A Java-free Quint model checker for TypeScript, powered by tla-ts. Experimental.",
+  "keywords": ["quint", "tlaplus", "tla-plus", "model-checking", "model-checker", "formal-verification", "formal-methods", "specification", "typescript", "nodejs"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sequelcore/quint-check.git"

@@ -29,7 +29,7 @@ export const SUPPORTED_OPCODES: readonly string[] = [
   "Rec", "field", "with", "fieldNames",
   "Tup", "item", "tuples",
   "Bool",
-  "List", "append", "concat", "head", "tail", "length", "nth", "indices",
+  "List", "append", "concat", "head", "tail", "length", "nth", "indices", "replaceAt", "slice", "range", "select", "foldl",
 ];
 
 // The IR is JSON; its shapes are checked where they are read.
@@ -199,6 +199,10 @@ function app(ex: Ex, ctx: Ctx): string {
     case "head": return `QTS__head(${e(0)})`;
     case "tail": return `QTS__tail(${e(0)})`;
     case "nth": return `QTS__nth(${e(0)}, ${e(1)})`;
+    case "replaceAt": return `QTS__replaceAt(${e(0)}, ${e(1)}, ${e(2)})`;
+    case "slice": return `QTS__slice(${e(0)}, ${e(1)}, ${e(2)})`;
+    case "range": return `QTS__range(${e(0)}, ${e(1)})`;
+    case "select": case "foldl": return walkList(op, a, ctx);
     case "item": return `(${e(0)})[${itemIndex(a[1])}]`;
     // S_1 \X ... \X S_n with n >= 2 is the set of n-tuples, not nested pairs. Each factor is parenthesized:
     // \X binds tighter than DOMAIN, so `DOMAIN m \X S` would be `DOMAIN (m \X S)`.
@@ -367,6 +371,28 @@ function fold(a: Ex[], ctx: Ctx): string {
 }
 
 /**
+ * `l.select(p)` or `l.foldl(z, f)` as a recursive helper that walks the list from its head. A list has an
+ * order, so unlike a set's fold, foldl takes any operator.
+ */
+function walkList(op: "select" | "foldl", a: Ex[], ctx: Ctx): string {
+  const { params, body } = lambdaOf(op === "select" ? a[1] : a[2], op === "select" ? 1 : 2);
+  const [acc, x] = op === "select" ? [undefined, params[0] ?? ""] : [params[0] ?? "", params[1] ?? ""];
+  const bound = acc === undefined ? [x] : [acc, x];
+  const captured = new Set<string>();
+  freeLocals(body, ctx, new Set(bound), captured);
+  const extraNames = [...captured].map(mangle);
+  const extra = extraNames.map((v) => `, ${v}`).join("");
+  const id = `QTS__${op}${++ctx.counter.n}`;
+  const term = expr(body, withLocals(ctx, bound));
+  const next = acc === undefined ? `IF ${term} THEN Append(QTS__acc, ${mangle(x)}) ELSE QTS__acc` : term;
+  const lets = `${acc === undefined ? "" : `${mangle(acc)} == QTS__acc\n        `}${mangle(x)} == Head(QTS__l)`;
+  const arity = ["_", "_", ...extraNames.map(() => "_")].join(", ");
+  ctx.helpers.push(`RECURSIVE ${id}(${arity})\n${id}(QTS__acc, QTS__l${extra}) ==\n` +
+    `  IF Len(QTS__l) = 0 THEN QTS__acc ELSE\n    LET ${lets} IN\n    ${id}(${next}, Tail(QTS__l)${extra})`);
+  return `${id}(${op === "select" ? "<<>>" : expr(a[1], ctx)}, ${expr(a[0], ctx)}${extra})`;
+}
+
+/**
  * The first opcode in `ex` that is neither in `SUPPORTED_OPCODES` nor a
  * definition of the module, or undefined. A Map literal's pairs and a
  * nondet's `oneOf` are part of their construct, so they aren't reported.
@@ -475,6 +501,12 @@ const PRELUDE = [
   `QTS__head(QTS__l) == IF Len(QTS__l) > 0 THEN Head(QTS__l) ELSE QTS__unsupported("head of an empty list")`,
   `QTS__tail(QTS__l) == IF Len(QTS__l) > 0 THEN Tail(QTS__l) ELSE QTS__unsupported("tail of an empty list")`,
   `QTS__nth(QTS__l, QTS__i) == IF 0 <= QTS__i /\\ QTS__i < Len(QTS__l) THEN QTS__l[QTS__i + 1] ELSE QTS__unsupported("nth outside the list")`,
+  `QTS__replaceAt(QTS__l, QTS__i, QTS__v) == IF 0 <= QTS__i /\\ QTS__i < Len(QTS__l) THEN [QTS__l EXCEPT ![QTS__i + 1] = QTS__v] ELSE QTS__unsupported("replaceAt outside the list")`,
+  // builtin.qnt leaves slice undefined unless 0 <= i < length, 0 <= j <= length and i <= j, so an empty
+  // slice at the end of a list, or any slice of an empty list, is undefined too.
+  `QTS__slice(QTS__l, QTS__i, QTS__j) == IF 0 <= QTS__i /\\ QTS__i < Len(QTS__l) /\\ QTS__j <= Len(QTS__l) /\\ QTS__i <= QTS__j THEN SubSeq(QTS__l, QTS__i + 1, QTS__j) ` +
+    `ELSE QTS__unsupported("slice outside the list")`,
+  `QTS__range(QTS__i, QTS__j) == IF QTS__i <= QTS__j THEN [QTS__k \\in 1 .. (QTS__j - QTS__i) |-> QTS__i + QTS__k - 1] ELSE QTS__unsupported("range with a start after its end")`,
 ];
 
 /**

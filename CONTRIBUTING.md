@@ -62,7 +62,7 @@ npm pack
 mkdir ../my-project
 cd ../my-project
 npm init -y
-npm install ../quint-check/sequelcore-quint-check-0.1.0-alpha.2.tgz
+npm install ../quint-check/sequelcore-quint-check-0.1.0-alpha.3.tgz
 ```
 
 `npm pack` compiles `src/` to `dist/` and writes the tarball, named after the
