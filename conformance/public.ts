@@ -16,9 +16,9 @@ export const PUBLIC_REFUSED: readonly { id: string; file: string; main: string; 
   { id: "coin", file: "conformance/public/coin.qnt", main: "coin", reason: "operator ipow" },
   { id: "two_phase_commit", file: "conformance/public/two_phase_commit.qnt", main: "two_phase_commit_3", reason: "operator then" },
   { id: "tictactoe", file: "conformance/public/tictactoe.qnt", main: "tictactoe", reason: "operator eventually" },
-  { id: "BinSearch", file: "conformance/public/BinSearch.qnt", main: "BinSearch10", reason: "operator List" },
+  { id: "BinSearch", file: "conformance/public/BinSearch.qnt", main: "BinSearch10", reason: "operator ipow" },
   { id: "generate", file: "conformance/public/generate.qnt", main: "gen", reason: "operator apalache::generate" },
   { id: "counters", file: "conformance/public/counters.qnt", main: "counters", reason: "operator then" },
   { id: "bakery", file: "conformance/public/bakery.qnt", main: "understanding", reason: "unresolved name Nat" },
-  { id: "demo-mutex-list", file: "demo/mutex_list.qnt", main: "mutex_list", reason: "operator List" },
+  { id: "demo-mutex-pairs", file: "demo/mutex_pairs.qnt", main: "mutex_pairs", reason: "operator powerset" },
 ];

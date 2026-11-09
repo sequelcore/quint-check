@@ -51,6 +51,7 @@ function literal(x: ItfValue, t: Type): string {
     case "str": return JSON.stringify(x);
     case "int": return `(${v["#bigint"]})`;
     case "set": return `Set(${(v["#set"] as ItfValue[]).map((e) => literal(e, t.elem)).join(", ")})`;
+    case "list": return `[${(x as ItfValue[]).map((e) => literal(e, t.elem)).join(", ")}]`;
     case "fun": return `Map(${(v["#map"] as [ItfValue, ItfValue][]).map(([k, y]) => `${literal(k, t.arg)} -> ${literal(y, t.res)}`).join(", ")})`;
     case "tup": return `(${(v["#tup"] as ItfValue[]).map((e, k) => literal(e, t.fields.fields[k].fieldType)).join(", ")})`;
     case "rec": return `{ ${t.fields.fields.map((f: Type) => `${f.fieldName}: ${literal(v[f.fieldName], f.fieldType)}`).join(", ")} }`;

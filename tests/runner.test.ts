@@ -87,7 +87,7 @@ test("every kind of result leaves no run folder behind", async () => {
   const outcomes = [
     await check("demo/mutex.qnt", { main: "mutex", invariants: ["inv"] }),
     await check("demo/mutex_bug.qnt", { main: "mutex_bug", invariants: ["inv"] }),
-    await check("demo/mutex_list.qnt", { main: "mutex_list", invariants: ["inv"] }),
+    await check("demo/mutex_pairs.qnt", { main: "mutex_pairs", invariants: ["inv"] }),
     await check("tests/fixtures/no-such-model.qnt", { main: "nothing", invariants: ["inv"] }),
     await check("tests/fixtures/unbounded.qnt", { ...unbounded, timeoutMs: 3_000 }),
   ].map((r) => r.status);

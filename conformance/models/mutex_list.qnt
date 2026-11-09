@@ -1,6 +1,5 @@
-// The correct model with the lock kept as a list of its holder, empty when
-// free. Quint accepts it, but lists are outside quint-check's subset, so
-// quint-check answers unsupported instead of a verdict.
+// The demo's mutex with the lock kept as a list of its holder, empty when
+// free: [] or [owner].
 module mutex_list {
   type Phase = Idle | Waiting | Critical
 

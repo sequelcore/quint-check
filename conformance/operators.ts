@@ -35,6 +35,7 @@ const LANG_DIV = "docs/content/docs/lang.md:1401 (\"integer division, lik m \\di
 const LESSON_DIV = "docs/content/docs/lessons/integers.md:242 (\"compute the integer part and the remainder\")";
 const RECORDS = "docs/content/docs/lang.md:1195 (Records)";
 const BOOL = "quint/src/builtin.qnt:17 (Bool: \"The set of all booleans. That is, Set(false, true)\")";
+const LISTS = "docs/content/docs/lang.md:1296 (Lists: 0-indexed; [e_1, ..., e_n] is << e_1, ..., e_n >>; l[i] is s[i + 1]; l.indices() is the indices from 0)";
 const TUPLES = "docs/content/docs/lang.md:1225 (Tuples: (e_1, ..., e_n) is << e_1, ..., e_n >>, t._i is t[i], tuples(S_1, ..., S_n) is S_1 \\X ... \\X S_n)";
 const EVALUATORS_TRUNCATE = "Quint's evaluators truncate: quint/src/runtime/impl/builtins.ts:377 (BigInt /, %), evaluator/src/builtins.rs:371 (i64::checked_div, checked_rem)";
 
@@ -91,6 +92,18 @@ export const OPERATOR_CASES: readonly OperatorCase[] = [
   { id: "bool-false", ops: ["Bool", "neq", "subseteq", "not"], expr: "Bool != Set(true) and Bool != Set(false) and not(Bool.subseteq(Set(true))) and Set(true).subseteq(Bool)", semantics: "defined", source: `${BOOL}` },
   { id: "bool-quantifiers", ops: ["Bool", "forall", "exists", "filter"], expr: "Bool.forall(b => b or not(b)) and Bool.exists(b => b) and Bool.exists(b => not(b)) and Bool.filter(b => b) == Set(true)", semantics: "defined", source: `${BOOL}` },
   { id: "bool-set-of-maps", ops: ["Bool", "setOfMaps", "size"], expr: "Set(1, 2).setOfMaps(Bool).size() == 4 and Map(1 -> true, 2 -> false).in(Set(1, 2).setOfMaps(Bool))", semantics: "defined", source: `${BOOL}; quint/src/builtin.qnt:331 (setOfMaps)` },
+  { id: "list-literal", ops: ["List", "eq", "neq"], expr: "[1, 2, 3] == List(1, 2, 3) and [1, 2] != [2, 1] and [1, 2] != [1, 2, 3] and [] == List()", semantics: "defined", source: `${LISTS}` },
+  { id: "list-append", ops: ["List", "append"], expr: "List(1, 2, 3).append(4) == List(1, 2, 3, 4) and List().append(1) == [1] and [1].append(1) != [1]", semantics: "defined", source: "quint/src/builtin.qnt:395 (append; the documentation's own example)" },
+  { id: "list-concat", ops: ["List", "concat"], expr: "List(1, 2, 3).concat(List(4, 5, 6)) == List(1, 2, 3, 4, 5, 6) and [1].concat([]) == [1] and [].concat([2]) == [2] and [1].concat([2]) != [2, 1]", semantics: "defined", source: "quint/src/builtin.qnt:404 (concat: l1 with l2 concatenated at the end; its example uses append by mistake)" },
+  { id: "list-head-tail", ops: ["List", "head", "tail"], expr: "List(1, 2, 3).head() == 1 and List(1, 2, 3).tail() == List(2, 3) and [7].tail() == [] and [7].head() == 7", semantics: "defined", source: "quint/src/builtin.qnt:415, :426 (head, tail; the documentation's own examples)" },
+  { id: "list-length", ops: ["List", "length"], expr: "List(1, 2, 3).length() == 3 and [].length() == 0 and [5, 5].length() == 2", semantics: "defined", source: "quint/src/builtin.qnt:435 (length; the documentation's own example)" },
+  { id: "list-nth", ops: ["List", "nth"], expr: "List(1, 2, 3).nth(1) == 2 and [4, 5, 6][0] == 4 and [4, 5, 6][2] == 6 and [4, 5, 6][1] != 4", semantics: "defined", source: "quint/src/builtin.qnt:446 (nth: the i+1th element; the documentation's own example)" },
+  { id: "list-indices", ops: ["List", "indices"], expr: "List(1, 2, 3).indices() == Set(0, 1, 2) and [9].indices() == Set(0) and [].indices().size() == 0", semantics: "defined", source: "quint/src/builtin.qnt:455 (indices; the documentation's own example)" },
+  { id: "list-nested", ops: ["List", "append", "nth", "length"], expr: "[[1], [2, 3]].nth(1).length() == 2 and Set([1], [1]).size() == 1 and Map(1 -> [true]).get(1) == [true] and { a: [1, 2] }.a.append(3) == [1, 2, 3]", semantics: "defined", source: `${LISTS}; lists in lists, sets, maps and records` },
+  { id: "list-head-empty", ops: ["List", "head"], expr: "List(1).tail().head() == 0", semantics: "undefined", source: "quint/src/builtin.qnt:417 (head: \"If `l` is empty, the behavior is undefined\")" },
+  { id: "list-tail-empty", ops: ["List", "tail"], expr: "List(1).tail().tail() == List()", semantics: "undefined", source: "quint/src/builtin.qnt:428 (tail: \"If `l` is empty, the behavior is undefined\")" },
+  { id: "list-nth-past-end", ops: ["List", "nth"], expr: "List(1, 2).nth(2) == 0", semantics: "undefined", source: "quint/src/builtin.qnt:448 (nth: \"If `i` is negative or greater than or equal to `l.length()`, the behavior is undefined\")" },
+  { id: "list-nth-negative", ops: ["List", "nth", "iuminus"], expr: "List(1, 2).nth(-1) == 0", semantics: "undefined", source: "quint/src/builtin.qnt:448 (nth: \"If `i` is negative or greater than or equal to `l.length()`, the behavior is undefined\")" },
   { id: "set-of-maps-empty", ops: ["setOfMaps", "size"], expr: "Set(1).exclude(Set(1)).setOfMaps(Set(0, 1)).size() == 1 and Set(1).setOfMaps(Set(1).exclude(Set(1))).size() == 0", semantics: "defined", source: "quint/src/builtin.qnt:331 (setOfMaps: all maps from no keys is the one empty map; to no values, none)" },
   { id: "map-empty", ops: ["Map", "put"], expr: "Map().put(1, 2) == Map(1 -> 2) and Map(1 -> 2).keys().exclude(Set(1)).size() == 0", semantics: "defined", source: "docs/content/docs/lang.md Maps (Map() is the map with no keys)" },
   { id: "ite", ops: ["ite"], expr: "(if (1 < 2) 3 else 4) == 3 and (if (2 < 1) 3 else 4) == 4", semantics: "defined", source: "docs/content/docs/lang.md if-then-else" },
@@ -140,7 +153,7 @@ export const UNSUPPORTED_CASES: readonly { id: string; module: string }[] = [
   { id: "temporal", module: "var x: int\naction init = x' = 0\naction step = x' = x\nval inv = true\ntemporal always0 = always(x == 0)" },
   { id: "then", module: "var x: int\naction init = x' = 0\naction inc = x' = x + 1\naction step = inc.then(inc)\nval inv = true" },
   { id: "choose-some", module: "var x: int\naction init = x' = Set(1, 2).chooseSome()\naction step = x' = x\nval inv = true" },
-  { id: "list", module: "var l: List[int]\naction init = l' = [1, 2]\naction step = l' = l\nval inv = l[0] == 1" },
+  { id: "list-replace-at", module: "var l: List[int]\naction init = l' = [1, 2].replaceAt(0, 3)\naction step = l' = l\nval inv = true" },
   { id: "set-to-map", module: "var m: int -> int\naction init = m' = Set((1, 2)).setToMap()\naction step = m' = m\nval inv = true" },
   { id: "reps", module: "var x: int\naction init = x' = 0\naction step = 2.reps(_ => x' = x)\nval inv = true" },
   { id: "powerset", module: "var s: Set[Set[int]]\naction init = s' = Set(1, 2).powerset()\naction step = s' = s\nval inv = true" },

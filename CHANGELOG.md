@@ -12,6 +12,14 @@ release may change the API, the command line or the result format.
 
 - `Bool`, the set of Booleans, in the supported subset. Quint's `ewd840` and
   `prisoners` examples now check with their authors' invariants.
+- Lists: literals, `append`, `concat`, `head`, `tail`, `length`, `nth` and
+  `indices`, as TLA+ sequences. `head` and `tail` of an empty list, and `nth`
+  outside the list, answer `unsupported`, since Quint leaves them undefined.
+  A counterexample shows a list as `[1, 2]`, and ITF writes it as a JSON array.
+
+### Changed
+
+- The demo's refused model is now `mutex_pairs.qnt`, which uses `powerset`.
 
 ## [0.1.0-alpha.2] - 2026-11-08
 

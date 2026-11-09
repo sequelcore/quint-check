@@ -29,6 +29,7 @@ export const SUPPORTED_OPCODES: readonly string[] = [
   "Rec", "field", "with", "fieldNames",
   "Tup", "item", "tuples",
   "Bool",
+  "List", "append", "concat", "head", "tail", "length", "nth", "indices",
 ];
 
 // The IR is JSON; its shapes are checked where they are read.
@@ -188,6 +189,16 @@ function app(ex: Ex, ctx: Ctx): string {
     case "with": return `[${e(0)} EXCEPT !.${fieldName(a[1])} = ${e(2)}]`;
     case "fieldNames": return `DOMAIN ${e(0)}`;
     case "Tup": return tuple(a, ctx);
+    // A Quint list is a TLA+ sequence, as Quint's language reference and its official route have it; Quint
+    // indexes from 0 and TLA+ from 1.
+    case "List": return `<<${a.map((_, i) => e(i)).join(", ")}>>`;
+    case "append": return `Append(${e(0)}, ${e(1)})`;
+    case "concat": return `((${e(0)}) \\o (${e(1)}))`;
+    case "length": return `Len(${e(0)})`;
+    case "indices": return `(0 .. (Len(${e(0)}) - 1))`;
+    case "head": return `QTS__head(${e(0)})`;
+    case "tail": return `QTS__tail(${e(0)})`;
+    case "nth": return `QTS__nth(${e(0)}, ${e(1)})`;
     case "item": return `(${e(0)})[${itemIndex(a[1])}]`;
     // S_1 \X ... \X S_n with n >= 2 is the set of n-tuples, not nested pairs. Each factor is parenthesized:
     // \X binds tighter than DOMAIN, so `DOMAIN m \X S` would be `DOMAIN (m \X S)`.
@@ -460,6 +471,10 @@ const PRELUDE = [
   `QTS__set(QTS__f, QTS__k, QTS__v) == IF QTS__k \\in DOMAIN QTS__f THEN [QTS__f EXCEPT ![QTS__k] = QTS__v] ELSE QTS__unsupported("set with a key the map lacks")`,
   // put sets the key's value, adding the key when the map lacks it.
   `QTS__put(QTS__f, QTS__k, QTS__v) == [QTS__x \\in DOMAIN QTS__f \\cup {QTS__k} |-> IF QTS__x = QTS__k THEN QTS__v ELSE QTS__f[QTS__x]]`,
+  // builtin.qnt leaves head and tail of an empty list, and nth outside 0 .. length - 1, undefined.
+  `QTS__head(QTS__l) == IF Len(QTS__l) > 0 THEN Head(QTS__l) ELSE QTS__unsupported("head of an empty list")`,
+  `QTS__tail(QTS__l) == IF Len(QTS__l) > 0 THEN Tail(QTS__l) ELSE QTS__unsupported("tail of an empty list")`,
+  `QTS__nth(QTS__l, QTS__i) == IF 0 <= QTS__i /\\ QTS__i < Len(QTS__l) THEN QTS__l[QTS__i + 1] ELSE QTS__unsupported("nth outside the list")`,
 ];
 
 /**

@@ -18,7 +18,7 @@ They test quint-check on specifications it didn't write, in four groups
 | Supported, with the authors' own invariants | The whole graph compared across routes, as for the other models | `play_rock_paper_scissors.qnt` (`winInv`, passed), `ewd426.qnt` (`tokenInv`, passed, in both of its modules), `ewd426_3.qnt` (`tokenInv`, passed), `ewd426_4.qnt` (`tokenInv`, passed), `games/secret-santa/secret_santa.qnt` (`inv`, violated, as in Quint's own route), `DiningPhilosophers5.qnt` (`TypeOk` and `Safety`, passed), `ewd840.qnt` (`IndInv`, passed; `TokenAlwaysBlack`, a non-property its authors list, violated), `prisoners.qnt` (`safetyInv`, passed) |
 | Supported, with an invariant we added | The same | `booleans.qnt` and `tuples.qnt` (each with one invariant that holds, one that breaks), and `play_rock_paper_scissors.qnt` (a draw is reachable) |
 | Partially supported | Translated, but no complete verdict: `inconclusive`, never `passed` | `instances.qnt`, whose counters grow without bound |
-| Refused | `unsupported` at translation, naming the construct | `weakFairness.qnt` (`leadsTo`), `coin.qnt` (`ipow`), `two_phase_commit.qnt` (`then`), `tictactoe.qnt` (`eventually`), `BinSearch.qnt` (`List`), `generate.qnt` (`apalache::generate`), `counters.qnt` (`then`), `bakery.qnt` (`Nat`) |
+| Refused | `unsupported` at translation, naming the construct | `weakFairness.qnt` (`leadsTo`), `coin.qnt` (`ipow`), `two_phase_commit.qnt` (`then`), `tictactoe.qnt` (`eventually`), `BinSearch.qnt` (`ipow`), `generate.qnt` (`apalache::generate`), `counters.qnt` (`then`), `bakery.qnt` (`Nat`) |
 
 Every model here is accepted by Quint's frontend. A refusal is a limit of
 quint-check's subset, not a defect in the model or in Quint.

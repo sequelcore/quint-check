@@ -12,7 +12,7 @@ const dir = import.meta.dir;
 const demos: { file: string; main: string; expect: CheckResult["status"]; what: string }[] = [
   { file: "mutex.qnt", main: "mutex", expect: "passed", what: "a correct model: three processes, one lock, at most one in the critical section" },
   { file: "mutex_bug.qnt", main: "mutex_bug", expect: "violated", what: "the same model with a deliberate bug: enter doesn't check the lock" },
-  { file: "mutex_list.qnt", main: "mutex_list", expect: "unsupported", what: "the correct model with the lock as a list, outside quint-check's subset" },
+  { file: "mutex_pairs.qnt", main: "mutex_pairs", expect: "unsupported", what: "the correct model with its invariant over the pairs of powerset, outside quint-check's subset" },
 ];
 
 let unexpected = 0;
