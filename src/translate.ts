@@ -12,7 +12,7 @@ import { type QuintType, typeProblem } from "./itf.js";
 export class Unsupported extends Error {}
 
 /** The text a reached unsupported operation fails with, so the check reports it as unsupported, never as a violation. */
-export const MARKER = "quint-ts-unsupported:";
+export const MARKER = "quint-check-unsupported:";
 
 /**
  * The operators translated, each with a conformance case (`conformance/operators.ts`).
@@ -485,7 +485,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   const entries = invariantEntries(defs.get("q::inv"), invariants);
   if (vars.size === 0) throw new Unsupported("a module with no state variables");
   const reserved = [...vars, ...defs.keys()].find((n) => mangle(n).startsWith("QTS__"));
-  if (reserved !== undefined) throw new Unsupported(`the name ${reserved}, whose prefix QTS__ quint-ts reserves for the names it generates`);
+  if (reserved !== undefined) throw new Unsupported(`the name ${reserved}, whose prefix QTS__ quint-check reserves for the names it generates`);
   uniqueTlaNames(vars, defs, invariants.length);
   // Name the first operator outside the subset before any other check, so the reason is the construct itself.
   for (const d of defs.values()) {
@@ -495,7 +495,7 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
   // A counterexample reports every variable as ITF, by its type; one that couldn't be reported is refused here.
   for (const [v, type] of types) {
     const problem = typeProblem(type);
-    if (problem !== undefined) throw new Unsupported(`the state variable ${v}, whose type (${problem}) quint-ts can't report in a counterexample`);
+    if (problem !== undefined) throw new Unsupported(`the state variable ${v}, whose type (${problem}) quint-check can't report in a counterexample`);
   }
   const step = assigned(defs.get("q::step").expr, defs);
   const missing = [...vars].filter((v) => !step.has(v));

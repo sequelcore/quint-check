@@ -1,9 +1,21 @@
 # Changelog
 
-All notable changes to quint-ts are recorded here. The format follows
+All notable changes to quint-check, called quint-ts until 0.1.0-alpha.1, are
+recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Before 1.0.0, any
 release may change the API, the command line or the result format.
+
+## [Unreleased]
+
+### Changed
+
+- quint-ts is now quint-check: the package is `@sequelcore/quint-check`, the
+  command is `quint-check`, and the repository is `sequelcore/quint-check`.
+  The environment variables are `QUINT_CHECK_CACHE` and
+  `QUINT_CHECK_CACHE_DIR`, and the cache and temporary folders start with
+  `quint-check`. Nothing reads the old names: `quint-ts cache clear`, run
+  before upgrading, removes the old cache.
 
 ## [0.1.0-alpha.1] - 2026-11-08
 

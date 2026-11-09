@@ -8,8 +8,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { isAlive } from "./process.js";
 
-const PREFIX = "quint-ts-run-";
-const OWNER = /^quint-ts-run-(\d+)-/;
+const PREFIX = "quint-check-run-";
+const OWNER = /^quint-check-run-(\d+)-/;
 
 /** A new folder for one check, owned by this process. */
 export function makeRunDir(): Promise<string> {
@@ -22,7 +22,7 @@ export async function removeRunDir(dir: string): Promise<void> {
     // Retries cover a file another program, such as an antivirus scanner, holds open for a moment.
     await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch (err) {
-    process.emitWarning(`quint-ts couldn't remove its temporary folder ${dir}: ${(err as Error).message}`, { code: "QUINT_TS_CLEANUP" });
+    process.emitWarning(`quint-check couldn't remove its temporary folder ${dir}: ${(err as Error).message}`, { code: "QUINT_CHECK_CLEANUP" });
   }
 }
 

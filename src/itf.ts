@@ -57,7 +57,7 @@ interface Row {
   readonly other: { readonly kind: string };
 }
 
-/** A value whose structure doesn't fit its type: a quint-ts defect, never a counterexample. */
+/** A value whose structure doesn't fit its type: a quint-check defect, never a counterexample. */
 export class EncodingError extends Error {}
 
 const isUnit = (t: QuintType): boolean => t.kind === "tup" && t.fields.fields.length === 0;
@@ -155,9 +155,9 @@ export function toItf(d: Dump, t: QuintType): ItfValue {
   }
 }
 
-const unreportable = (what: string): Error => new Error(`quint-ts can't report the counterexample: ${what}`);
+const unreportable = (what: string): Error => new Error(`quint-check can't report the counterexample: ${what}`);
 
-/** The most elements quint-ts enumerates in one set the checker holds lazily. */
+/** The most elements quint-check enumerates in one set the checker holds lazily. */
 const MAX_ENUMERATED = 100_000;
 
 /**
@@ -177,7 +177,7 @@ function elements(v: Value): Dump[] {
   if (typeof v === "object" && "enumerated" in v && v.enumerated !== undefined) return elements(v.enumerated);
   if (typeof v !== "object") throw unreportable(`a set that the checker holds as ${String(v)}`);
   const limited = (n: number): number => {
-    if (n > MAX_ENUMERATED) throw unreportable(`a set of ${n} elements in a state, more than the ${MAX_ENUMERATED} quint-ts enumerates`);
+    if (n > MAX_ENUMERATED) throw unreportable(`a set of ${n} elements in a state, more than the ${MAX_ENUMERATED} quint-check enumerates`);
     return n;
   };
   switch (v.kind) {
@@ -198,6 +198,6 @@ function elements(v: Value): Dump[] {
       for (const f of factors) out = out.flatMap((t) => f.map((x) => [...t, x]));
       return out.map((t) => ({ fn: t.map((x, i) => [i + 1, x] as const) }));
     }
-    default: throw unreportable(`a set that the checker holds as ${v.kind}, which quint-ts doesn't enumerate`);
+    default: throw unreportable(`a set that the checker holds as ${v.kind}, which quint-check doesn't enumerate`);
   }
 }

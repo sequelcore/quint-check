@@ -1,5 +1,5 @@
 // A stand-in for the checker child, for the paths where its result mustn't count: node fake-checker.mjs <run folder>
-// It does what <run folder>/mode says. Each result it writes would be a pass if quint-ts trusted it.
+// It does what <run folder>/mode says. Each result it writes would be a pass if quint-check trusted it.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

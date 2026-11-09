@@ -1,4 +1,4 @@
-/** The model corpus: each checked by quint-ts, compared as whole state graphs, and its counterexample checked against the graphs. */
+/** The model corpus: each checked by quint-check, compared as whole state graphs, and its counterexample checked against the graphs. */
 export interface ModelCase {
   readonly id: string;
   readonly file: string;
@@ -13,7 +13,7 @@ export interface ModelCase {
   /** The IR opcodes the model exercises; the harness checks they appear in its IR. */
   readonly ops: readonly string[];
   readonly note: string;
-  /** For a violated case: why `quint verify --out-itf` gives no counterexample to compare with quint-ts's. */
+  /** For a violated case: why `quint verify --out-itf` gives no counterexample to compare with quint-check's. */
   readonly apalacheItf?: string;
   /** For a violated case: the negative controls of the ITF checks to run on its counterexample (see itf.ts). */
   readonly itfControls?: "values" | "names";

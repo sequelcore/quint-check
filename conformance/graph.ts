@@ -1,11 +1,11 @@
 /**
  * Whole-state-graph comparison of a model across three routes:
  *
- * - qts/tla-ts: quint-ts's translation, checked by tla-ts.
- * - qts/tlc: the same translation, checked by Java TLC (Apalache's jar), so a
- *   difference from qts/tla-ts is the checker's.
+ * - qc/tla-ts: quint-check's translation, checked by tla-ts.
+ * - qc/tlc: the same translation, checked by Java TLC (Apalache's jar), so a
+ *   difference from qc/tla-ts is the checker's.
  * - official/tlc: Apalache's translation (`quint compile --target tlaplus`),
- *   checked by the same TLC, so a difference from qts/tlc is the translator's.
+ *   checked by the same TLC, so a difference from qc/tlc is the translator's.
  *
  * Each run explores every reachable state with `-continue`, dumps the graph,
  * and lists every state that breaks the invariant. A run that stops early is
@@ -123,7 +123,7 @@ function violatingStates(output: string, t: Translation): Set<string> {
 }
 
 function explore(tla: string, moduleName: string, cfg: string, t: Translation, checker: "tla-ts" | "tlc"): Graph {
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-graph-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-graph-"));
   try {
     writeFileSync(join(dir, `${moduleName}.tla`), tla);
     writeFileSync(join(dir, `${moduleName}.cfg`), cfg);
@@ -139,7 +139,7 @@ function explore(tla: string, moduleName: string, cfg: string, t: Translation, c
     const evalError = /Error: The error occurred when TLC was evaluating|Assert evaluated to FALSE|Error: Parsing or semantic/.test(output);
     const complete = ran.error === undefined && ran.signal === null && finished && !evalError;
     const why = complete ? "" : ran.error !== undefined || ran.signal !== null ? "the checker was stopped"
-      : evalError ? (output.split(/\r?\n/).find((l) => /quint-ts-unsupported|^Error:/.test(l)) ?? "an evaluation error") : "the search didn't finish";
+      : evalError ? (output.split(/\r?\n/).find((l) => /quint-check-unsupported|^Error:/.test(l)) ?? "an evaluation error") : "the search didn't finish";
     let parsed = { init: new Set<string>(), states: new Set<string>(), edges: new Set<string>() };
     let dumpProblem = "";
     try { parsed = parseDot(readFileSync(dot, "utf8").replace(/\r\n/g, "\n"), t); } catch (err) { dumpProblem = `no readable dump: ${String(err)}`; }
@@ -165,9 +165,9 @@ export function graphs(t: Target): GraphRoutes | { error: string } {
   if (translated.kind !== "translated") return { error: `${translated.kind}: ${"reason" in translated ? translated.reason : translated.output}` };
   const translation = translated.translation;
   const cfg = `${translation.cfg}\n`;
-  const routes: Record<string, Graph> = { "qts/tla-ts": explore(translation.tla, "Q", cfg, translation, "tla-ts") };
+  const routes: Record<string, Graph> = { "qc/tla-ts": explore(translation.tla, "Q", cfg, translation, "tla-ts") };
   if (javaAvailable()) {
-    routes["qts/tlc"] = explore(translation.tla, "Q", cfg, translation, "tlc");
+    routes["qc/tlc"] = explore(translation.tla, "Q", cfg, translation, "tlc");
     const compiled = runQuint(["compile", "--target", "tlaplus", `--main=${t.main}`, `--invariant=${t.invariant}`, t.file], { timeoutMs: 300_000 });
     const moduleName = /^-+ MODULE (\S+) -+/m.exec(compiled.stdout)?.[1];
     routes["official/tlc"] = compiled.status === 0 && moduleName !== undefined

@@ -38,7 +38,7 @@ interface Module { name: string; declarations: Declaration[] }
 
 /** The modules of `file` as Quint parses them, or the parse error. */
 function parseModules(file: string): { ok: true; modules: Module[] } | { ok: false; output: string } {
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-survey-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-survey-"));
   try {
     const out = join(dir, "parsed.json");
     const ran = runQuint(["parse", "--out", out, file]);
@@ -114,7 +114,7 @@ const TRANSLATED: readonly [Outcome, string][] = [
   ["error", "checked with an error"],
 ];
 const OTHER: readonly [Outcome, string][] = [
-  ["refused", "Refused by quint-ts"],
+  ["refused", "Refused by quint-check"],
   ["frontend-error", "Rejected by Quint's frontend with the last module as main"],
   ["no-init-step", "Without `init` or `step`"],
 ];

@@ -10,7 +10,7 @@ to add invariants to it: `booleans_check.qnt`, because `booleans.qnt`
 declares none, and `play_rock_paper_scissors_check.qnt`, to plant a
 violation.
 
-They test quint-ts on specifications it didn't write, in four groups
+They test quint-check on specifications it didn't write, in four groups
 ([models.ts](../models.ts) and [public.ts](../public.ts)):
 
 | Group | Expected | Models |
@@ -21,11 +21,11 @@ They test quint-ts on specifications it didn't write, in four groups
 | Refused | `unsupported` at translation, naming the construct | `weakFairness.qnt` (`leadsTo`), `coin.qnt` (`ipow`), `ewd840.qnt` and `prisoners.qnt` (`Bool`), `two_phase_commit.qnt` (`then`), `tictactoe.qnt` (`eventually`), `BinSearch.qnt` (`List`), `generate.qnt` (`apalache::generate`), `counters.qnt` (`then`), `bakery.qnt` (`Nat`) |
 
 Every model here is accepted by Quint's frontend. A refusal is a limit of
-quint-ts's subset, not a defect in the model or in Quint.
+quint-check's subset, not a defect in the model or in Quint.
 
 ## All of Quint's examples
 
-All 77 `.qnt` files in Quint's `examples/` went through quint-ts's
+All 77 `.qnt` files in Quint's `examples/` went through quint-check's
 translation, with the last module of each file as the main module, then the
 translated ones were checked with their authors' invariants:
 
@@ -35,7 +35,7 @@ translated ones were checked with their authors' invariants:
 | … a definitive verdict with the authors' own invariant | 0 | 1 | 4 | 5 | **5**: 4 `passed` after a complete search, 1 `violated` with a counterexample |
 | … no invariant of the authors to check | 1 | 1 | 1 (`booleans.qnt`, checked with invariants we added) | 3 | 5 (`booleans.qnt`, `records.qnt`, `kettle.qnt`, `DiningPhilosophers5.qnt`, `tuples.qnt`) |
 | … translated but `inconclusive` | 1 | 1 | 1 | 1 | 2 (`instances.qnt`, unbounded; `teaching.qnt`, not finished in the survey's 30 s) |
-| Refused by quint-ts | 49 | 48 | 44 | 41 | 38 |
+| Refused by quint-check | 49 | 48 | 44 | 41 | 38 |
 | Rejected by Quint's own frontend with the module chosen | 1 | 1 | 1 | 1 | 1 |
 | Without both `init` and `step` (libraries and tests) | 25 | 25 | 26 | 26 | 26 |
 

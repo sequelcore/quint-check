@@ -14,7 +14,7 @@ const posix = process.platform !== "win32";
 const unbounded = { main: "unbounded", invariants: ["inv"] as [string] };
 
 /** This process's run folders that still exist. */
-const myRunDirs = (owner = process.pid): string[] => readdirSync(tmpdir()).filter((n) => n.startsWith(`quint-ts-run-${owner}-`)).map((n) => join(tmpdir(), n));
+const myRunDirs = (owner = process.pid): string[] => readdirSync(tmpdir()).filter((n) => n.startsWith(`quint-check-run-${owner}-`)).map((n) => join(tmpdir(), n));
 
 /** The checker child's pid, once one of `owner`'s run folders records it. */
 async function checkerPid(owner: number, ms = 30_000): Promise<number> {
@@ -114,13 +114,13 @@ test("when the host dies, its checker exits, and a later sweep removes the folde
 }, 90_000);
 
 test("the sweep removes only folders whose owner is gone", async () => {
-  const root = mkdtempSync(join(tmpdir(), "quint-ts-sweep-test-"));
+  const root = mkdtempSync(join(tmpdir(), "quint-check-sweep-test-"));
   try {
     const ended = spawn(process.execPath, ["-e", "0"], { stdio: "ignore" });
     await new Promise((resolve) => ended.once("exit", resolve));
-    const dead = join(root, `quint-ts-run-${ended.pid}-a`);
-    const mine = join(root, `quint-ts-run-${process.pid}-b`);
-    const other = join(root, "quint-ts-cache-c");
+    const dead = join(root, `quint-check-run-${ended.pid}-a`);
+    const mine = join(root, `quint-check-run-${process.pid}-b`);
+    const other = join(root, "quint-check-cache-c");
     for (const d of [dead, mine, other]) mkdirSync(d);
     expect(await sweepStaleRunDirs(root)).toEqual([dead]);
     expect([existsSync(dead), existsSync(mine), existsSync(other)]).toEqual([false, true, true]);
@@ -128,7 +128,7 @@ test("the sweep removes only folders whose owner is gone", async () => {
 });
 
 test("a run folder that can't be removed is a warning, never a throw", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "quint-ts-cleanup-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "quint-check-cleanup-test-"));
   const inner = join(dir, "inner");
   mkdirSync(inner);
   writeFileSync(join(inner, "file"), "x");
@@ -142,7 +142,7 @@ test("a run folder that can't be removed is a warning, never a throw", async () 
     else process.chdir(inner);
     await removeRunDir(dir);
     await Bun.sleep(10);
-    expect(warnings).toContainEqual({ name: "Warning", code: "QUINT_TS_CLEANUP" });
+    expect(warnings).toContainEqual({ name: "Warning", code: "QUINT_CHECK_CLEANUP" });
   } finally {
     process.off("warning", onWarning);
     process.chdir(cwd);
@@ -227,7 +227,7 @@ test("a counterexample that doesn't fit the variables' types is an error, never 
     status: "violated", trace: { vars: ["m::x"], states: [{ "#meta": { index: 0, action: "init" }, "m::x": { "#bigint": "0" } }] } });
   for (const values of [{ x: "zero" }, {}, { x: 0, y: 1 }] as Record<string, Dump>[]) {
     expect(verdict(withValues(values), translation, "m.qnt"), JSON.stringify(values)).toMatchObject({
-      status: "error", stage: "checker", output: expect.stringContaining("quint-ts can't report the counterexample") });
+      status: "error", stage: "checker", output: expect.stringContaining("quint-check can't report the counterexample") });
   }
 });
 
@@ -244,7 +244,7 @@ test("the checker's result counts only when it exits 0 and writes a complete, we
     ["malformed", "error", noResult],
   ];
   for (const [mode, status, output] of cases) {
-    const dir = mkdtempSync(join(tmpdir(), "quint-ts-checker-test-"));
+    const dir = mkdtempSync(join(tmpdir(), "quint-check-checker-test-"));
     try {
       writeFileSync(join(dir, "mode"), mode);
       const r = await runChecker(fake, dir, noNames, "m.qnt", performance.now() + 30_000);

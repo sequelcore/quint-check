@@ -16,9 +16,9 @@ Run 2026-11-09T01:48:07.701Z on win32 x64: Quint 0.33.1, tla-ts 0.0.9, Bun 1.4.4
 
 ## Operators
 
-A defined case must pass everywhere; any other must be `unsupported` in quint-ts, and the other routes are recorded.
+A defined case must pass everywhere; any other must be `unsupported` in quint-check, and the other routes are recorded.
 
-| Case | Semantics | quint-ts | evaluator-ts | evaluator-rust | official (Apalache + TLC) | Source |
+| Case | Semantics | quint-check | evaluator-ts | evaluator-rust | official (Apalache + TLC) | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | `eq-neq` | defined | passed | passed | passed | passed | quint/src/builtin.qnt eq, neq |
 | `boolean` | defined | passed | passed | passed | passed | quint/src/builtin.qnt iff, implies, not, and, or |
@@ -75,7 +75,7 @@ A defined case must pass everywhere; any other must be `unsupported` in quint-ts
 | `record-set` | defined | passed | passed | passed | passed | docs/content/docs/lang.md:1195 (Records); quint/src/builtin.qnt:973 (records are values, so sets hold them) |
 | `record-map` | defined | passed | passed | passed | passed | docs/content/docs/lang.md:1195 (Records); quint/src/builtin.qnt mapBy, get, set (records as keys and as values) |
 | `record-variant` | defined | passed | passed | passed | passed | docs/content/docs/lang.md:1195 (Records); docs/content/docs/lang.md:1256 (Sum Types: a record as a constructor's payload) |
-| `record-odd-names` | defined | passed | passed | passed | passed | docs/content/docs/lang.md:1195 (Records): field names are identifiers, so a TLA+ operator's name or quint-ts's prefix is a field name too |
+| `record-odd-names` | defined | passed | passed | passed | passed | docs/content/docs/lang.md:1195 (Records): field names are identifiers, so a TLA+ operator's name or quint-check's prefix is a field name too |
 | `record-empty` | unspecified | unsupported | passed | passed | error | docs/content/docs/lang.md:1195 (Records) ("Warning: n >= 1"): no record without fields |
 | `record-reserved-name` | defined | unsupported | passed | passed | error | docs/content/docs/lang.md:1195 (Records): field names are identifiers |
 | `record-string-name` | defined | unsupported | passed | passed | error | quint/src/builtin.qnt:973 (Rec takes a string for each field name) |
@@ -100,7 +100,7 @@ A defined case must pass everywhere; any other must be `unsupported` in quint-ts
 
 ## Constructs outside the MVP
 
-| Case | quint-ts | Reason |
+| Case | quint-check | Reason |
 | --- | --- | --- |
 | `temporal` | unsupported | operator always |
 | `then` | unsupported | operator then |
@@ -116,7 +116,7 @@ A defined case must pass everywhere; any other must be `unsupported` in quint-ts
 
 From Quint's examples ([public/](public/)), and the demo's model with variants. The supported ones are in the models table below.
 
-| Model | Group | Expected | quint-ts | Reason |
+| Model | Group | Expected | quint-check | Reason |
 | --- | --- | --- | --- | --- |
 | `instances` | partially supported | inconclusive | inconclusive | timeout |
 | `weakFairness` | refused | unsupported: operator leadsTo | unsupported | operator leadsTo |
@@ -138,7 +138,7 @@ Graphs are explored completely with `-continue`: initial states, states, transit
 A counterexample's ITF is replayed through Quint's simulator, which must write the same ITF and break the invariant at the last state
 only, and must reach each state with the model's own init and step; Apalache's counterexample must have the same variables and length.
 
-| Model | Expected | quint-ts | Simulator (300 samples) | Official | qts/tla-ts vs qts/tlc | qts/tlc vs official/tlc | Counterexample | ITF |
+| Model | Expected | quint-check | Simulator (300 samples) | Official | qc/tla-ts vs qc/tlc | qc/tlc vs official/tlc | Counterexample | ITF |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `reserve` | passed | passed (20 states, 60 transitions) | passed | passed | equal | equal | — | — |
 | `reserve-overdraw` | violated | violated (56 states, 210 transitions) | violated | violated | equal | equal | valid in 3 graphs | Quint accepts it; Apalache: same shape |

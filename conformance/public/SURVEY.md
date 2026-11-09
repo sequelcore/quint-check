@@ -11,7 +11,7 @@ Each file's last module is the main module, and each value of that file named as
 | … no invariant of the authors to check | 5 |
 | … inconclusive | 2 |
 | … checked with an error | 0 |
-| Refused by quint-ts | 38 |
+| Refused by quint-check | 38 |
 | Rejected by Quint's frontend with the last module as main | 1 |
 | Without `init` or `step` | 26 |
 

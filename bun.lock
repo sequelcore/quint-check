@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "quint-ts",
+      "name": "@sequelcore/quint-check",
       "dependencies": {
         "@informalsystems/quint": "0.33.1",
         "tla-ts": "0.0.9",

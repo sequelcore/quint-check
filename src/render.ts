@@ -44,7 +44,7 @@ export function quintValue(value: ItfValue): string {
   return `{ ${keys.map((k) => `${k}: ${quintValue(fields[k] as ItfValue)}`).join(", ")} }`;
 }
 
-/** The arguments of `quint-ts check` for `request`, with `timeoutMs` in place of the request's. */
+/** The arguments of `quint-check check` for `request`, with `timeoutMs` in place of the request's. */
 function checkCommand(request: Request, timeoutMs: number): string {
   const options = [
     ...request.main === undefined ? [] : ["--main", request.main],
@@ -53,7 +53,7 @@ function checkCommand(request: Request, timeoutMs: number): string {
     ...request.invariants.flatMap((i) => ["--invariant", i]),
     "--timeout-ms", String(timeoutMs),
   ];
-  return ["quint-ts", "check", request.file, ...options].map(arg).join(" ");
+  return ["quint-check", "check", request.file, ...options].map(arg).join(" ");
 }
 
 /** `quint verify --backend=tlc` for `request`, which checks the whole language with Java. */
@@ -107,7 +107,7 @@ export function render(result: CheckResult, request: Request): { readonly stdout
     case "unsupported": {
       const found = result.where === "translation" ? "found during translation); nothing was checked" : "a reachable state needs it); nothing was proved";
       return {
-        stdout: lines(`unsupported: ${result.reason}, outside quint-ts's subset (${found}`),
+        stdout: lines(`unsupported: ${result.reason}, outside quint-check's subset (${found}`),
         stderr: lines(`${verifyCommand(request)} checks the whole language (needs Java)`),
       };
     }
@@ -127,7 +127,7 @@ export function render(result: CheckResult, request: Request): { readonly stdout
       const output = result.output.trimEnd();
       const stages: Readonly<Record<typeof result.stage, readonly [string, string]>> = {
         frontend: ["Quint's frontend rejected the model", "fix what Quint reports, then run the same command again"],
-        translation: ["the checker couldn't read quint-ts's translation", "this is a quint-ts defect; open an issue in sequelcore/quint-ts with the model and this command"],
+        translation: ["the checker couldn't read quint-check's translation", "this is a quint-check defect; open an issue in sequelcore/quint-check with the model and this command"],
         checker: ["the checker failed", "run the same command once more; if it fails again, open an issue with the output above"],
       };
       const [what, next] = stages[result.stage];

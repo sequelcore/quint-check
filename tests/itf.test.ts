@@ -95,5 +95,5 @@ test("a value dump can't enumerate is refused, never guessed", () => {
     { kind: "Interval", low: 1, high: 200_000 },
     { kind: "FunctionSet", domain: { kind: "Interval", low: 1, high: 20 }, range: set([true, false]) } as unknown as Value,
   ];
-  for (const v of refused) expect(() => dump(v), JSON.stringify(v)).toThrow("quint-ts can't report the counterexample");
+  for (const v of refused) expect(() => dump(v), JSON.stringify(v)).toThrow("quint-check can't report the counterexample");
 });

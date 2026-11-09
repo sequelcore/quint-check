@@ -1,6 +1,6 @@
-# quint-ts
+# quint-check
 
-Instructions for agents contributing to quint-ts, a Java-free Quint model
+Instructions for agents contributing to quint-check, a Java-free Quint model
 checker built on Quint's frontend and tla-ts. Read [README.md](README.md)
 for what a result means.
 
@@ -17,7 +17,7 @@ for what a result means.
   IR from `quint compile --target json`.
 - Quint's simulators are not the only authority. A case's `semantics` comes
   from Quint's documentation; where the documentation and the evaluators
-  disagree the case is `contested`, and quint-ts refuses it.
+  disagree the case is `contested`, and quint-check refuses it.
 - Don't present a disagreement between routes as an upstream bug unless its
   reproduction in `repro/` shows it and its README says why it's a defect
   and not undefined behavior.

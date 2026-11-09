@@ -10,7 +10,7 @@
  *
  * The folder is per user, under the platform's cache location, and
  * separate for each tla-ts version, runtime, platform and architecture.
- * `QUINT_TS_CACHE=off` turns it off, and `QUINT_TS_CACHE_DIR` moves it. When
+ * `QUINT_CHECK_CACHE=off` turns it off, and `QUINT_CHECK_CACHE_DIR` moves it. When
  * it can't be created or written, checks run without it, as when it's off.
  */
 import { accessSync, constants, mkdirSync, readdirSync, rmSync } from "node:fs";
@@ -19,13 +19,13 @@ import { join } from "node:path";
 
 type Env = Readonly<Record<string, string | undefined>>;
 
-/** Where quint-ts keeps its caches: QUINT_TS_CACHE_DIR, else the platform's per-user cache folder. */
+/** Where quint-check keeps its caches: QUINT_CHECK_CACHE_DIR, else the platform's per-user cache folder. */
 export function cacheRoot(env: Env = process.env): string {
-  const set = env["QUINT_TS_CACHE_DIR"];
+  const set = env["QUINT_CHECK_CACHE_DIR"];
   if (set !== undefined && set !== "") return set;
-  if (process.platform === "win32") return join(env["LOCALAPPDATA"] ?? join(homedir(), "AppData", "Local"), "quint-ts", "cache");
-  if (process.platform === "darwin") return join(homedir(), "Library", "Caches", "quint-ts");
-  return join(env["XDG_CACHE_HOME"] ?? join(homedir(), ".cache"), "quint-ts");
+  if (process.platform === "win32") return join(env["LOCALAPPDATA"] ?? join(homedir(), "AppData", "Local"), "quint-check", "cache");
+  if (process.platform === "darwin") return join(homedir(), "Library", "Caches", "quint-check");
+  return join(env["XDG_CACHE_HOME"] ?? join(homedir(), ".cache"), "quint-check");
 }
 
 /** The runtime that runs tla-ts, as `bun-1.4.4` or `node-24.22.1`. */
@@ -40,7 +40,7 @@ function runtime(): string {
  * can't be written.
  */
 export function checkerCache(tlaTsVersion: string, env: Env = process.env): string | undefined {
-  if (env["QUINT_TS_CACHE"] === "off") return undefined;
+  if (env["QUINT_CHECK_CACHE"] === "off") return undefined;
   const dir = join(cacheRoot(env), `tla-ts-${tlaTsVersion}`, `${runtime()}-${process.platform}-${process.arch}`);
   try {
     mkdirSync(dir, { recursive: true, mode: 0o700 });

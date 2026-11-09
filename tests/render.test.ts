@@ -23,7 +23,7 @@ test("a passed result ends with the verdict, after the search and the tools", ()
 
 test("a violated result prints the first state whole, then what each step changed, then the search and which invariant broke where", () => {
   const trace: ItfTrace = {
-    "#meta": { format: "ITF", "format-description": "https://apalache-mc.org/docs/adr/015adr-trace.html", source: "spec.qnt", status: "violation", description: "Created by quint-ts 0.0.0" },
+    "#meta": { format: "ITF", "format-description": "https://apalache-mc.org/docs/adr/015adr-trace.html", source: "spec.qnt", status: "violation", description: "Created by quint-check 0.0.0" },
     vars: ["phase", "n"],
     states: [
       { "#meta": { index: 0, action: "init" }, phase: { tag: "Idle", value: { "#tup": [] } }, n: { "#bigint": "0" } },
@@ -64,22 +64,22 @@ test("each ITF value prints as the Quint expression that builds it", () => {
 test("unsupported points to Quint's own route, which checks the whole language", () => {
   const atTranslation: CheckResult = { status: "unsupported", reason: "operator List", where: "translation", guarantee: guarantee("none") };
   expect(render(atTranslation, { ...request, invariants: ["inv", "x >= 0"] })).toEqual({
-    stdout: "unsupported: operator List, outside quint-ts's subset (found during translation); nothing was checked\n",
+    stdout: "unsupported: operator List, outside quint-check's subset (found during translation); nothing was checked\n",
     stderr: `quint verify --backend=tlc spec.qnt --main=spec --invariant=inv --invariant="x >= 0" checks the whole language (needs Java)\n`,
   });
   const reached: CheckResult = { ...atTranslation, where: "reached-state", guarantee: guarantee("partial") };
-  expect(render(reached, request).stdout).toBe("unsupported: operator List, outside quint-ts's subset (a reachable state needs it); nothing was proved\n");
+  expect(render(reached, request).stdout).toBe("unsupported: operator List, outside quint-check's subset (a reachable state needs it); nothing was proved\n");
 });
 
 test("a timeout suggests the same command with twice the time; no initial state names init", () => {
   const before: CheckResult = { status: "inconclusive", reason: "timeout", guarantee: guarantee("none") };
   expect(render(before, { ...request, timeoutMs: 1 })).toEqual({
     stdout: "inconclusive: the 1 ms time limit ran out before the search began; nothing was proved\n",
-    stderr: "rerun with more time: quint-ts check spec.qnt --main spec --invariant inv --timeout-ms 2\n",
+    stderr: "rerun with more time: quint-check check spec.qnt --main spec --invariant inv --timeout-ms 2\n",
   });
   const during = render({ ...before, guarantee: guarantee("partial") }, request);
   expect(during.stdout).toBe("inconclusive: the 60000 ms time limit ran out during the search; nothing was proved\n");
-  expect(during.stderr).toBe("rerun with more time: quint-ts check spec.qnt --main spec --invariant inv --timeout-ms 120000\n");
+  expect(during.stderr).toBe("rerun with more time: quint-check check spec.qnt --main spec --invariant inv --timeout-ms 120000\n");
   const noInit: CheckResult = { status: "inconclusive", reason: "no-initial-state", guarantee: guarantee("none") };
   expect(render(noInit, { ...request, init: "start" })).toEqual({
     stdout: "inconclusive: start has no satisfying state, so nothing was checked\n",
@@ -94,8 +94,8 @@ test("each error stage says what failed and what to do next", () => {
     stderr: "fix what Quint reports, then run the same command again\n",
   });
   const translation = render({ ...frontend, stage: "translation", output: "Parse error at line 3" }, request);
-  expect(translation.stdout).toBe("Parse error at line 3\nerror: the checker couldn't read quint-ts's translation (above)\n");
-  expect(translation.stderr).toBe("this is a quint-ts defect; open an issue in sequelcore/quint-ts with the model and this command\n");
+  expect(translation.stdout).toBe("Parse error at line 3\nerror: the checker couldn't read quint-check's translation (above)\n");
+  expect(translation.stderr).toBe("this is a quint-check defect; open an issue in sequelcore/quint-check with the model and this command\n");
   const checker = render({ ...frontend, stage: "checker", output: "the checker exited with code 3." }, request);
   expect(checker.stdout).toBe("the checker exited with code 3.\nerror: the checker failed (above)\n");
   expect(checker.stderr).toBe("run the same command once more; if it fails again, open an issue with the output above\n");

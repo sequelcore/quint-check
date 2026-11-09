@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>] [--timeout-ms <ms>] [--out-itf <file>] [--json]
- * quint-ts translate <file.qnt> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>]
- * quint-ts cache path|clear
- * quint-ts --help | --version        quint-ts <command> --help
+ * quint-check check <file.qnt> --invariant <expr> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>] [--timeout-ms <ms>] [--out-itf <file>] [--json]
+ * quint-check translate <file.qnt> [--invariant <expr>...] [--main <module>] [--init <action>] [--step <action>]
+ * quint-check cache path|clear
+ * quint-check --help | --version        quint-check <command> --help
  * `check` prints a summary, or with --json the result as JSON. Exit codes: 0 passed, 20 violated, 21 unsupported, 22 inconclusive,
  * 23 error, 2 usage error, 1 crash, 130 SIGINT, 143 SIGTERM. `translate` prints the TLA+, or on failure
  * a message on stderr and exit 21 (unsupported) or 23 (error).
@@ -15,10 +15,10 @@ import { cacheRoot, clearCaches } from "./cache.js";
 import { check, invariantProblem, translateFile } from "./check.js";
 import { render } from "./render.js";
 
-const CHECK_USAGE = "quint-ts check <file.qnt> --invariant <expr> [--invariant <expr>...] [options]";
-const TRANSLATE_USAGE = "quint-ts translate <file.qnt> [--invariant <expr>...] [options]";
-const CACHE_USAGE = "quint-ts cache path|clear";
-const TOP_USAGE = "quint-ts <command> [options]";
+const CHECK_USAGE = "quint-check check <file.qnt> --invariant <expr> [--invariant <expr>...] [options]";
+const TRANSLATE_USAGE = "quint-check translate <file.qnt> [--invariant <expr>...] [options]";
+const CACHE_USAGE = "quint-check cache path|clear";
+const TOP_USAGE = "quint-check <command> [options]";
 
 const CHECK_EXIT_CODES = "Exit codes: 0 passed, 20 violated, 21 unsupported, 22 inconclusive, 23 error, 2 usage error,\n" +
   "1 crash, 130 interrupted (SIGINT), 143 terminated (SIGTERM). Deadlock is not checked.";
@@ -26,9 +26,9 @@ const CHECK_EXIT_CODES = "Exit codes: 0 passed, 20 violated, 21 unsupported, 22 
 const TOP_HELP = `Check Quint models without Java: Quint's own frontend, then the tla-ts model checker.
 
 Examples:
-  quint-ts check spec.qnt --main spec --invariant inv
-  quint-ts check spec.qnt --invariant safe --invariant "balance >= 0" --timeout-ms 120000
-  quint-ts check spec.qnt --invariant inv --json
+  quint-check check spec.qnt --main spec --invariant inv
+  quint-check check spec.qnt --invariant safe --invariant "balance >= 0" --timeout-ms 120000
+  quint-check check spec.qnt --invariant inv --json
 
 Usage: ${TOP_USAGE}
 
@@ -38,7 +38,7 @@ Commands:
   cache path|clear       Print or remove the checker's compile cache
 
 Options:
-  -h, --help             Print this help, or a command's with quint-ts <command> --help
+  -h, --help             Print this help, or a command's with quint-check <command> --help
   --version              Print the version
 
 Exit codes of check: 0 passed, 20 violated, 21 unsupported, 22 inconclusive, 23 error,
@@ -48,9 +48,9 @@ Exit codes of check: 0 passed, 20 violated, 21 unsupported, 22 inconclusive, 23 
 const CHECK_HELP = `Check that each invariant holds in every reachable state of a Quint model.
 
 Examples:
-  quint-ts check spec.qnt --main spec --invariant inv
-  quint-ts check spec.qnt --invariant inv --invariant "size(queue) <= 3"
-  quint-ts check spec.qnt --invariant inv --out-itf counterexample.itf.json
+  quint-check check spec.qnt --main spec --invariant inv
+  quint-check check spec.qnt --invariant inv --invariant "size(queue) <= 3"
+  quint-check check spec.qnt --invariant inv --out-itf counterexample.itf.json
 
 Usage: ${CHECK_USAGE}
 
@@ -71,8 +71,8 @@ ${CHECK_EXIT_CODES}
 const TRANSLATE_HELP = `Print the TLA+ module and configuration that check would run.
 
 Examples:
-  quint-ts translate spec.qnt --main spec
-  quint-ts translate spec.qnt --main spec --invariant inv
+  quint-check translate spec.qnt --main spec
+  quint-check translate spec.qnt --main spec --invariant inv
 
 Usage: ${TRANSLATE_USAGE}
 
@@ -89,8 +89,8 @@ Exit codes: 0 translated, 21 unsupported, 23 error, 2 usage error, 1 crash. A fa
 const CACHE_HELP = `Print or remove the checker's compile cache.
 
 Examples:
-  quint-ts cache path
-  quint-ts cache clear
+  quint-check cache path
+  quint-check cache clear
 
 Usage: ${CACHE_USAGE}
 
@@ -109,7 +109,7 @@ const HELP: Record<string, string> = { check: CHECK_HELP, translate: TRANSLATE_H
 
 /** A usage error: the usage line first, then the problem with its next step, on stderr; exit 2. */
 function usage(line: string, problem: string): never {
-  console.error(`usage: ${line}\nquint-ts: ${problem}`);
+  console.error(`usage: ${line}\nquint-check: ${problem}`);
   process.exit(2);
 }
 
@@ -129,13 +129,13 @@ if (optionArgs.includes("--help") || optionArgs.includes("-h")) {
 }
 
 if (command === "cache") {
-  if (rest.length !== 1 || (rest[0] !== "path" && rest[0] !== "clear")) usage(CACHE_USAGE, "cache takes one argument, path or clear; run quint-ts cache --help");
+  if (rest.length !== 1 || (rest[0] !== "path" && rest[0] !== "clear")) usage(CACHE_USAGE, "cache takes one argument, path or clear; run quint-check cache --help");
   if (rest[0] === "path") console.log(cacheRoot());
   else for (const removed of clearCaches()) console.log(`removed ${removed}`);
   process.exit(0);
 }
 if (command !== "check" && command !== "translate") {
-  usage(TOP_USAGE, command === undefined ? "no command given; run quint-ts --help for the commands" : `unknown command ${command}; run quint-ts --help for the commands`);
+  usage(TOP_USAGE, command === undefined ? "no command given; run quint-check --help for the commands" : `unknown command ${command}; run quint-check --help for the commands`);
 }
 const commandUsage = USAGE[command] ?? TOP_USAGE;
 const fail = (problem: string): never => usage(commandUsage, problem);
@@ -166,22 +166,22 @@ try {
       // The old name of --timeout-ms is not an alias: it stays unknown, with a fixed hint.
       fail(name === "--timeout" && command === "check"
         ? "unknown option --timeout; the time limit is --timeout-ms <ms>"
-        : `unknown option ${name}; run quint-ts ${command} --help for the options`);
+        : `unknown option ${name}; run quint-check ${command} --help for the options`);
     }
-    fail(`${name} needs a value; run quint-ts ${command} --help for the options`);
+    fail(`${name} needs a value; run quint-check ${command} --help for the options`);
   }
   throw err;
 }
 const { values, positionals, tokens } = parsed;
 for (const name of ["timeout-ms", "out-itf", "json"] as const) {
-  if (command === "translate" && values[name] !== undefined) fail(`unknown option --${name}; run quint-ts translate --help for the options`);
+  if (command === "translate" && values[name] !== undefined) fail(`unknown option --${name}; run quint-check translate --help for the options`);
 }
 for (const name of ["main", "init", "step", "timeout-ms", "out-itf", "json"]) {
   const times = tokens.filter((t) => t.kind === "option" && t.name === name).length;
   if (times > 1) fail(`--${name} given ${times === 2 ? "twice" : `${times} times`}; give it once`);
 }
 if (positionals.length !== 1) {
-  fail(positionals.length === 0 ? `${command} needs a model file, such as quint-ts ${command} spec.qnt${command === "check" ? " --invariant inv" : ""}`
+  fail(positionals.length === 0 ? `${command} needs a model file, such as quint-check ${command} spec.qnt${command === "check" ? " --invariant inv" : ""}`
     : `unexpected argument ${positionals.slice(1).join(" ")}; ${command} takes one model file`);
 }
 const file = positionals[0] ?? "";
@@ -200,11 +200,11 @@ if (command === "translate") {
   if (invariants.length > 0) invariantsOk();
   const t = translateFile(file, { ...selected, invariants });
   if (t.kind === "unsupported") {
-    console.error(`quint-ts: unsupported: ${t.reason}, outside quint-ts's subset; nothing was translated`);
+    console.error(`quint-check: unsupported: ${t.reason}, outside quint-check's subset; nothing was translated`);
     process.exit(21);
   }
   if (t.kind === "frontend-error") {
-    console.error(`${t.output.trimEnd()}\nquint-ts: error: Quint's frontend rejected the model (above); fix what it reports, then run the same command again`);
+    console.error(`${t.output.trimEnd()}\nquint-check: error: Quint's frontend rejected the model (above); fix what it reports, then run the same command again`);
     process.exit(23);
   }
   console.log(`${t.translation.tla}\n\n\\* Q.cfg\n\\* ${t.translation.cfg.replaceAll("\n", "\n\\* ")}`);
@@ -228,7 +228,7 @@ if (outItf !== undefined) {
   // Checked before the search, so a long check doesn't end with nowhere to write.
   const folder = dirname(resolve(outItf));
   if (statSync(folder, { throwIfNoEntry: false })?.isDirectory() !== true) fail(`--out-itf ${outItf}: the folder ${folder} doesn't exist`);
-  if (/\{(seq|test)\}/.test(outItf)) console.error(`quint-ts: warning: --out-itf ${outItf} is used as written; {seq} and {test} aren't replaced`);
+  if (/\{(seq|test)\}/.test(outItf)) console.error(`quint-check: warning: --out-itf ${outItf} is used as written; {seq} and {test} aren't replaced`);
 }
 // Ctrl-C and SIGTERM stop the check. On POSIX its children run in their own process group, so the signal
 // reaches only this process, and the check stops every child it started before the CLI exits.
@@ -237,7 +237,7 @@ const STATUS_EXIT = { passed: 0, violated: 20, unsupported: 21, inconclusive: 22
 const stop = new AbortController();
 // Only a person watching a terminal needs to know a check started; a script or a log doesn't.
 if (process.stderr.isTTY) {
-  console.error(`quint-ts: checking ${file} (${invariants.length === 1 ? "1 invariant" : `${invariants.length} invariants`}, time limit ${timeoutMs ?? 60_000} ms)`);
+  console.error(`quint-check: checking ${file} (${invariants.length === 1 ? "1 invariant" : `${invariants.length} invariants`}, time limit ${timeoutMs ?? 60_000} ms)`);
 }
 for (const name of ["SIGINT", "SIGTERM"] as const) process.once(name, () => stop.abort(name));
 const result = await check(file, {
@@ -258,7 +258,7 @@ if (values.json === true) {
 }
 if (outItf !== undefined) {
   if (result.status !== "violated") {
-    console.error(`quint-ts: no counterexample; nothing written to ${outItf}`);
+    console.error(`quint-check: no counterexample; nothing written to ${outItf}`);
   } else {
     // Written whole or not at all: a partial file is renamed into place only once it is complete.
     const partial = `${outItf}.${process.pid}.partial`;
@@ -267,7 +267,7 @@ if (outItf !== undefined) {
       renameSync(partial, outItf);
     } catch (err) {
       rmSync(partial, { force: true });
-      console.error(`quint-ts: error: the counterexample couldn't be written to ${outItf}: ${err instanceof Error ? err.message : String(err)}`);
+      console.error(`quint-check: error: the counterexample couldn't be written to ${outItf}: ${err instanceof Error ? err.message : String(err)}`);
       process.exit(STATUS_EXIT.error);
     }
   }

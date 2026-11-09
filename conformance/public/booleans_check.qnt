@@ -1,5 +1,5 @@
 // Invariants for Quint's public booleans.qnt, which declares none. Not part of Quint's examples:
-// written for quint-ts's conformance, importing booleans.qnt unchanged.
+// written for quint-check's conformance, importing booleans.qnt unchanged.
 
 // b alternates between true and false, so this holds in both reachable states.
 module booleans_holds {

@@ -1,6 +1,6 @@
 /**
  * Public Quint models (conformance/public/, from Quint's examples) that
- * quint-ts can't give a complete verdict on. The supported ones are in
+ * quint-check can't give a complete verdict on. The supported ones are in
  * models.ts, compared as whole graphs. See conformance/public/README.md.
  */
 
@@ -10,7 +10,7 @@ export const PUBLIC_PARTIAL: readonly { id: string; file: string; main: string; 
     why: "its counters grow without bound, so an explicit-state search never finishes" },
 ];
 
-/** Accepted by Quint's frontend, refused by quint-ts at translation, naming the construct; Quint's examples, and the demo's model with a list. */
+/** Accepted by Quint's frontend, refused by quint-check at translation, naming the construct; Quint's examples, and the demo's model with a list. */
 export const PUBLIC_REFUSED: readonly { id: string; file: string; main: string; reason: string }[] = [
   { id: "weakFairness", file: "conformance/public/weakFairness.qnt", main: "weakFairness", reason: "operator leadsTo" },
   { id: "coin", file: "conformance/public/coin.qnt", main: "coin", reason: "operator ipow" },
