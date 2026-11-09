@@ -5,7 +5,7 @@ All notable changes to quint-ts are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Before 1.0.0, any
 release may change the API, the command line or the result format.
 
-## [0.1.0-alpha.1] - Unreleased
+## [0.1.0-alpha.1] - 2026-11-08
 
 The first release. It checks safety invariants of Quint models in a subset of
 the language, with Quint's own frontend and the tla-ts model checker, on Node
