@@ -22,6 +22,7 @@
     "demo/*.qnt",
     "README.md",
     "CHANGELOG.md",
+    "docs",
     "LICENSE",
     "NOTICE"
   ],

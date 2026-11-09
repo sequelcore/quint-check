@@ -1,8 +1,11 @@
 # quint-check
 
 Instructions for agents contributing to quint-check, a Java-free Quint model
-checker built on Quint's frontend and tla-ts. Read [README.md](README.md)
-for what a result means.
+checker built on Quint's frontend and tla-ts. Read
+[docs/results.md](docs/results.md) for what a result means and
+[CONTRIBUTING.md](CONTRIBUTING.md) for the commands. A change to a command,
+flag, export, result field or the subset updates its page in `docs/` and the
+changelog in the same change.
 
 ## Rules
 

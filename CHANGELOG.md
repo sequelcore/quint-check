@@ -12,6 +12,10 @@ The first version on npm, as `@sequelcore/quint-check` under the `alpha`
 dist-tag, with provenance: `npm install @sequelcore/quint-check@alpha`. Its
 checking, command line and results are those of 0.1.0-alpha.1.
 
+The documentation moved from the README to `docs/`, which ships in the package:
+a quickstart, what a result means, references for the command line, the API,
+counterexamples and the supported subset, and how a check runs.
+
 ### Changed
 
 - quint-ts is now quint-check: the package is `@sequelcore/quint-check`, the
