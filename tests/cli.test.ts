@@ -134,6 +134,8 @@ test("check exits with a code per status, in the summary and with --json alike",
   const cases: { args: string[]; code: number; status: string }[] = [
     { args: ["check", ...mutex, "--invariant", "inv"], code: 0, status: "passed" },
     { args: ["check", "demo/mutex_bug.qnt", "--main", "mutex_bug", "--invariant", "inv"], code: 20, status: "violated" },
+    { args: ["check", ...mutex, "--invariant", "false"], code: 20, status: "violated" },
+    { args: ["check", ...mutex, "--invariant", "1 > 2"], code: 20, status: "violated" },
     { args: ["check", "demo/mutex_pairs.qnt", "--main", "mutex_pairs", "--invariant", "inv"], code: 21, status: "unsupported" },
     { args: ["check", ...mutex, "--invariant", "inv", "--timeout-ms", "1"], code: 22, status: "inconclusive" },
     { args: ["check", ...mutex, "--invariant", "nope"], code: 23, status: "error" },

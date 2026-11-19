@@ -6,6 +6,16 @@ recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Before 1.0.0, any
 release may change the API, the command line or the result format.
 
+## [Unreleased]
+
+### Fixed
+
+- An invariant that reads no state variable and is false, such as
+  `--invariant false` or `--invariant "1 > 2"`, is `violated` in the first
+  initial state, with that state as the counterexample. It was an `error`:
+  the checker evaluated it once, before any state
+  ([#32](https://github.com/sequelcore/quint-check/issues/32)).
+
 ## [0.1.0-alpha.3] - 2026-11-09
 
 `Bool` and lists join the supported subset.

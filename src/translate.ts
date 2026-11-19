@@ -422,21 +422,26 @@ function firstUnsupported(ex: Ex, defs: Map<string, Def>): string | undefined {
   return undefined;
 }
 
+/** Whether `ex` reads a state variable, directly or through one of `readers`. */
+function readsState(ex: Ex, vars: ReadonlySet<string>, readers: ReadonlySet<string>): boolean {
+  const reads = (e: Ex): boolean => {
+    if (e === null || typeof e !== "object") return false;
+    if (e.kind === "name") return vars.has(e.name) || readers.has(e.name);
+    if (e.kind === "lambda") return reads(e.expr);
+    if (e.kind === "let") return reads(e.opdef.expr) || reads(e.expr);
+    return (e.kind === "app" && readers.has(e.opcode)) || (e.args ?? []).some(reads);
+  };
+  return reads(ex);
+}
+
 /** The definitions whose expression reads a state variable, directly or through other definitions. */
 function stateReaders(defs: Map<string, Def>, vars: ReadonlySet<string>): Set<string> {
   const readers = new Set<string>();
-  const reads = (ex: Ex): boolean => {
-    if (ex === null || typeof ex !== "object") return false;
-    if (ex.kind === "name") return vars.has(ex.name) || readers.has(ex.name);
-    if (ex.kind === "lambda") return reads(ex.expr);
-    if (ex.kind === "let") return reads(ex.opdef.expr) || reads(ex.expr);
-    return (ex.kind === "app" && readers.has(ex.opcode)) || (ex.args ?? []).some(reads);
-  };
   // Until nothing changes, so the result doesn't depend on the order of the definitions.
   for (let grew = true; grew;) {
     grew = false;
     for (const [n, d] of defs) {
-      if (!readers.has(n) && reads(d.expr)) {
+      if (!readers.has(n) && readsState(d.expr, vars, readers)) {
         readers.add(n);
         grew = true;
       }
@@ -568,10 +573,15 @@ export function translate(ir: Ex, invariants: readonly string[]): Translation {
     body.push(...helpers, text);
   }
   // After every other definition: an invariant may use any of them.
+  const first = mangle([...vars][0] ?? "");
   entries.forEach((entry, k) => {
     const helpers: string[] = [];
     const ctx: Ctx = { defs, vars, readers, mode: "state", helpers, counter, locals: new Set() };
-    const text = `${invariantName(k)} ==\n  ${expr(entry, ctx)}`;
+    // The checker evaluates an invariant that reads no state variable once, before any state, and stops
+    // with an error when it is false. Reading a variable makes it state-level, so it is checked in each
+    // state: a false one is violated in the first initial state, and a model with none is still inconclusive.
+    const property = readsState(entry, vars, readers) ? expr(entry, ctx) : `${first} = ${first} /\\ (${expr(entry, ctx)})`;
+    const text = `${invariantName(k)} ==\n  ${property}`;
     body.push(...helpers, text);
   });
   const tla = ["---- MODULE Q ----", "EXTENDS Integers, Sequences, FiniteSets, TLC", `VARIABLES ${[...vars].map(mangle).join(", ")}`,
