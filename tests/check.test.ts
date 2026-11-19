@@ -111,6 +111,19 @@ test("an invariant whose commas belong to an expression is still accepted", asyn
   expect(result.status).toBe("passed");
 }, 60_000);
 
+test("an invariant that reads no state variable is checked in each state, like any other", async () => {
+  // The checker evaluates a constant invariant once, before any state, unless the translation makes it read the state.
+  for (const entry of ["false", "1 > 2"]) {
+    const result = await check("demo/mutex.qnt", { main: "mutex", invariants: [entry] });
+    expect(result, entry).toMatchObject({ status: "violated", invariant: entry });
+    if (result.status === "violated") expect(result.trace.states.map((s) => s["#meta"]), entry).toEqual([{ index: 0, action: "init" }]);
+  }
+  expect(await check("tests/fixtures/in_range.qnt", { main: "in_range", invariants: ["1 < 2"] })).toMatchObject({ status: "passed" });
+  // With no initial state there is no state to break it.
+  expect(await check("tests/fixtures/no_init.qnt", { main: "no_init", invariants: ["false"] }))
+    .toMatchObject({ status: "inconclusive", reason: "no-initial-state" });
+}, 120_000);
+
 test("a construct outside the subset is unsupported at translation", async () => {
   const result = await check("tests/fixtures/temporal.qnt", { main: "temp", invariants: ["inv"] });
   expect(result.status).toBe("unsupported");
