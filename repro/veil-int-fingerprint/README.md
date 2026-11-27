@@ -50,5 +50,5 @@ qualifies the result is its maintainers' decision.
 
 ## What a report should ask
 
-That `quint verify --backend veil` not report `[ok]` for `fp.qnt`. Not
-reported yet.
+That `quint verify --backend veil` not report `[ok]` for `fp.qnt`. Reported as
+[quint-co/quint#2096](https://github.com/quint-co/quint/issues/2096) on 2026-11-27.
