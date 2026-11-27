@@ -1,0 +1,52 @@
+$ quint --version
+0.35.0
+$ node --version
+v24.15.0
+
+$ quint run --backend=typescript --invariant=inv --max-samples=1 --max-steps=1 --seed=0x1 fp.qnt
+An example execution:
+[State 0] { x: 0 }
+[State 1] { x: 4611686018427387904 }
+[violation] Found an issue (6ms at 167 traces/second).
+  ❌ inv
+error: Invariant violated
+
+$ quint run --backend=rust --invariant=inv --max-samples=1 --max-steps=1 --seed=0x1 fp.qnt
+An example execution:
+[State 0] { x: 0 }
+[State 1] { x: 4611686018427387904 }
+[violation] Found an issue (15ms at 67 traces/second).
+  ❌ inv
+error: Invariant violated
+
+$ quint verify --backend=veil --invariant=inv fp.qnt
+[Veil] Running Veil's model checker, which is compiled at the first check of a spec...
+[Veil] Explored 1 states.
+[ok] No violation found (109ms).
+
+$ quint verify --backend=veil --invariant=inv --verbosity=4 fp.qnt   # last metrics line
+{"compilationStatus":{"status":"none"},"details":{"modelCheck":{"metrics":{"actionStats":[{"distinctStates":0,"label":{"$veil":"ctor","args":[],"name":"step_","type":"Label"},"statesGenerated":1}],"allActionLabels":[],"diameter":0,"distinctStates":1,"history":[],"queue":0,"statesFound":2}}},"elapsedMs":2,"isCancelled":false,"isRunning":true,"startTimeMs":103180,"status":"Running..."}
+
+$ quint verify --backend=veil --symbolic --max-steps=1 --invariant=inv fp.qnt
+[Veil] Checking inv in every execution of up to 1 step, for every value of the constants...
+✗ inv fails after 1 step:
+  State 0 (via init):
+    x = 0
+  State 1 (via step_):
+    x = 4611686018427387904
+[violation] Found an issue (11163ms).
+error: inv is violated
+
+a -> b: Veil's verdict
+0 -> 4611686018427387904: [ok]
+0 -> 9223372036854775808: [ok]
+0 -> 18446744073709551616: [ok]
+1 -> 4611686018427387905: [ok]
+7 -> 4611686018427387911: [ok]
+-1 -> -4611686018427387905: [ok]
+0 -> 2305843009213693952: [violation]
+0 -> 4611686018427387903: [violation]
+0 -> 4611686018427387905: [violation]
+0 -> 9223372036854775807: [violation]
+1 -> 9223372036854775808: [violation]
+-2 -> -4611686018427387905: [violation]
